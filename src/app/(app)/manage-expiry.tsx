@@ -243,7 +243,7 @@ export default function ManageExpiryScreen() {
         <View style={styles.sheetContent}>
           <Text style={styles.sheetTitle}>Expiry Alerts</Text>
           {notificationCount === 0 ? (
-            <Text style={styles.emptyNote}>No alerts right now — you're all caught up.</Text>
+            <Text style={styles.emptyNote}>No alerts right now — you&apos;re all caught up.</Text>
           ) : (
             <ScrollView style={styles.notifScroll}>
               {(notifications.data ?? []).map((n) => (
