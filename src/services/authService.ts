@@ -26,7 +26,15 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  otp?: string;
   shopName?: string;
+}
+
+export interface OtpRequestResponse {
+  success: boolean;
+  message: string;
+  resendIn?: number;
+  expiresIn?: number;
 }
 
 export interface AuthResponse {
@@ -76,6 +84,38 @@ class AuthService {
     } catch (error) {
       logger.warn('Registration failed');
       throw toAuthError(error, 'Registration failed. Please try again.');
+    }
+  }
+
+  /** Step 1 of registration: sends a 6-digit verification code to the email. */
+  async sendRegisterOtp(data: Omit<RegisterData, 'otp'>): Promise<OtpRequestResponse> {
+    try {
+      const response = await api.post<OtpRequestResponse>('/auth/register/send-otp', data);
+      return response.data;
+    } catch (error) {
+      logger.warn('Sending registration code failed');
+      throw toAuthError(error, 'Could not send the verification code. Please try again.');
+    }
+  }
+
+  /** Sends a password reset code. The server responds generically for privacy. */
+  async forgotPassword(email: string): Promise<OtpRequestResponse> {
+    try {
+      const response = await api.post<OtpRequestResponse>('/auth/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      logger.warn('Forgot password request failed');
+      throw toAuthError(error, 'Could not send the reset code. Please try again.');
+    }
+  }
+
+  /** Verifies the reset code and sets the new password. */
+  async resetPassword(data: { email: string; otp: string; newPassword: string }): Promise<void> {
+    try {
+      await api.post('/auth/reset-password', data);
+    } catch (error) {
+      logger.warn('Password reset failed');
+      throw toAuthError(error, 'Could not reset your password. Please try again.');
     }
   }
 

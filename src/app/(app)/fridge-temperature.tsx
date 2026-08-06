@@ -87,7 +87,7 @@ export default function FridgeTemperatureScreen() {
   };
 
   return (
-    <ToolScreen title="Temperature Log" subtitle="Chillers & freezers">
+    <ToolScreen title="Temperature Log" subtitle="Fridges & freezers">
       <SegmentedTabs options={tabs} value={tab} onChange={setTab} />
 
       {tab === 'today' &&
@@ -114,7 +114,7 @@ export default function FridgeTemperatureScreen() {
                 title="No equipment yet"
                 subtitle={
                   isOwner
-                    ? 'Add your chillers and freezers to start logging temperatures.'
+                    ? 'Add your fridges and freezers to start logging temperatures.'
                     : 'The shop owner has not added any equipment yet.'
                 }
               />
@@ -170,10 +170,12 @@ export default function FridgeTemperatureScreen() {
                 <RecordCard style={item.isAlert ? styles.alertCard : undefined}>
                   <View style={styles.logRow}>
                     <View style={styles.logBody}>
-                      <Text style={styles.logTitle}>
-                        {item.fridgeName ?? ''} · {item.compartment === 'FREEZER' ? 'Freezer' : 'Chiller'} ·{' '}
-                        {item.entryType === 'MORNING' ? 'Morning' : 'Evening'}
-                      </Text>
+                      <View style={styles.titleRow}>
+                        <Text style={styles.logTitle}>
+                          {item.fridgeName ?? ''} · {item.entryType === 'MORNING' ? 'Morning' : 'Evening'}
+                        </Text>
+                        {item.compartment === 'FREEZER' && <FreezerTag />}
+                      </View>
                       <Text style={styles.logMeta}>
                         {item.recordedByName ?? '—'} · {formatDateTime(item.recordedAt)}
                       </Text>
@@ -209,11 +211,15 @@ export default function FridgeTemperatureScreen() {
               >
                 <View style={styles.logRow}>
                   <View style={styles.logBody}>
-                    <Text style={styles.logTitle}>{item.name}</Text>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.logTitle}>{item.name}</Text>
+                      {(item.hasFreezer || isFreezerUnit(item.minSafeTemp, item.maxSafeTemp)) && <FreezerTag />}
+                    </View>
                     <Text style={styles.logMeta}>
                       {item.location ? `${item.location} · ` : ''}
-                      Chiller {item.minSafeTemp}° to {item.maxSafeTemp}°C
-                      {item.hasFreezer ? ` · Freezer ${item.freezerMinSafeTemp}° to ${item.freezerMaxSafeTemp}°C` : ''}
+                      {item.hasFreezer
+                        ? `${item.freezerMinSafeTemp ?? item.minSafeTemp}° to ${item.freezerMaxSafeTemp ?? item.maxSafeTemp}°C`
+                        : `${item.minSafeTemp}° to ${item.maxSafeTemp}°C`}
                     </Text>
                   </View>
                   {!item.isActive && <StatusPill label="INACTIVE" color={Colors.light.warning} />}
@@ -222,7 +228,7 @@ export default function FridgeTemperatureScreen() {
               </RecordCard>
             )}
             ListEmptyComponent={
-              <EmptyState icon="snow-outline" title="No equipment" subtitle="Add your first chiller or freezer." />
+              <EmptyState icon="snow-outline" title="No equipment" subtitle="Add your first fridge or freezer." />
             }
           />
           <Fab
@@ -287,7 +293,24 @@ export default function FridgeTemperatureScreen() {
   );
 }
 
-/** Today card: morning/evening slots per compartment, red when out of range. */
+/** Legacy freezer detection for units saved before the explicit freezer flag. */
+function isFreezerUnit(minSafeTemp: number, maxSafeTemp: number): boolean {
+  return minSafeTemp <= -11 && maxSafeTemp <= -11;
+}
+
+const FREEZER_BLUE = '#1E88E5';
+const FREEZER_BLUE_BG = '#E3F2FD';
+
+function FreezerTag() {
+  return (
+    <View style={styles.freezerTag}>
+      <Ionicons name="snow" size={11} color={FREEZER_BLUE} />
+      <Text style={styles.freezerTagText}>Freezer</Text>
+    </View>
+  );
+}
+
+/** Today card: morning/evening slots, red when out of range. */
 function TodayFridgeCard({
   fridge,
   onLog,
@@ -295,17 +318,30 @@ function TodayFridgeCard({
   fridge: FridgeTodayStatus;
   onLog: (slot: EntrySlot, compartment: Compartment) => void;
 }) {
-  const freezerOnly =
-    !fridge.hasFreezer && fridge.minSafeTemp <= -11 && fridge.maxSafeTemp <= -11;
+  const freezer = fridge.hasFreezer || isFreezerUnit(fridge.minSafeTemp, fridge.maxSafeTemp);
+  const min = freezer ? (fridge.freezerMinSafeTemp ?? fridge.minSafeTemp) : fridge.minSafeTemp;
+  const max = freezer ? (fridge.freezerMaxSafeTemp ?? fridge.maxSafeTemp) : fridge.maxSafeTemp;
+  const compartment: Compartment = freezer ? 'FREEZER' : 'FRIDGE';
+
+  // Freezer readings may live in either bucket depending on when the unit was created.
+  const morningLogged = freezer
+    ? fridge.morningFreezerLogged || fridge.morningFridgeLogged
+    : fridge.morningFridgeLogged;
+  const morningTemp = freezer
+    ? (fridge.morningFreezerTemp ?? fridge.morningFridgeTemp)
+    : fridge.morningFridgeTemp;
+  const eveningLogged = freezer
+    ? fridge.eveningFreezerLogged || fridge.eveningFridgeLogged
+    : fridge.eveningFridgeLogged;
+  const eveningTemp = freezer
+    ? (fridge.eveningFreezerTemp ?? fridge.eveningFridgeTemp)
+    : fridge.eveningFridgeTemp;
 
   const slot = (
     label: string,
     logged: boolean,
     temp: number | null | undefined,
     slotType: EntrySlot,
-    compartment: Compartment,
-    min: number,
-    max: number,
   ) => {
     const isAlert = logged && temp != null && (temp < min || temp > max);
     return (
@@ -332,46 +368,31 @@ function TodayFridgeCard({
   return (
     <RecordCard>
       <View style={styles.fridgeHeader}>
-        <View style={styles.fridgeIcon}>
-          <Ionicons name={freezerOnly ? 'snow-outline' : 'thermometer-outline'} size={18} color={Colors.light.primary} />
+        <View style={[styles.fridgeIcon, freezer && styles.fridgeIconFreezer]}>
+          <Ionicons
+            name={freezer ? 'snow' : 'thermometer-outline'}
+            size={18}
+            color={freezer ? FREEZER_BLUE : Colors.light.primary}
+          />
         </View>
         <View style={styles.logBody}>
-          <Text style={styles.logTitle}>{fridge.name}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.logTitle}>{fridge.name}</Text>
+            {freezer && <FreezerTag />}
+          </View>
           {!!fridge.location && <Text style={styles.logMeta}>{fridge.location}</Text>}
         </View>
       </View>
 
-      {!freezerOnly && (
-        <View style={styles.slotSection}>
-          <Text style={styles.slotSectionLabel}>
-            Chiller ({fridge.minSafeTemp}° to {fridge.maxSafeTemp}°C)
-          </Text>
-          <View style={styles.slotRow}>
-            {slot('Morning', fridge.morningFridgeLogged, fridge.morningFridgeTemp, 'MORNING', 'FRIDGE', fridge.minSafeTemp, fridge.maxSafeTemp)}
-            {slot('Evening', fridge.eveningFridgeLogged, fridge.eveningFridgeTemp, 'EVENING', 'FRIDGE', fridge.minSafeTemp, fridge.maxSafeTemp)}
-          </View>
+      <View style={styles.slotSection}>
+        <Text style={styles.slotSectionLabel}>
+          Safe range {min}° to {max}°C
+        </Text>
+        <View style={styles.slotRow}>
+          {slot('Morning', morningLogged, morningTemp, 'MORNING')}
+          {slot('Evening', eveningLogged, eveningTemp, 'EVENING')}
         </View>
-      )}
-
-      {(fridge.hasFreezer || freezerOnly) && (
-        <View style={styles.slotSection}>
-          <Text style={styles.slotSectionLabel}>
-            Freezer ({fridge.freezerMinSafeTemp ?? fridge.minSafeTemp}° to {fridge.freezerMaxSafeTemp ?? fridge.maxSafeTemp}
-            °C)
-          </Text>
-          <View style={styles.slotRow}>
-            {freezerOnly
-              ? [
-                  slot('Morning', fridge.morningFridgeLogged, fridge.morningFridgeTemp, 'MORNING', 'FREEZER', fridge.minSafeTemp, fridge.maxSafeTemp),
-                  slot('Evening', fridge.eveningFridgeLogged, fridge.eveningFridgeTemp, 'EVENING', 'FREEZER', fridge.minSafeTemp, fridge.maxSafeTemp),
-                ]
-              : [
-                  slot('Morning', fridge.morningFreezerLogged, fridge.morningFreezerTemp, 'MORNING', 'FREEZER', fridge.freezerMinSafeTemp ?? -17, fridge.freezerMaxSafeTemp ?? -11),
-                  slot('Evening', fridge.eveningFreezerLogged, fridge.eveningFreezerTemp, 'EVENING', 'FREEZER', fridge.freezerMinSafeTemp ?? -17, fridge.freezerMaxSafeTemp ?? -11),
-                ]}
-          </View>
-        </View>
-      )}
+      </View>
     </RecordCard>
   );
 }
@@ -439,13 +460,14 @@ function LogTemperatureSheet({
   return (
     <BottomSheet visible={target != null} onClose={onClose} keyboardAware>
       <View style={styles.sheetContent}>
-        <Text style={styles.sheetTitle}>
-          {target
-            ? `${target.fridge.name} · ${target.compartment === 'FREEZER' ? 'Freezer' : 'Chiller'} · ${
-                target.slot === 'MORNING' ? 'Morning' : 'Evening'
-              }`
-            : ''}
-        </Text>
+        <View style={styles.sheetTitleRow}>
+          <Text style={styles.sheetTitle}>
+            {target
+              ? `${target.fridge.name} · ${target.slot === 'MORNING' ? 'Morning' : 'Evening'}`
+              : ''}
+          </Text>
+          {target?.compartment === 'FREEZER' && <FreezerTag />}
+        </View>
         <TextField
           label="Temperature (°C)"
           value={tempText}
@@ -482,6 +504,8 @@ function FridgeFormSheet({
     minSafeTemp?: number;
     maxSafeTemp?: number;
     hasFreezer?: boolean;
+    freezerMinSafeTemp?: number;
+    freezerMaxSafeTemp?: number;
     isActive?: boolean;
   }) => void;
   saving: boolean;
@@ -490,7 +514,7 @@ function FridgeFormSheet({
   const [location, setLocation] = useState('');
   const [minTemp, setMinTemp] = useState('-5');
   const [maxTemp, setMaxTemp] = useState('8');
-  const [hasFreezer, setHasFreezer] = useState(false);
+  const [isFreezer, setIsFreezer] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
   const [lastKey, setLastKey] = useState<string | null>(null);
@@ -498,14 +522,31 @@ function FridgeFormSheet({
   if (key !== lastKey) {
     setLastKey(key);
     if (key) {
+      const freezer =
+        fridge != null &&
+        (fridge.hasFreezer || (fridge.minSafeTemp <= -11 && fridge.maxSafeTemp <= -11));
       setName(fridge?.name ?? '');
       setLocation(fridge?.location ?? '');
       setMinTemp(String(fridge?.minSafeTemp ?? -5));
       setMaxTemp(String(fridge?.maxSafeTemp ?? 8));
-      setHasFreezer(fridge?.hasFreezer ?? false);
+      setIsFreezer(freezer);
       setIsActive(fridge?.isActive ?? true);
     }
   }
+
+  // Swap in sensible defaults when toggling a brand-new form.
+  const toggleFreezer = (value: boolean) => {
+    setIsFreezer(value);
+    if (!fridge) {
+      if (value && minTemp === '-5' && maxTemp === '8') {
+        setMinTemp('-21');
+        setMaxTemp('-18');
+      } else if (!value && minTemp === '-21' && maxTemp === '-18') {
+        setMinTemp('-5');
+        setMaxTemp('8');
+      }
+    }
+  };
 
   const min = Number(minTemp);
   const max = Number(maxTemp);
@@ -519,20 +560,28 @@ function FridgeFormSheet({
         <TextField label="Location (optional)" value={location} onChangeText={setLocation} placeholder="e.g. Back room" />
         <View style={styles.tempRow}>
           <View style={styles.tempField}>
-            <TextField label="Min safe °C" value={minTemp} onChangeText={setMinTemp} keyboardType="numbers-and-punctuation" />
+            <TextField label="Min temp °C" value={minTemp} onChangeText={setMinTemp} keyboardType="numbers-and-punctuation" />
           </View>
           <View style={styles.tempField}>
-            <TextField label="Max safe °C" value={maxTemp} onChangeText={setMaxTemp} keyboardType="numbers-and-punctuation" />
+            <TextField label="Max temp °C" value={maxTemp} onChangeText={setMaxTemp} keyboardType="numbers-and-punctuation" />
           </View>
         </View>
         <View style={styles.switchRow}>
-          <Text style={styles.switchLabel}>Has freezer compartment</Text>
+          <View style={styles.switchLabelRow}>
+            <Ionicons name="snow" size={16} color={FREEZER_BLUE} />
+            <Text style={styles.switchLabel}>Is this a freezer?</Text>
+          </View>
           <Switch
-            value={hasFreezer}
-            onValueChange={setHasFreezer}
-            trackColor={{ true: Colors.light.primary }}
+            value={isFreezer}
+            onValueChange={toggleFreezer}
+            trackColor={{ true: FREEZER_BLUE }}
           />
         </View>
+        {isFreezer && (
+          <Text style={styles.freezerHint}>
+            Tagged with a blue freezer badge. Readings are checked against the range above.
+          </Text>
+        )}
         {fridge && (
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>Active</Text>
@@ -548,7 +597,10 @@ function FridgeFormSheet({
               location: location.trim() || undefined,
               minSafeTemp: min,
               maxSafeTemp: max,
-              hasFreezer,
+              hasFreezer: isFreezer,
+              // Freezer units keep one range — mirror it into the freezer fields
+              // so backend alert checks use the same numbers.
+              ...(isFreezer ? { freezerMinSafeTemp: min, freezerMaxSafeTemp: max } : {}),
               ...(fridge ? { isActive } : {}),
             })
           }
@@ -608,6 +660,29 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fridgeIconFreezer: {
+    backgroundColor: FREEZER_BLUE_BG,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    flexWrap: 'wrap',
+  },
+  freezerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: FREEZER_BLUE_BG,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  freezerTagText: {
+    ...Typography.caption,
+    color: FREEZER_BLUE,
+    fontWeight: '700',
   },
   slotSection: {
     marginTop: Spacing.xs,
@@ -731,6 +806,11 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginBottom: Spacing.xs,
   },
+  sheetTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   tempRow: {
     flexDirection: 'row',
     gap: Spacing.sm,
@@ -743,8 +823,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  switchLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   switchLabel: {
     ...Typography.body,
     color: Colors.light.text,
+  },
+  freezerHint: {
+    ...Typography.caption,
+    color: FREEZER_BLUE,
+    marginTop: -Spacing.xs,
   },
 });

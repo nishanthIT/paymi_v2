@@ -18,7 +18,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ErrorBanner, TextField } from '@/components/ui/text-field';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
-import { useAuth } from '@/contexts/AuthContext';
+import { setPendingRegistration } from '@/features/auth/pending-registration';
+import authService from '@/services/authService';
 import {
   validateConfirmPassword,
   validateEmail,
@@ -34,7 +35,6 @@ interface FieldErrors {
 }
 
 export default function RegisterScreen() {
-  const { register } = useAuth();
   const router = useRouter();
 
   const emailRef = useRef<TextInput>(null);
@@ -68,12 +68,16 @@ export default function RegisterScreen() {
 
     setIsSubmitting(true);
     try {
-      await register({
+      const details = {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         password,
-      });
-      // Navigation is handled by the protected route guards.
+      };
+      // Send a verification code first — the account is only created after
+      // the code is confirmed on the next screen.
+      await authService.sendRegisterOtp(details);
+      setPendingRegistration(details);
+      router.push('/verify-email');
     } catch (error: any) {
       setServerError(error?.message ?? 'Registration failed. Please try again.');
     } finally {

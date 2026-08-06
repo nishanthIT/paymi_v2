@@ -121,6 +121,10 @@ export default function LoginScreen() {
               editable={!isSubmitting}
             />
 
+            <Link href="/forgot-password" style={styles.forgotLink}>
+              Forgot password?
+            </Link>
+
             <PrimaryButton
               title="Sign In"
               onPress={handleLogin}
@@ -195,6 +199,13 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: Spacing.sm,
+  },
+  forgotLink: {
+    ...Typography.bodySmall,
+    color: Colors.light.primary,
+    fontWeight: '600',
+    alignSelf: 'flex-end',
+    marginTop: -Spacing.xs,
   },
   footer: {
     flexDirection: 'row',

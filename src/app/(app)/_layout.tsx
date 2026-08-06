@@ -37,6 +37,8 @@ export default function AppLayout() {
       <Stack.Screen name="vat-calculator" />
       <Stack.Screen name="profit-calculator" />
       <Stack.Screen name="shift-sheet" />
+      <Stack.Screen name="compare-products" />
+      <Stack.Screen name="compare/[productId]" />
     </Stack>
   );
 }

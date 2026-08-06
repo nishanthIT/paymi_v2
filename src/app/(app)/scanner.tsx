@@ -36,6 +36,7 @@ const beepSource = require('@/assets/sounds/beep.wav');
 export default function ScannerScreen() {
   const { listId, intent } = useLocalSearchParams<{ listId?: string; intent?: string }>();
   const isReportIntent = intent === 'report';
+  const isCompareIntent = intent === 'compare';
   const router = useRouter();
   const { showToast } = useToast();
   const [permission, requestPermission] = useCameraPermissions();
@@ -113,6 +114,14 @@ export default function ScannerScreen() {
             router.back();
             return;
           }
+          if (isCompareIntent) {
+            // Jump straight into the comparison screen for the scanned product.
+            router.replace({
+              pathname: '/(app)/compare/[productId]',
+              params: { productId: found.id },
+            });
+            return;
+          }
           setProduct(found);
         } else {
           setNotFoundBarcode(data);
@@ -123,7 +132,7 @@ export default function ScannerScreen() {
         resumeScanning();
       }
     },
-    [isReportIntent, lookupBarcode, player, resumeScanning, router, showToast],
+    [isCompareIntent, isReportIntent, lookupBarcode, player, resumeScanning, router, showToast],
   );
 
   const handleAdd = async (selected: Product, quantity: number) => {

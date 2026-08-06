@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Shadows } from '@/constants/theme';
 import { useChatRealtime, useUnreadCount } from '@/features/chat/hooks/use-chats';
+import { useTemperatureAlerts } from '@/features/fridges/hooks/use-temperature-alerts';
 import { useListRealtime } from '@/features/lists/hooks/use-list-realtime';
 
 /** Bottom tabs: Home, Lists, Chat, Profile. */
@@ -17,6 +18,8 @@ export default function TabsLayout() {
   useChatRealtime();
   // Keep shared shopping lists in sync in real time (owner + employees).
   useListRealtime();
+  // Surface out-of-range temperature readings as instant notifications.
+  useTemperatureAlerts();
   const unreadCount = useUnreadCount();
 
   return (

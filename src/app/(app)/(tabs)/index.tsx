@@ -67,9 +67,9 @@ export default function HomeScreen() {
         {/* Quick actions */}
         <Animated.View entering={FadeInDown.duration(400).delay(160)} style={styles.quickRow}>
           <QuickAction
-            icon="cart"
-            label="Lists"
-            onPress={() => router.push('/(app)/(tabs)/lists')}
+            icon="git-compare"
+            label="Compare Products"
+            onPress={() => router.push('/(app)/compare-products')}
           />
           <QuickAction
             icon="pricetags"
