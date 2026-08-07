@@ -51,7 +51,7 @@ export default function HomeScreen() {
         }
       >
         <Animated.View entering={FadeInUp.duration(400)} style={styles.header}>
-          <Text style={styles.greeting}>Hi {firstName} 👋</Text>
+          <Text style={styles.greeting}>Hi {firstName} </Text>
           <Text style={styles.subtitle}>Here’s what’s new today</Text>
         </Animated.View>
 

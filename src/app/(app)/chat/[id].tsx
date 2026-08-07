@@ -231,7 +231,7 @@ export default function ChatThreadScreen() {
             }
             ListEmptyComponent={
               <View style={styles.emptyThread}>
-                <Text style={styles.emptyThreadText}>No messages yet — say hello 👋</Text>
+                <Text style={styles.emptyThreadText}>No messages yet — say hello </Text>
               </View>
             }
             keyboardShouldPersistTaps="handled"

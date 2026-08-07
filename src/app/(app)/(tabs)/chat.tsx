@@ -276,7 +276,7 @@ function ChatRow({
             style={[styles.chatPreview, chat.unreadCount > 0 && styles.chatPreviewUnread]}
             numberOfLines={1}
           >
-            {chat.lastMessage ?? (isGroup ? `${chat.participantCount} members` : 'Say hello 👋')}
+            {chat.lastMessage ?? (isGroup ? `${chat.participantCount} members` : 'Say hello ')}
           </Text>
           {chat.unreadCount > 0 && (
             <View style={styles.unreadBadge}>
