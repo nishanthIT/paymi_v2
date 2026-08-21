@@ -30,9 +30,11 @@ import {
 import {
   formatDateTime,
   formatMoney,
+  formatMoneyTyping,
   parseMoneyInput,
   toDateParam,
 } from '@/features/shop-tools/format';
+import { matchesSearch } from '@/utils/search';
 
 type StatusTab = 'all' | 'TO_PAY' | 'PAID';
 type RangeTab = 'today' | '7d' | '30d' | 'custom' | 'all';
@@ -93,14 +95,9 @@ export default function SupplierPayoutScreen() {
 
   const visible = useMemo(() => {
     const all = records.data ?? [];
-    const term = search.trim().toLowerCase();
+    const term = search.trim();
     if (!term) return all;
-    return all.filter(
-      (r) =>
-        r.supplier.toLowerCase().includes(term) ||
-        (r.notes ?? '').toLowerCase().includes(term) ||
-        r.recordedBy.toLowerCase().includes(term),
-    );
+    return all.filter((r) => matchesSearch(term, r.supplier, r.notes, r.recordedBy));
   }, [records.data, search]);
 
   const totals = useMemo(() => {
@@ -319,11 +316,11 @@ function PayoutForm({
     (status === 'TO_PAY' || method != null);
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{record ? 'Edit Payout' : 'New Supplier Payout'}</Text>
         <TextField label="Supplier" value={supplier} onChangeText={setSupplier} placeholder="e.g. Bestway" />
-        <TextField label="Amount (£)" value={amountText} onChangeText={setAmountText} keyboardType="decimal-pad" placeholder="0.00" />
+        <TextField label="Amount (£)" value={amountText} onChangeText={(text) => setAmountText(formatMoneyTyping(text))} keyboardType="decimal-pad" placeholder="0.00" />
         <OptionPicker<PaymentStatus>
           label="Status"
           options={[

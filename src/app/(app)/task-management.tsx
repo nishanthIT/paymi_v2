@@ -241,7 +241,7 @@ function TaskForm({
   const valid = title.trim().length > 0 && selectedIds.length > 0;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{task ? 'Edit Task' : 'New Task'}</Text>
         <TextField label="Title" value={title} onChangeText={setTitle} placeholder="e.g. Restock shelves" />

@@ -23,6 +23,7 @@ import Animated, {
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { SizeBadge } from '@/components/ui/size-badge';
 import type { ListProduct } from '@/features/lists/types';
+import { formatMoneyTyping } from '@/features/shop-tools/format';
 import { formatSizeLabel } from '@/utils/pack-size';
 import { getProductImageUrl } from '@/utils/product-image';
 
@@ -131,6 +132,12 @@ export const CollectProductCard = memo(function CollectProductCard({
             />
           </View>
           <View style={styles.metaRow}>
+            {product.isUrgent && (
+              <View style={styles.urgentPill}>
+                <Ionicons name="alert-circle" size={10} color="#FFFFFF" />
+                <Text style={styles.urgentPillText}>URGENT</Text>
+              </View>
+            )}
             {product.isFreeItem && (
               <View style={styles.freePill}>
                 <Ionicons name="gift" size={10} color="#FFFFFF" />
@@ -192,7 +199,7 @@ export const CollectProductCard = memo(function CollectProductCard({
             <TextInput
               style={styles.priceInput}
               value={priceValue}
-              onChangeText={setPriceValue}
+              onChangeText={(text) => setPriceValue(formatMoneyTyping(text))}
               placeholder="Correct price"
               placeholderTextColor={Colors.light.textLight}
               keyboardType="decimal-pad"
@@ -307,6 +314,20 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   freePillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  urgentPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: Colors.light.error,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  urgentPillText: {
     fontSize: 9,
     fontWeight: '800',
     color: '#FFFFFF',

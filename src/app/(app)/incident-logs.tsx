@@ -285,7 +285,7 @@ function IncidentForm({
   const valid = description.trim().length > 0;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{incident ? 'Edit Incident' : 'Report Incident'}</Text>
         <View style={styles.dateTimeRow}>

@@ -41,6 +41,8 @@ export interface AddProductInput {
   listId: string;
   product: Product;
   quantity: number;
+  isUrgent?: boolean;
+  inHandStock?: number;
 }
 
 /**
@@ -52,9 +54,9 @@ export function useAddProduct() {
 
   return useMutation({
     mutationKey: ['lists', 'add-product'],
-    mutationFn: ({ listId, product, quantity }: AddProductInput) =>
-      listApi.addProductToList({ listId, productId: product.id, quantity }),
-    onMutate: async ({ listId, product, quantity }) => {
+    mutationFn: ({ listId, product, quantity, isUrgent, inHandStock }: AddProductInput) =>
+      listApi.addProductToList({ listId, productId: product.id, quantity, isUrgent, inHandStock }),
+    onMutate: async ({ listId, product, quantity, isUrgent }) => {
       await queryClient.cancelQueries({ queryKey: listKeys.detail(listId) });
       const previousDetail = queryClient.getQueryData<ListDetails>(listKeys.detail(listId));
       const previousLists = queryClient.getQueryData<ShoppingList[]>(listKeys.all);
@@ -64,7 +66,9 @@ export function useAddProduct() {
       if (existing) {
         patchListProducts(queryClient, listId, (products) =>
           products.map((p) =>
-            p.productId === product.id ? { ...p, quantity: p.quantity + quantity } : p,
+            p.productId === product.id
+              ? { ...p, quantity: p.quantity + quantity, isUrgent: p.isUrgent || !!isUrgent }
+              : p,
           ),
         );
       } else {
@@ -84,6 +88,7 @@ export function useAddProduct() {
           img: typeof product.img === 'string' ? product.img : null,
           quantity,
           isPurchased: false,
+          isUrgent: !!isUrgent,
         };
         patchListProducts(queryClient, listId, (products) => [optimistic, ...products]);
         patchListItemCount(queryClient, listId, 1);
@@ -191,6 +196,49 @@ export function useTogglePurchased(listId: string) {
         queryClient.setQueryData(listKeys.detail(listId), context.previousDetail);
       }
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: listKeys.detail(listId) });
+    },
+  });
+}
+
+/** Optimistic urgent-flag toggle. */
+export function useToggleUrgent(listId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['lists', 'toggle-urgent'],
+    mutationFn: (listProductId: string) =>
+      listApi.toggleUrgent({ listId, listProductId }),
+    onMutate: async (listProductId) => {
+      await queryClient.cancelQueries({ queryKey: listKeys.detail(listId) });
+      const previousDetail = queryClient.getQueryData<ListDetails>(listKeys.detail(listId));
+      patchListProducts(queryClient, listId, (products) =>
+        products.map((p) =>
+          p.id === listProductId ? { ...p, isUrgent: !p.isUrgent } : p,
+        ),
+      );
+      return { previousDetail };
+    },
+    onError: (_error, _listProductId, context) => {
+      if (context?.previousDetail) {
+        queryClient.setQueryData(listKeys.detail(listId), context.previousDetail);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: listKeys.detail(listId) });
+    },
+  });
+}
+
+/** Moves a list item to the same product at another shop, then refreshes the list. */
+export function useChangeShop(listId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['lists', 'change-shop'],
+    mutationFn: (input: { listProductId: string; productAtShopId: string }) =>
+      listApi.changeProductShop({ listId, ...input }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: listKeys.detail(listId) });
     },

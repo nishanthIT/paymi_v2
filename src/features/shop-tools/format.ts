@@ -45,3 +45,13 @@ export function parseMoneyInput(text: string): number | null {
   const num = Number(cleaned);
   return Number.isFinite(num) ? num : null;
 }
+
+/**
+ * Auto-decimal money entry (matches the web admin): digits are treated as
+ * pence and the decimal point is placed automatically — "1250" → "12.50".
+ */
+export function formatMoneyTyping(text: string): string {
+  const digits = text.replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  return (parseInt(digits, 10) / 100).toFixed(2);
+}

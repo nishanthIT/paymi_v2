@@ -25,6 +25,7 @@ import { useBarcodeLookup, useSubmitNewProduct } from '@/features/lists/hooks/us
 import { useSmartAdd } from '@/features/lists/hooks/use-smart-add';
 import type { Product } from '@/features/lists/types';
 import { emitReportScan } from '@/features/price-reports/scan-bridge';
+import { emitWasteScan } from '@/features/waste/scan-bridge';
 
 const FRAME_SIZE = 260;
 const beepSource = require('@/assets/sounds/beep.wav');
@@ -37,6 +38,7 @@ export default function ScannerScreen() {
   const { listId, intent } = useLocalSearchParams<{ listId?: string; intent?: string }>();
   const isReportIntent = intent === 'report';
   const isCompareIntent = intent === 'compare';
+  const isWasteIntent = intent === 'waste';
   const router = useRouter();
   const { showToast } = useToast();
   const [permission, requestPermission] = useCameraPermissions();
@@ -114,6 +116,17 @@ export default function ScannerScreen() {
             router.back();
             return;
           }
+          if (isWasteIntent) {
+            // Hand the product back to the waste form (stays mounted below).
+            emitWasteScan({
+              id: found.id,
+              title: found.title,
+              barcode: found.barcode,
+              price: found.rrp ?? found.lowestPrice ?? null,
+            });
+            router.back();
+            return;
+          }
           if (isCompareIntent) {
             // Jump straight into the comparison screen for the scanned product.
             router.replace({
@@ -124,6 +137,11 @@ export default function ScannerScreen() {
           }
           setProduct(found);
         } else {
+          if (isWasteIntent) {
+            showToast('No product found for this barcode', 'error');
+            resumeScanning();
+            return;
+          }
           setNotFoundBarcode(data);
         }
       } catch (error: any) {
@@ -132,17 +150,24 @@ export default function ScannerScreen() {
         resumeScanning();
       }
     },
-    [isCompareIntent, isReportIntent, lookupBarcode, player, resumeScanning, router, showToast],
+    [isCompareIntent, isReportIntent, isWasteIntent, lookupBarcode, player, resumeScanning, router, showToast],
   );
 
-  const handleAdd = async (selected: Product, quantity: number) => {
+  const handleAdd = async (
+    selected: Product,
+    quantity: number,
+    options?: { isUrgent?: boolean; inHandStock?: number },
+  ) => {
     if (!listId) return;
     setProduct(null);
     // Bundle-aware add: shows the bundle sheet when the product is part of an
     // active offer, otherwise adds directly. The short delay lets the product
     // sheet's modal finish dismissing before the bundle sheet is presented —
     // iOS won't present a modal while another is still closing.
-    const outcome = await smartAdd.requestAdd(selected, quantity, { presentDelayMs: 350 });
+    const outcome = await smartAdd.requestAdd(selected, quantity, {
+      presentDelayMs: 350,
+      ...options,
+    });
     if (outcome === 'added') resumeScanning();
   };
 
@@ -237,10 +262,10 @@ export default function ScannerScreen() {
         barcode={notFoundBarcode ?? ''}
         onClose={resumeScanning}
         submitting={submitNewProduct.isPending}
-        onSubmit={({ title, retailSize }) => {
+        onSubmit={({ title, retailSize, category, inHandStock }) => {
           if (!notFoundBarcode) return;
           submitNewProduct.mutate(
-            { barcode: notFoundBarcode, title, retailSize },
+            { barcode: notFoundBarcode, title, retailSize, category, inHandStock },
             {
               onSuccess: (newProduct) => {
                 if (listId) {

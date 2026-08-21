@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -19,7 +19,11 @@ interface ProductSheetProps {
   visible: boolean;
   onClose: () => void;
   /** Called with the chosen quantity. Sheet closes immediately (optimistic). */
-  onAdd: (product: Product, quantity: number) => void;
+  onAdd: (
+    product: Product,
+    quantity: number,
+    options?: { isUrgent?: boolean; inHandStock?: number },
+  ) => void;
   /** True when this product is already in the target list. */
   inList?: boolean;
 }
@@ -28,6 +32,9 @@ interface ProductSheetProps {
 export function ProductSheet({ product, visible, onClose, onAdd, inList }: ProductSheetProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [trackStock, setTrackStock] = useState(false);
+  const [stockText, setStockText] = useState('');
 
   const { data: packData } = usePackOptions(visible ? product?.id : null);
   const packOptions = useMemo(
@@ -45,6 +52,9 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
     if (visible) {
       setQuantity(1);
       setSelectedOptionId(null);
+      setIsUrgent(false);
+      setTrackStock(false);
+      setStockText('');
     }
   }, [visible, product?.id]);
 
@@ -56,7 +66,15 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
   const selectedOption =
     packOptions.find((o) => o.productId === (selectedOptionId ?? product.id)) ?? null;
 
+  const stockQuantity = Number(stockText);
+  const stockValid =
+    !trackStock || (stockText.trim() !== '' && Number.isInteger(stockQuantity) && stockQuantity >= 0);
+
   const handleAdd = () => {
+    const options = {
+      isUrgent: isUrgent || undefined,
+      inHandStock: trackStock && stockValid ? stockQuantity : undefined,
+    };
     // When a different pack size was chosen, add that variant instead.
     if (selectedOption && !selectedOption.isCurrent) {
       onAdd(
@@ -73,9 +91,10 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
           lowestPrice: selectedOption.price,
         },
         quantity,
+        options,
       );
     } else {
-      onAdd(product, quantity);
+      onAdd(product, quantity, options);
     }
   };
 
@@ -94,7 +113,7 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
   }, null)?.quantity;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.imageWrapper}>
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={200} />
@@ -201,6 +220,46 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
         <QuantityStepper value={quantity} onChange={setQuantity} />
       </View>
 
+      <View style={styles.toggleRow}>
+        <View style={styles.toggleLabelWrap}>
+          <Ionicons
+            name={isUrgent ? 'alert-circle' : 'alert-circle-outline'}
+            size={18}
+            color={isUrgent ? Colors.light.error : Colors.light.textSecondary}
+          />
+          <Text style={styles.toggleLabel}>Is Urgent</Text>
+        </View>
+        <Switch
+          value={isUrgent}
+          onValueChange={setIsUrgent}
+          trackColor={{ true: Colors.light.error }}
+        />
+      </View>
+
+      <View style={styles.toggleRow}>
+        <View style={styles.toggleLabelWrap}>
+          <Ionicons name="file-tray-stacked-outline" size={18} color={Colors.light.textSecondary} />
+          <Text style={styles.toggleLabel}>In-Hand Stock</Text>
+        </View>
+        <Switch
+          value={trackStock}
+          onValueChange={setTrackStock}
+          trackColor={{ true: Colors.light.primary }}
+        />
+      </View>
+      {trackStock && (
+        <TextInput
+          value={stockText}
+          onChangeText={(text) => setStockText(text.replace(/[^0-9]/g, ''))}
+          placeholder="Available quantity, e.g. 24"
+          placeholderTextColor={Colors.light.textLight}
+          style={styles.stockInput}
+          keyboardType="number-pad"
+          returnKeyType="done"
+          autoFocus
+        />
+      )}
+
       {inList && (
         <View style={styles.inListNote}>
           <Ionicons name="information-circle" size={16} color={Colors.light.primary} />
@@ -212,6 +271,7 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
         <PrimaryButton
           title={inList ? 'Increase Quantity' : 'Add to List'}
           onPress={handleAdd}
+          disabled={!stockValid}
         />
         <PrimaryButton title="Cancel" variant="ghost" onPress={onClose} />
       </View>
@@ -469,6 +529,33 @@ const styles = StyleSheet.create({
   quantityLabel: {
     ...Typography.bodyBold,
     color: Colors.light.text,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+  },
+  toggleLabelWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  toggleLabel: {
+    ...Typography.bodyBold,
+    color: Colors.light.text,
+  },
+  stockInput: {
+    ...Typography.body,
+    color: Colors.light.text,
+    backgroundColor: Colors.light.backgroundCard,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    marginBottom: Spacing.sm,
   },
   inListNote: {
     flexDirection: 'row',

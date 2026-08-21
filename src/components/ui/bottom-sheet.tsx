@@ -4,7 +4,9 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -25,6 +27,11 @@ interface BottomSheetProps {
   children: React.ReactNode;
   /** Avoid keyboard (for sheets containing inputs). */
   keyboardAware?: boolean;
+  /**
+   * Wrap content in a ScrollView capped below screen height so every field
+   * stays reachable while the keyboard is open. Use for multi-field forms.
+   */
+  scrollable?: boolean;
 }
 
 const SPRING = { damping: 22, stiffness: 260, mass: 0.9 };
@@ -34,7 +41,13 @@ const CLOSE_DURATION = 180;
  * Lightweight, dependency-free bottom sheet: spring entrance, backdrop fade,
  * and drag-down to dismiss. Runs entirely on the UI thread.
  */
-export function BottomSheet({ visible, onClose, children, keyboardAware }: BottomSheetProps) {
+export function BottomSheet({
+  visible,
+  onClose,
+  children,
+  keyboardAware,
+  scrollable,
+}: BottomSheetProps) {
   const [mounted, setMounted] = useState(visible);
   const translateY = useSharedValue(600);
   const backdrop = useSharedValue(0);
@@ -78,6 +91,7 @@ export function BottomSheet({ visible, onClose, children, keyboardAware }: Botto
   }));
 
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
 
   if (!mounted) return null;
 
@@ -95,7 +109,19 @@ export function BottomSheet({ visible, onClose, children, keyboardAware }: Botto
           <View style={styles.handle} />
         </View>
       </GestureDetector>
-      {children}
+      {scrollable ? (
+        <ScrollView
+          style={{ maxHeight: windowHeight * 0.7 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
+          bounces={false}
+        >
+          {children}
+        </ScrollView>
+      ) : (
+        children
+      )}
     </Animated.View>
   );
 

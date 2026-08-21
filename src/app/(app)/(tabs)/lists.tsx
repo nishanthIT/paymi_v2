@@ -20,6 +20,7 @@ import { CreateListSheet } from '@/features/lists/components/create-list-sheet';
 import { ListCard } from '@/features/lists/components/list-card';
 import { useCreateList, useDeleteList, useLists, useUntrackList } from '@/features/lists/hooks/use-lists';
 import type { ShoppingList } from '@/features/lists/types';
+import { matchesSearch } from '@/utils/search';
 
 /**
  * Shopping Lists tab. Cached lists render instantly; refreshes are silent.
@@ -38,9 +39,9 @@ export default function ListsScreen() {
 
   const filteredLists = useMemo(() => {
     if (!lists) return [];
-    const term = filter.trim().toLowerCase();
+    const term = filter.trim();
     if (!term) return lists;
-    return lists.filter((list) => list.name.toLowerCase().includes(term));
+    return lists.filter((list) => matchesSearch(term, list.name));
   }, [lists, filter]);
 
   const handleCreate = (name: string) => {

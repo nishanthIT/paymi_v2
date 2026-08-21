@@ -34,6 +34,9 @@ export interface ListProduct {
   img: string | null;
   quantity: number;
   isPurchased: boolean;
+  isUrgent?: boolean;
+  /** Shop's recorded on-hand quantity for this product (null when untracked). */
+  inHandStock?: number | null;
   isFreeItem?: boolean;
   freeQuantity?: number;
   bundlePromotionId?: string | null;

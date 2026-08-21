@@ -9,6 +9,7 @@ import { formatSizeLabel } from '@/utils/pack-size';
 import { getProductImageUrl } from '@/utils/product-image';
 
 import type { Product } from '../types';
+import { QuantityStepper } from './quantity-stepper';
 
 interface SearchResultCardProps {
   product: Product;
@@ -18,6 +19,9 @@ interface SearchResultCardProps {
   isAdding: boolean;
   /** Product already in the target list → adding bumps quantity. */
   inList: boolean;
+  /** Current quantity in the list — shows an inline stepper when > 0. */
+  quantityInList?: number;
+  onQuantityChange?: (quantity: number) => void;
 }
 
 /** Search result card with image, availability, price and a quick-add button. */
@@ -27,6 +31,8 @@ export const SearchResultCard = React.memo(function SearchResultCard({
   onAdd,
   isAdding,
   inList,
+  quantityInList,
+  onQuantityChange,
 }: SearchResultCardProps) {
   const imageUrl = getProductImageUrl(product.img as any, product.barcode);
 
@@ -64,22 +70,27 @@ export const SearchResultCard = React.memo(function SearchResultCard({
         </View>
       </View>
 
-      <Pressable
-        onPress={onAdd}
-        disabled={isAdding}
-        hitSlop={8}
-        style={({ pressed }) => [
-          styles.addButton,
-          inList && styles.addButtonInList,
-          pressed && styles.addButtonPressed,
-        ]}
-      >
-        {isAdding ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <Ionicons name={inList ? 'add-circle' : 'add'} size={22} color="#FFFFFF" />
-        )}
-      </Pressable>
+      {inList && quantityInList != null && quantityInList > 0 && onQuantityChange ? (
+        // Adjust quantity right from the search result — no extra screen needed.
+        <QuantityStepper value={quantityInList} onChange={onQuantityChange} compact />
+      ) : (
+        <Pressable
+          onPress={onAdd}
+          disabled={isAdding}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.addButton,
+            inList && styles.addButtonInList,
+            pressed && styles.addButtonPressed,
+          ]}
+        >
+          {isAdding ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Ionicons name={inList ? 'add-circle' : 'add'} size={22} color="#FFFFFF" />
+          )}
+        </Pressable>
+      )}
     </Pressable>
   );
 });

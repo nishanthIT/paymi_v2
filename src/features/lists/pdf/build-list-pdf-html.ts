@@ -193,42 +193,42 @@ export function buildListPdfHtml(list: ListDetails, options: PdfExportOptions): 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; }
   html, body {
     font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    color: #000; background: #fff; font-size: 9.5px; line-height: 1.2;
+    color: #333; background: #fff; font-size: 9.5px; line-height: 1.2;
   }
 
   .doc-header { display: flex; justify-content: space-between; align-items: baseline;
-    border-bottom: 1.5px solid #000; padding-bottom: 2px; margin-bottom: 3px; }
+    border-bottom: 1.5px solid #666; padding-bottom: 2px; margin-bottom: 3px; }
   .doc-title { font-size: 14px; font-weight: 800; letter-spacing: 0.2px; }
-  .doc-sub { font-size: 8px; color: #333; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+  .doc-sub { font-size: 8px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
 
   .page-break { page-break-before: always; }
-  .shop-header { border: 1px solid #000; border-radius: 2px; padding: 2px 6px; margin-bottom: 3px; }
+  .shop-header { border: 1px solid #777; border-radius: 2px; padding: 2px 6px; margin-bottom: 3px; }
   .shop-title-row { display: flex; justify-content: space-between; align-items: center; }
   .shop-name { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
-  .bc-flag { font-size: 7px; font-weight: 800; border: 1px solid #000; border-radius: 2px;
+  .bc-flag { font-size: 7px; font-weight: 800; border: 1px solid #777; border-radius: 2px;
     padding: 0 4px; letter-spacing: 0.5px; }
-  .shop-meta { font-size: 8.5px; color: #222; }
+  .shop-meta { font-size: 8.5px; color: #555; }
   .shop-meta b { font-size: 9.5px; }
   .dot { margin: 0 3px; }
 
   .aisle { margin-bottom: 1px; }
-  .aisle-label { background: #000; color: #fff; font-size: 8.5px; font-weight: 800;
+  .aisle-label { background: #595959; color: #fff; font-size: 8.5px; font-weight: 800;
     letter-spacing: 0.8px; padding: 1px 5px; margin: 2px 0 1px; }
   .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-    color: #111; border-bottom: 0.5px solid #000; margin: 1px 1px 1px; }
+    color: #555; border-bottom: 0.5px solid #999; margin: 1px 1px 1px; }
 
   /* STRICT: always two blocks per row. Fixed 50% width, never grows. */
   .grid { display: flex; flex-wrap: wrap; }
-  .product { width: 50%; flex: 0 0 50%; max-width: 50%; border: 0.5px solid #000;
+  .product { width: 50%; flex: 0 0 50%; max-width: 50%; border: 0.5px solid #999;
     padding: 1px 3px 2px; margin: 0 0 -0.5px; page-break-inside: avoid; break-inside: avoid;
     overflow: hidden; }
 
   .p-top { display: flex; align-items: baseline; gap: 3px; }
-  .checkbox { flex: 0 0 auto; width: 10px; height: 10px; border: 1.2px solid #000;
+  .checkbox { flex: 0 0 auto; width: 10px; height: 10px; border: 1.2px solid #777;
     align-self: center; }
   .p-name { flex: 1 1 auto; font-size: 9.5px; font-weight: 700; word-break: break-word;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .size { display: inline-block; font-size: 8px; font-weight: 800; border: 0.5px solid #000;
+  .size { display: inline-block; font-size: 8px; font-weight: 800; border: 0.5px solid #999;
     padding: 0 2px; white-space: nowrap; }
   .qty { flex: 0 0 auto; font-size: 13px; font-weight: 900; line-height: 1; }
   .price-now { flex: 0 0 auto; font-size: 9.5px; font-weight: 800; }
@@ -236,17 +236,17 @@ export function buildListPdfHtml(list: ListDetails, options: PdfExportOptions): 
   .p-meta { display: flex; align-items: center; gap: 4px; margin-top: 1px; }
   .code-num { font-size: 8.5px; font-weight: 700; font-family: 'Courier New', monospace;
     letter-spacing: 0.2px; white-space: nowrap; }
-  .code-num.case { color: #111; }
+  .code-num.case { color: #555; }
   .price-fix { display: flex; align-items: center; margin-left: auto;
-    font-size: 8px; font-weight: 700; color: #222; }
-  .price-box { display: inline-block; width: 36px; height: 11px; border: 0.5px solid #000;
+    font-size: 8px; font-weight: 700; color: #555; }
+  .price-box { display: inline-block; width: 36px; height: 11px; border: 0.5px solid #999;
     margin-left: 1px; background: #fff; }
 
   .bc-row { display: flex; gap: 4px; margin-top: 1px; }
   .bc { flex: 1 1 0; min-width: 0; }
 
-  .doc-footer { margin-top: 3px; padding-top: 2px; border-top: 0.5px solid #000;
-    font-size: 7px; color: #333; display: flex; justify-content: space-between; }
+  .doc-footer { margin-top: 3px; padding-top: 2px; border-top: 0.5px solid #999;
+    font-size: 7px; color: #555; display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>

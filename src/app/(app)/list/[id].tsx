@@ -23,10 +23,12 @@ import { exportListPdf } from '@/features/lists/pdf/export-list-pdf';
 import {
   useListDetails,
   useRemoveProduct,
+  useToggleUrgent,
   useUpdateQuantity,
 } from '@/features/lists/hooks/use-list-details';
 import { useRenameList } from '@/features/lists/hooks/use-lists';
 import type { ListProduct } from '@/features/lists/types';
+import { matchesSearch } from '@/utils/search';
 
 /**
  * List details: instant in-list search, check-off progress, quantity
@@ -41,6 +43,7 @@ export default function ListDetailsScreen() {
   const { data: list, isLoading, isRefetching, refetch } = useListDetails(listId);
   const removeProduct = useRemoveProduct(listId);
   const updateQuantity = useUpdateQuantity(listId);
+  const toggleUrgent = useToggleUrgent(listId);
   const renameList = useRenameList();
 
   const [filter, setFilter] = useState('');
@@ -84,17 +87,13 @@ export default function ListDetailsScreen() {
 
   const products = useMemo(() => {
     const all = list?.products ?? [];
-    const term = filter.trim().toLowerCase();
+    const term = filter.trim();
     const filtered = term
-      ? all.filter(
-          (p) =>
-            p.productName.toLowerCase().includes(term) ||
-            p.barcode.includes(term) ||
-            p.category.toLowerCase().includes(term),
-        )
+      ? all.filter((p) => matchesSearch(term, p.productName, p.barcode, p.category))
       : all;
-    // Bundle items stay grouped together (bundles first, keyed by promotion),
-    // everything else is plain A→Z. Collected state only matters in Collect Mode.
+    // Bundle items stay grouped together (bundles first, keyed by promotion);
+    // everything else is newest-first — cuid ids are time-ordered, so sorting
+    // by id desc works even when the backend returns insertion order.
     return [...filtered].sort((a, b) => {
       const bundleA = a.bundlePromotionId ?? '';
       const bundleB = b.bundlePromotionId ?? '';
@@ -102,7 +101,7 @@ export default function ListDetailsScreen() {
       if (bundleA !== bundleB) return bundleA.localeCompare(bundleB);
       // Within a bundle: paid items before free items.
       if (bundleA && !!a.isFreeItem !== !!b.isFreeItem) return a.isFreeItem ? 1 : -1;
-      return a.productName.localeCompare(b.productName);
+      return b.id.localeCompare(a.id); // 'optimistic-' rows sort above cuids too
     });
   }, [list?.products, filter]);
 
@@ -119,6 +118,7 @@ export default function ListDetailsScreen() {
           updateQuantity.mutate({ listProductId: item.id, quantity }, { onError })
         }
         onRemove={() => removeProduct.mutate(item.productId, { onError })}
+        onToggleUrgent={() => toggleUrgent.mutate(item.id, { onError })}
       />
     </Animated.View>
   );

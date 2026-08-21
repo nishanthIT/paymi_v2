@@ -38,6 +38,7 @@ import {
   type ExpirySearchProduct,
   type ExpiryStatus,
 } from '@/features/expiry/api';
+import { matchesSearch } from '@/utils/search';
 import { DateTimeField } from '@/features/shop-tools/components/date-time-field';
 import { EmptyState } from '@/features/shop-tools/components/empty-state';
 import { Fab, RecordCard, StatusPill } from '@/features/shop-tools/components/primitives';
@@ -98,13 +99,10 @@ export default function ManageExpiryScreen() {
   const counts = list.data?.counts;
   const visible = useMemo(() => {
     const products = list.data?.products ?? [];
-    const term = search.trim().toLowerCase();
+    const term = search.trim();
     if (!term) return products;
-    return products.filter(
-      (p) =>
-        p.productName.toLowerCase().includes(term) ||
-        (p.productBarcode ?? '').includes(term) ||
-        (p.batchNumber ?? '').toLowerCase().includes(term),
+    return products.filter((p) =>
+      matchesSearch(term, p.productName, p.productBarcode, p.batchNumber),
     );
   }, [list.data, search]);
 
@@ -399,7 +397,7 @@ function AddExpirySheet({
   const valid = selected != null && expiryDate != null && Number.isFinite(quantity) && quantity > 0;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>Track a Product</Text>
         {!selected ? (
@@ -536,7 +534,7 @@ function EditExpirySheet({
   const valid = expiryDate != null && Number.isFinite(quantity) && quantity > 0;
 
   return (
-    <BottomSheet visible={product != null} onClose={onClose} keyboardAware>
+    <BottomSheet visible={product != null} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle} numberOfLines={1}>
           {product?.productName ?? ''}
@@ -711,7 +709,7 @@ function CategoryForm({
   const valid = name.trim().length > 0 && reminderDays.length > 0;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{category ? 'Edit Reminder Rule' : 'New Reminder Rule'}</Text>
         <TextField label="Name" value={name} onChangeText={setName} placeholder="e.g. Dairy" />

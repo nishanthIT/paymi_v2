@@ -261,7 +261,7 @@ function AreaFormSheet({
   }
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{area ? 'Edit Area' : 'New Cleaning Area'}</Text>
         <TextField label="Area name" value={name} onChangeText={setName} placeholder="e.g. Kitchen" />

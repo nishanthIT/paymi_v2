@@ -29,6 +29,7 @@ import {
 } from '@/features/price-reports/hooks';
 import { subscribeReportScan } from '@/features/price-reports/scan-bridge';
 import type { ReportProduct, ReportShop } from '@/features/price-reports/types';
+import { formatMoneyTyping } from '@/features/shop-tools/format';
 import { formatSizeLabel } from '@/utils/pack-size';
 import { getProductImageUrl } from '@/utils/product-image';
 
@@ -275,7 +276,7 @@ export default function ReportPriceScreen() {
                   <TextInput
                     style={styles.priceInput}
                     value={priceValue}
-                    onChangeText={setPriceValue}
+                    onChangeText={(text) => setPriceValue(formatMoneyTyping(text))}
                     placeholder="Enter the correct price"
                     placeholderTextColor={Colors.light.textLight}
                     keyboardType="decimal-pad"

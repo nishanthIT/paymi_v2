@@ -7,6 +7,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { matchesSearch } from '@/utils/search';
 
 import type { ListProduct } from '../types';
 
@@ -58,14 +59,14 @@ export function ExportPdfSheet({ visible, products, exporting, onClose, onExport
   }, [products]);
 
   const filteredShops = useMemo(() => {
-    const term = shopQuery.trim().toLowerCase();
-    return term ? shops.filter((s) => s.shopName.toLowerCase().includes(term)) : shops;
+    const term = shopQuery.trim();
+    return term ? shops.filter((s) => matchesSearch(term, s.shopName)) : shops;
   }, [shops, shopQuery]);
 
   const canExport = !includeBarcodes || !!selectedShopId;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.headerIcon}>

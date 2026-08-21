@@ -100,10 +100,17 @@ export async function addProductToList(input: {
   listId: string;
   productId: string;
   quantity?: number;
+  isUrgent?: boolean;
+  inHandStock?: number;
 }): Promise<AddProductResult> {
-  const { listId, productId, quantity = 1 } = input;
+  const { listId, productId, quantity = 1, isUrgent, inHandStock } = input;
   try {
-    const response = await api.post('/lists/addProduct', { listId, productId });
+    const response = await api.post('/lists/addProduct', {
+      listId,
+      productId,
+      ...(isUrgent ? { isUrgent: true } : {}),
+      ...(inHandStock != null ? { inHandStock } : {}),
+    });
     const result: AddProductResult = response.data;
 
     if (quantity > 1 && result?.data?.listProductId) {
@@ -160,6 +167,31 @@ export async function togglePurchased(input: {
   }
 }
 
+export async function toggleUrgent(input: {
+  listId: string;
+  listProductId: string;
+}): Promise<void> {
+  try {
+    await api.put('/lists/toggleUrgent', input);
+  } catch (error: any) {
+    throw apiError(error, 'Failed to update item');
+  }
+}
+
+/** Moves a list item to the same product at a different shop. */
+export async function changeProductShop(input: {
+  listId: string;
+  listProductId: string;
+  productAtShopId: string;
+}): Promise<{ message: string }> {
+  try {
+    const response = await api.put('/lists/changeShop', input);
+    return response.data;
+  } catch (error: any) {
+    throw apiError(error, 'Failed to move product to another shop');
+  }
+}
+
 export async function searchProducts(query: string): Promise<Product[]> {
   const term = query.trim();
   if (term.length < 2) return [];
@@ -185,6 +217,27 @@ export async function fetchProductByBarcode(barcode: string): Promise<Product | 
 }
 
 /**
+ * All known category names: the managed Category table merged with the
+ * distinct categories already used on products, deduped case-insensitively.
+ */
+export async function fetchCategories(): Promise<string[]> {
+  try {
+    const [managed, fromProducts] = await Promise.all([
+      api.get('/categories').then((r) => r.data?.data ?? []).catch(() => []),
+      api.get('/categories/product-categories').then((r) => r.data?.data ?? []).catch(() => []),
+    ]);
+    const seen = new Map<string, string>();
+    for (const entry of [...managed.map((c: any) => c?.name), ...fromProducts]) {
+      const name = typeof entry === 'string' ? entry.trim() : '';
+      if (name && !seen.has(name.toLowerCase())) seen.set(name.toLowerCase(), name);
+    }
+    return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+  } catch (error: any) {
+    throw apiError(error, 'Failed to load categories');
+  }
+}
+
+/**
  * Submits an unknown scanned barcode via the existing quick-add endpoint.
  * The product lands in the backend's pending-submissions queue (category
  * USER_SUBMITTED_PENDING) for an admin to review and approve. It also has a
@@ -194,6 +247,8 @@ export async function submitNewProduct(input: {
   barcode: string;
   title: string;
   retailSize?: string;
+  category?: string;
+  inHandStock?: number;
 }): Promise<Product> {
   try {
     const response = await api.post('/products/quick-add', {
@@ -201,6 +256,8 @@ export async function submitNewProduct(input: {
       title: input.title,
       // retailSize is required server-side; fall back when left blank.
       retailSize: input.retailSize?.trim() || 'N/A',
+      ...(input.category?.trim() ? { category: input.category.trim() } : {}),
+      ...(input.inHandStock != null ? { inHandStock: input.inHandStock } : {}),
     });
     return response.data?.data;
   } catch (error: any) {

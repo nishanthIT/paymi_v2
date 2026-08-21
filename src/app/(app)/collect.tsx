@@ -11,7 +11,7 @@ import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/
 import { CollectDetailsSheet } from '@/features/collect/components/collect-details-sheet';
 import { CollectProductCard } from '@/features/collect/components/collect-product-card';
 import { ShopSelector, type ShopSummary } from '@/features/collect/components/shop-selector';
-import { useListDetails, useTogglePurchased } from '@/features/lists/hooks/use-list-details';
+import { useListDetails, useTogglePurchased, useToggleUrgent, useChangeShop } from '@/features/lists/hooks/use-list-details';
 import type { ListProduct } from '@/features/lists/types';
 import { useSubmitPriceReport } from '@/features/price-reports/hooks';
 
@@ -28,11 +28,14 @@ export default function CollectScreen() {
   const { showToast } = useToast();
   const { data: list, isLoading, isFetching } = useListDetails(listId ?? '');
   const toggle = useTogglePurchased(listId ?? '');
+  const toggleUrgent = useToggleUrgent(listId ?? '');
+  const changeShop = useChangeShop(listId ?? '');
   const submitReport = useSubmitPriceReport();
 
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
   const [aisle, setAisle] = useState<string | null>(null);
+  const [urgentOnly, setUrgentOnly] = useState(false);
   const [detailsId, setDetailsId] = useState<string | null>(null);
 
   const products = useMemo(() => list?.products ?? [], [list?.products]);
@@ -82,12 +85,18 @@ export default function CollectScreen() {
         new Set(
           shopProducts.map((p) => p.aielNumber || p.locationCode).filter(Boolean),
         ),
-      ).sort() as string[],
+        // Natural order so Aisle 2 comes before Aisle 10.
+      ).sort((a, b) =>
+        (a as string).localeCompare(b as string, undefined, { numeric: true, sensitivity: 'base' }),
+      ) as string[],
     [shopProducts],
   );
 
+  const hasUrgent = useMemo(() => shopProducts.some((p) => p.isUrgent), [shopProducts]);
+
   const visible = useMemo(() => {
     let items = shopProducts;
+    if (urgentOnly) items = items.filter((p) => p.isUrgent);
     if (category) items = items.filter((p) => p.category === category);
     if (aisle) items = items.filter((p) => (p.aielNumber || p.locationCode) === aisle);
     // Bundle items stay grouped (bundles first); within the rest: uncollected
@@ -101,10 +110,11 @@ export default function CollectScreen() {
       if (a.isPurchased !== b.isPurchased) return a.isPurchased ? 1 : -1;
       const aisleA = a.aielNumber || a.locationCode || '';
       const aisleB = b.aielNumber || b.locationCode || '';
-      if (aisleA !== aisleB) return aisleA.localeCompare(aisleB);
+      if (aisleA !== aisleB)
+        return aisleA.localeCompare(aisleB, undefined, { numeric: true, sensitivity: 'base' });
       return a.productName.localeCompare(b.productName);
     });
-  }, [shopProducts, category, aisle]);
+  }, [shopProducts, category, aisle, urgentOnly]);
 
   // Interleave a header row before each bundle group so the employee sees
   // which products belong together, the free item, and live bundle progress.
@@ -224,13 +234,19 @@ export default function CollectScreen() {
         />
       </View>
 
-      {(categories.length > 1 || aisles.length > 1) && (
+      {shopProducts.length > 0 && (
         <View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filterRow}
           >
+            <FilterChip
+              label={`Urgent${hasUrgent ? '' : ' (none)'}`}
+              icon="alert-circle"
+              active={urgentOnly}
+              onPress={() => setUrgentOnly((on) => !on)}
+            />
             {categories.length > 1 &&
               categories.map((c) => (
                 <FilterChip
@@ -240,7 +256,7 @@ export default function CollectScreen() {
                   onPress={() => setCategory(category === c ? null : c)}
                 />
               ))}
-            {aisles.length > 1 &&
+            {aisles.length > 0 &&
               aisles.map((a) => (
                 <FilterChip
                   key={`a-${a}`}
@@ -325,6 +341,24 @@ export default function CollectScreen() {
         product={details}
         isLoading={isLoading || isFetching}
         onClose={() => setDetailsId(null)}
+        onToggleUrgent={(listProductId) =>
+          toggleUrgent.mutate(listProductId, {
+            onError: (error) => showToast(error.message, 'error'),
+          })
+        }
+        changingShop={changeShop.isPending}
+        onChangeShop={(listProductId, productAtShopId) =>
+          changeShop.mutate(
+            { listProductId, productAtShopId },
+            {
+              onSuccess: (result) => {
+                showToast(result?.message ?? 'Moved to the selected shop', 'success');
+                setDetailsId(null);
+              },
+              onError: (error) => showToast(error.message, 'error'),
+            },
+          )
+        }
       />
     </SafeAreaView>
   );

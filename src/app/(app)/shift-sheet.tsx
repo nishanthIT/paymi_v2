@@ -28,9 +28,11 @@ import { useIsOwner } from '@/features/shop-tools/hooks/use-is-owner';
 import {
   formatDate,
   formatMoney,
+  formatMoneyTyping,
   parseMoneyInput,
   toDateParam,
 } from '@/features/shop-tools/format';
+import { matchesSearch } from '@/utils/search';
 
 /**
  * End-of-shift cash/card totals. Employees submit ONE sheet per day and cannot
@@ -69,11 +71,9 @@ export default function ShiftSheetScreen() {
 
   const visible = useMemo(() => {
     const all = records.data ?? [];
-    const term = search.trim().toLowerCase();
+    const term = search.trim();
     if (!term) return all;
-    return all.filter(
-      (r) => r.recordedBy.toLowerCase().includes(term) || (r.notes ?? '').toLowerCase().includes(term),
-    );
+    return all.filter((r) => matchesSearch(term, r.recordedBy, r.notes));
   }, [records.data, search]);
 
   // Employees may create at most one sheet per calendar day (client-enforced).
@@ -262,16 +262,16 @@ function ShiftSheetForm({
   const total = valid ? cash + card : null;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{record ? 'Edit Shift Sheet' : 'New Shift Sheet'}</Text>
         <DateTimeField label="Shift date" mode="date" value={shiftDate} onChange={setShiftDate} maximumDate={new Date()} />
         <View style={styles.dateRowInner}>
           <View style={styles.dateField}>
-            <TextField label="Cash total (£)" value={cashText} onChangeText={setCashText} keyboardType="decimal-pad" placeholder="0.00" />
+            <TextField label="Cash total (£)" value={cashText} onChangeText={(text) => setCashText(formatMoneyTyping(text))} keyboardType="decimal-pad" placeholder="0.00" />
           </View>
           <View style={styles.dateField}>
-            <TextField label="Card total (£)" value={cardText} onChangeText={setCardText} keyboardType="decimal-pad" placeholder="0.00" />
+            <TextField label="Card total (£)" value={cardText} onChangeText={(text) => setCardText(formatMoneyTyping(text))} keyboardType="decimal-pad" placeholder="0.00" />
           </View>
         </View>
         {total != null && (

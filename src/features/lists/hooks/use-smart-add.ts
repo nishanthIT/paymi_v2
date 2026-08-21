@@ -33,6 +33,13 @@ export interface BundlePrompt {
   quantity: number;
   check: BundleCheckResult;
   offer: BundleOffer;
+  /** Urgent/in-hand-stock flags chosen before the bundle prompt appeared. */
+  addOptions?: AddOptions;
+}
+
+export interface AddOptions {
+  isUrgent?: boolean;
+  inHandStock?: number;
 }
 
 /**
@@ -59,12 +66,12 @@ export function useSmartAdd(listId: string | undefined) {
   });
 
   const addSingleNow = useCallback(
-    (product: Product, quantity: number) => {
+    (product: Product, quantity: number, addOptions?: AddOptions) => {
       if (!listId) return;
       const cached = queryClient.getQueryData<ListDetails>(listKeys.detail(listId));
       const wasInList = (cached?.products ?? []).some((p) => p.productId === product.id);
       addProduct.mutate(
-        { listId, product, quantity },
+        { listId, product, quantity, ...addOptions },
         {
           onSuccess: (result) => {
             showToast(
@@ -93,9 +100,13 @@ export function useSmartAdd(listId: string | undefined) {
     async (
       product: Product,
       quantity: number,
-      options?: { presentDelayMs?: number },
+      options?: { presentDelayMs?: number } & AddOptions,
     ): Promise<'added' | 'prompted'> => {
       if (!listId) return 'added';
+      const addOptions: AddOptions = {
+        isUrgent: options?.isUrgent,
+        inHandStock: options?.inHandStock,
+      };
       setCheckingProductId(product.id);
       const check = await listApi.checkBundleBeforeAdd({ productId: product.id, listId });
       setCheckingProductId(null);
@@ -104,10 +115,10 @@ export function useSmartAdd(listId: string | undefined) {
         if (options?.presentDelayMs) {
           await new Promise((resolve) => setTimeout(resolve, options.presentDelayMs));
         }
-        setBundlePrompt({ product, quantity, check, offer });
+        setBundlePrompt({ product, quantity, check, offer, addOptions });
         return 'prompted';
       }
-      addSingleNow(product, quantity);
+      addSingleNow(product, quantity, addOptions);
       return 'added';
     },
     [addSingleNow, listId],
@@ -118,9 +129,9 @@ export function useSmartAdd(listId: string | undefined) {
   /** "Add Single Product" from the bundle sheet. */
   const addSingleFromPrompt = useCallback(() => {
     if (!bundlePrompt) return;
-    const { product, quantity } = bundlePrompt;
+    const { product, quantity, addOptions } = bundlePrompt;
     setBundlePrompt(null);
-    addSingleNow(product, quantity);
+    addSingleNow(product, quantity, addOptions);
   }, [addSingleNow, bundlePrompt]);
 
   /** "Add Bundle" — claims the offer so buy quantity + free items land in the list. */

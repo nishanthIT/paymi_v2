@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
 
@@ -18,6 +19,7 @@ import { ToolScreen } from '@/features/shop-tools/components/tool-screen';
 import {
   formatDateTime,
   formatMoney,
+  formatMoneyTyping,
   parseMoneyInput,
   toDateParam,
 } from '@/features/shop-tools/format';
@@ -31,6 +33,7 @@ import {
   type WasteReason,
   type WasteRecord,
 } from '@/features/waste/api';
+import { subscribeWasteScan, type WasteScanProduct } from '@/features/waste/scan-bridge';
 
 type Range = 'today' | '7d' | '30d' | 'custom' | 'all';
 
@@ -45,11 +48,23 @@ const reasonLabels: Record<WasteReason, string> = {
 export default function WasteManagementScreen() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [range, setRange] = useState<Range>('30d');
   const [customStart, setCustomStart] = useState<Date | null>(null);
   const [customEnd, setCustomEnd] = useState<Date | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [scanned, setScanned] = useState<WasteScanProduct | null>(null);
+
+  // Reopen the form prefilled once the scanner hands a product back.
+  useEffect(
+    () =>
+      subscribeWasteScan((product) => {
+        setScanned(product);
+        setShowForm(true);
+      }),
+    [],
+  );
 
   const dates = useMemo(() => {
     const now = new Date();
@@ -147,13 +162,24 @@ export default function WasteManagementScreen() {
 
       <WasteForm
         visible={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          setShowForm(false);
+          setScanned(null);
+        }}
         saving={create.isPending}
+        initialProduct={scanned}
+        onScan={() => {
+          // The native sheet modal would cover the scanner screen, so close it
+          // first; the scan-bridge subscription reopens it prefilled.
+          setShowForm(false);
+          router.push({ pathname: '/(app)/scanner', params: { intent: 'waste' } });
+        }}
         onSave={(input) =>
           create
             .mutateAsync(input)
             .then(() => {
               setShowForm(false);
+              setScanned(null);
               showToast('Waste recorded', 'success');
             })
             .catch((error: any) => showToast(error?.message ?? 'Could not save', 'error'))
@@ -200,11 +226,15 @@ function WasteForm({
   onClose,
   onSave,
   saving,
+  initialProduct,
+  onScan,
 }: {
   visible: boolean;
   onClose: () => void;
   onSave: (input: WasteInput) => void;
   saving: boolean;
+  initialProduct?: WasteScanProduct | null;
+  onScan?: () => void;
 }) {
   const [productId, setProductId] = useState<string | undefined>(undefined);
   const [itemName, setItemName] = useState('');
@@ -221,10 +251,11 @@ function WasteForm({
   if (visible !== wasVisible) {
     setWasVisible(visible);
     if (visible) {
-      setProductId(undefined);
-      setItemName('');
+      // Prefill from a scanned product when the scanner reopened the form.
+      setProductId(initialProduct?.id);
+      setItemName(initialProduct?.title ?? '');
       setQuantityText('1');
-      setPriceText('');
+      setPriceText(initialProduct?.price != null ? Number(initialProduct.price).toFixed(2) : '');
       setPriceReduced(false);
       setReducedPriceText('');
       setReason('DAMAGED');
@@ -262,7 +293,7 @@ function WasteForm({
   const projectedLoss = valid ? quantity * (price ?? 0) : null;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>Record Waste</Text>
         <TextField
@@ -274,6 +305,15 @@ function WasteForm({
           }}
           placeholder="Search or type item name"
         />
+        {onScan && (
+          <Pressable
+            onPress={onScan}
+            style={({ pressed }) => [styles.scanButton, pressed && { opacity: 0.8 }]}
+          >
+            <Ionicons name="scan" size={16} color={Colors.light.primary} />
+            <Text style={styles.scanButtonText}>Scan barcode instead</Text>
+          </Pressable>
+        )}
         {hits.length > 0 && (
           <View style={styles.hitsBox}>
             {hits.map((hit) => (
@@ -301,7 +341,7 @@ function WasteForm({
             <TextField label="Quantity" value={quantityText} onChangeText={setQuantityText} keyboardType="number-pad" />
           </View>
           <View style={styles.flex1}>
-            <TextField label="Price each (£)" value={priceText} onChangeText={setPriceText} keyboardType="decimal-pad" placeholder="0.00" />
+            <TextField label="Price each (£)" value={priceText} onChangeText={(text) => setPriceText(formatMoneyTyping(text))} keyboardType="decimal-pad" placeholder="0.00" />
           </View>
         </View>
         <View style={styles.switchRow}>
@@ -316,7 +356,7 @@ function WasteForm({
           <TextField
             label="Reduced price (£)"
             value={reducedPriceText}
-            onChangeText={setReducedPriceText}
+            onChangeText={(text) => setReducedPriceText(formatMoneyTyping(text))}
             keyboardType="decimal-pad"
             placeholder="0.00"
           />
@@ -415,6 +455,22 @@ const styles = StyleSheet.create({
     ...Typography.h4,
     color: Colors.light.text,
     marginBottom: Spacing.xs,
+  },
+  scanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.light.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 10,
+    marginTop: -Spacing.xs,
+  },
+  scanButtonText: {
+    ...Typography.bodySmall,
+    fontWeight: '700',
+    color: Colors.light.primary,
   },
   dateTimeRow: {
     flexDirection: 'row',

@@ -458,7 +458,7 @@ function LogTemperatureSheet({
   const valid = temp != null && Number.isFinite(temp);
 
   return (
-    <BottomSheet visible={target != null} onClose={onClose} keyboardAware>
+    <BottomSheet visible={target != null} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <View style={styles.sheetTitleRow}>
           <Text style={styles.sheetTitle}>
@@ -553,7 +553,7 @@ function FridgeFormSheet({
   const valid = name.trim().length > 0 && Number.isFinite(min) && Number.isFinite(max) && min < max;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{fridge ? 'Edit Equipment' : 'New Equipment'}</Text>
         <TextField label="Name" value={name} onChangeText={setName} placeholder="e.g. Drinks Chiller" />

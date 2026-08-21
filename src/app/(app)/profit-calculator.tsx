@@ -2,18 +2,29 @@ import React, { useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { SegmentedTabs } from '@/features/shop-tools/components/segmented-tabs';
 import { ToolScreen } from '@/features/shop-tools/components/tool-screen';
-import { formatMoney, parseMoneyInput } from '@/features/shop-tools/format';
+import { formatMoney, formatMoneyTyping, parseMoneyInput } from '@/features/shop-tools/format';
 
-/** Profit calculator: cost + selling (+ optional VAT %) → profit, margin and markup. */
+type CalcMode = 'single' | 'case';
+
+/** Profit calculator: single-unit or case/bulk purchases → live profit, margin and markup. */
 export default function ProfitCalculatorScreen() {
+  const [mode, setMode] = useState<CalcMode>('single');
   const [costText, setCostText] = useState('');
   const [sellText, setSellText] = useState('');
   const [vatText, setVatText] = useState('0');
+  const [caseQtyText, setCaseQtyText] = useState('');
+  const [casePriceText, setCasePriceText] = useState('');
 
-  const cost = parseMoneyInput(costText);
   const selling = parseMoneyInput(sellText);
   const vatRate = parseMoneyInput(vatText) ?? 0;
+
+  // Case mode derives the per-unit cost from the whole case; single mode takes it directly.
+  const caseQty = Number(caseQtyText);
+  const casePrice = parseMoneyInput(casePriceText);
+  const caseValid = Number.isFinite(caseQty) && caseQty > 0 && casePrice != null && casePrice > 0;
+  const cost = mode === 'case' ? (caseValid ? casePrice! / caseQty : null) : parseMoneyInput(costText);
 
   const result = useMemo(() => {
     if (cost == null || cost <= 0 || selling == null || selling <= 0) return null;
@@ -23,16 +34,55 @@ export default function ProfitCalculatorScreen() {
     const profit = netSelling - cost;
     const markupPct = (profit / cost) * 100; // profit relative to cost
     const marginPct = (profit / netSelling) * 100; // profit relative to net revenue
-    return { netSelling, vatAmount, profit, markupPct, marginPct };
-  }, [cost, selling, vatRate]);
+    const units = mode === 'case' && caseValid ? caseQty : 1;
+    const totalProfit = profit * units;
+    return { netSelling, vatAmount, profit, markupPct, marginPct, units, totalProfit };
+  }, [cost, selling, vatRate, mode, caseValid, caseQty]);
 
   const isLoss = result != null && result.profit < 0;
 
   return (
     <ToolScreen title="Profit Calculator" subtitle="Live margin & markup" scroll>
+      <SegmentedTabs<CalcMode>
+        options={[
+          { value: 'single', label: 'Single Product' },
+          { value: 'case', label: 'Case / Bulk' },
+        ]}
+        value={mode}
+        onChange={setMode}
+      />
       <View style={styles.card}>
-        <MoneyField label="Cost price" value={costText} onChange={setCostText} />
-        <MoneyField label="Selling price" value={sellText} onChange={setSellText} />
+        {mode === 'case' ? (
+          <>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel}>Case quantity (units)</Text>
+              <View style={styles.inputRow}>
+                <TextInput
+                  value={caseQtyText}
+                  onChangeText={(text) => setCaseQtyText(text.replace(/[^0-9]/g, ''))}
+                  placeholder="e.g. 7"
+                  placeholderTextColor={Colors.light.textLight}
+                  keyboardType="number-pad"
+                  style={styles.input}
+                  returnKeyType="done"
+                  onSubmitEditing={Keyboard.dismiss}
+                />
+              </View>
+            </View>
+            <MoneyField label="Total case purchase price" value={casePriceText} onChange={setCasePriceText} />
+            {caseValid && (
+              <Text style={styles.unitCostNote}>
+                Cost per unit: {formatMoney(casePrice! / caseQty)}
+              </Text>
+            )}
+            <MoneyField label="Selling price (per unit)" value={sellText} onChange={setSellText} />
+          </>
+        ) : (
+          <>
+            <MoneyField label="Cost price" value={costText} onChange={setCostText} />
+            <MoneyField label="Selling price" value={sellText} onChange={setSellText} />
+          </>
+        )}
         <View style={styles.fieldBlock}>
           <Text style={styles.fieldLabel}>VAT rate on sale (%)</Text>
           <View style={styles.inputRow}>
@@ -53,6 +103,12 @@ export default function ProfitCalculatorScreen() {
 
       {result && (
         <View style={styles.resultCard}>
+          {mode === 'case' && (
+            <>
+              <Row label="Cost per unit" value={formatMoney(cost!)} />
+              <View style={styles.divider} />
+            </>
+          )}
           {vatRate > 0 && (
             <>
               <Row label="Net selling price" value={formatMoney(result.netSelling)} />
@@ -61,11 +117,19 @@ export default function ProfitCalculatorScreen() {
             </>
           )}
           <Row
-            label={isLoss ? 'Net loss' : 'Net profit'}
+            label={isLoss ? 'Loss per unit' : 'Profit per unit'}
             value={formatMoney(Math.abs(result.profit))}
             color={isLoss ? Colors.light.error : Colors.light.success}
             big
           />
+          {mode === 'case' && (
+            <Row
+              label={`Total ${isLoss ? 'loss' : 'profit'} (${result.units} units)`}
+              value={formatMoney(Math.abs(result.totalProfit))}
+              color={isLoss ? Colors.light.error : Colors.light.success}
+              big
+            />
+          )}
           <View style={styles.pctRow}>
             <PctCard label="Margin" value={result.marginPct} isLoss={isLoss} hint="profit ÷ revenue" />
             <PctCard label="Markup" value={result.markupPct} isLoss={isLoss} hint="profit ÷ cost" />
@@ -98,7 +162,7 @@ function MoneyField({
         <Text style={styles.currency}>£</Text>
         <TextInput
           value={value}
-          onChangeText={onChange}
+          onChangeText={(text) => onChange(formatMoneyTyping(text))}
           placeholder="0.00"
           placeholderTextColor={Colors.light.textLight}
           keyboardType="decimal-pad"
@@ -265,5 +329,10 @@ const styles = StyleSheet.create({
     color: Colors.light.error,
     marginTop: Spacing.xs,
     lineHeight: 18,
+  },
+  unitCostNote: {
+    ...Typography.bodySmall,
+    fontWeight: '700',
+    color: Colors.light.primary,
   },
 });

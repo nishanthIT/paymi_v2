@@ -15,6 +15,7 @@ interface ListProductRowProps {
   item: ListProduct;
   onQuantityChange: (quantity: number) => void;
   onRemove: () => void;
+  onToggleUrgent?: () => void;
 }
 
 /** Product row inside a list: image, price, quantity, remove — collected status is only tracked in Collect Mode. */
@@ -22,6 +23,7 @@ export const ListProductRow = React.memo(function ListProductRow({
   item,
   onQuantityChange,
   onRemove,
+  onToggleUrgent,
 }: ListProductRowProps) {
   const imageUrl = getProductImageUrl(item.img, item.barcode);
   const price = item.hasActiveOffer && item.offerPrice != null ? item.offerPrice : item.lowestPrice;
@@ -50,21 +52,27 @@ export const ListProductRow = React.memo(function ListProductRow({
             })}
           />
         </View>
-        {(item.isFreeItem || item.bundlePromotionId) && (
+        {(item.isFreeItem || item.bundlePromotionId || item.isUrgent) && (
           <View style={styles.badgeRow}>
+            {item.isUrgent && (
+              <View style={styles.urgentPill}>
+                <Ionicons name="alert-circle" size={10} color="#FFFFFF" />
+                <Text style={styles.urgentPillText}>URGENT</Text>
+              </View>
+            )}
             {item.isFreeItem ? (
               <View style={[styles.bundlePill, styles.freePill]}>
                 <Ionicons name="gift" size={10} color="#FFFFFF" />
                 <Text style={styles.bundlePillText}>FREE · Bundle</Text>
               </View>
-            ) : (
+            ) : item.bundlePromotionId ? (
               <View style={styles.bundlePill}>
                 <Ionicons name="gift-outline" size={10} color={Colors.light.primary} />
                 <Text style={[styles.bundlePillText, styles.bundlePillTextPrimary]}>
                   Bundle Offer{item.freeQuantity ? ` · +${item.freeQuantity} FREE` : ''}
                 </Text>
               </View>
-            )}
+            ) : null}
           </View>
         )}
         <View style={styles.priceRow}>
@@ -84,6 +92,20 @@ export const ListProductRow = React.memo(function ListProductRow({
             onChange={onQuantityChange}
             compact
           />
+          {onToggleUrgent && (
+            <Pressable
+              onPress={onToggleUrgent}
+              disabled={isPending}
+              hitSlop={10}
+              style={({ pressed }) => [styles.urgentButton, pressed && styles.removePressed]}
+            >
+              <Ionicons
+                name={item.isUrgent ? 'alert-circle' : 'alert-circle-outline'}
+                size={18}
+                color={item.isUrgent ? Colors.light.error : Colors.light.textLight}
+              />
+            </Pressable>
+          )}
           <Pressable
             onPress={onRemove}
             disabled={isPending}
@@ -172,6 +194,20 @@ const styles = StyleSheet.create({
   bundlePillTextPrimary: {
     color: Colors.light.primary,
   },
+  urgentPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: Colors.light.error,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  urgentPillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -204,6 +240,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  urgentButton: {
+    width: 30,
+    height: 30,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 'auto',
   },
   removePressed: {
     backgroundColor: Colors.light.backgroundSecondary,

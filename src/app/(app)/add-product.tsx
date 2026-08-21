@@ -18,7 +18,7 @@ import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/
 import { BundleOfferSheet } from '@/features/lists/components/bundle-offer-sheet';
 import { ProductSheet } from '@/features/lists/components/product-sheet';
 import { SearchResultCard } from '@/features/lists/components/search-result-card';
-import { useListDetails } from '@/features/lists/hooks/use-list-details';
+import { useListDetails, useUpdateQuantity } from '@/features/lists/hooks/use-list-details';
 import {
   useProductSearch,
   useRecentSearches,
@@ -44,13 +44,27 @@ export default function AddProductScreen() {
   const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
   const { data: list } = useListDetails(listId ?? '');
   const smartAdd = useSmartAdd(listId ?? undefined);
+  const updateQuantity = useUpdateQuantity(listId ?? '');
 
   const productIdsInList = useMemo(
     () => new Set((list?.products ?? []).map((p) => p.productId)),
     [list?.products],
   );
 
-  const handleAdd = async (product: Product, quantity = 1) => {
+  // listProduct row per productId so the card stepper can adjust quantity in place.
+  const listProductByProductId = useMemo(() => {
+    const map = new Map<string, { id: string; quantity: number }>();
+    for (const p of list?.products ?? []) {
+      if (!p.id.startsWith('optimistic-')) map.set(p.productId, { id: p.id, quantity: p.quantity });
+    }
+    return map;
+  }, [list?.products]);
+
+  const handleAdd = async (
+    product: Product,
+    quantity = 1,
+    options?: { isUrgent?: boolean; inHandStock?: number },
+  ) => {
     if (!listId) return;
     addRecentSearch(searchTerm);
     setAddingIds((prev) => new Set(prev).add(product.id));
@@ -59,7 +73,7 @@ export default function AddProductScreen() {
       // otherwise adds directly (toasts handled inside the hook). The delay
       // lets the product details sheet finish dismissing before the bundle
       // sheet presents — iOS won't present a modal while another is closing.
-      await smartAdd.requestAdd(product, quantity, { presentDelayMs: 350 });
+      await smartAdd.requestAdd(product, quantity, { presentDelayMs: 350, ...options });
     } catch (error: any) {
       showToast(error?.message ?? 'Failed to add product', 'error');
     } finally {
@@ -167,17 +181,28 @@ export default function AddProductScreen() {
           keyExtractor={(item) => item.id}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.listContent}
-          renderItem={({ item, index }) => (
-            <Animated.View entering={FadeInDown.duration(250).delay(Math.min(index, 8) * 30)}>
-              <SearchResultCard
-                product={item}
-                onPress={() => setSelectedProduct(item)}
-                onAdd={() => handleAdd(item)}
-                isAdding={addingIds.has(item.id)}
-                inList={productIdsInList.has(item.id)}
-              />
-            </Animated.View>
-          )}
+          renderItem={({ item, index }) => {
+            const inListEntry = listProductByProductId.get(item.id);
+            return (
+              <Animated.View entering={FadeInDown.duration(250).delay(Math.min(index, 8) * 30)}>
+                <SearchResultCard
+                  product={item}
+                  onPress={() => setSelectedProduct(item)}
+                  onAdd={() => handleAdd(item)}
+                  isAdding={addingIds.has(item.id)}
+                  inList={productIdsInList.has(item.id)}
+                  quantityInList={inListEntry?.quantity}
+                  onQuantityChange={(quantity) =>
+                    inListEntry &&
+                    updateQuantity.mutate(
+                      { listProductId: inListEntry.id, quantity },
+                      { onError: (error) => showToast(error.message, 'error') },
+                    )
+                  }
+                />
+              </Animated.View>
+            );
+          }}
           ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
         />
       )}
@@ -187,9 +212,9 @@ export default function AddProductScreen() {
         visible={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
         inList={!!selectedProduct && productIdsInList.has(selectedProduct.id)}
-        onAdd={(product, quantity) => {
+        onAdd={(product, quantity, options) => {
           setSelectedProduct(null);
-          handleAdd(product, quantity);
+          handleAdd(product, quantity, options);
         }}
       />
 

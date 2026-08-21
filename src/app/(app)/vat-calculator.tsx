@@ -17,7 +17,7 @@ import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { OptionPicker } from '@/features/shop-tools/components/option-picker';
 import { ToolScreen } from '@/features/shop-tools/components/tool-screen';
-import { formatMoney, parseMoneyInput } from '@/features/shop-tools/format';
+import { formatMoney, formatMoneyTyping, parseMoneyInput } from '@/features/shop-tools/format';
 
 const STORAGE_KEY = 'shop-tools.vat-calculator.v1';
 const QUICK_RATES = [5, 12.5, 20];
@@ -108,7 +108,7 @@ export default function VatCalculatorScreen() {
             <Text style={styles.currency}>£</Text>
             <TextInput
               value={amountText}
-              onChangeText={setAmountText}
+              onChangeText={(text) => setAmountText(formatMoneyTyping(text))}
               placeholder="0.00"
               placeholderTextColor={Colors.light.textLight}
               keyboardType="decimal-pad"

@@ -22,6 +22,7 @@ import { useChats, useCreateChat } from '@/features/chat/hooks/use-chats';
 import type { ChatSummary, DirectoryUser } from '@/features/chat/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { chatKeys } from '@/features/chat/keys';
+import { matchesSearch } from '@/utils/search';
 
 function monogram(name: string) {
   return name
@@ -67,13 +68,9 @@ export default function ChatScreen() {
   const chats = useMemo(() => chatsQuery.data ?? [], [chatsQuery.data]);
 
   const { groups, personal } = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = search.trim();
     const filtered = term
-      ? chats.filter(
-          (c) =>
-            c.name?.toLowerCase().includes(term) ||
-            c.lastMessage?.toLowerCase().includes(term),
-        )
+      ? chats.filter((c) => matchesSearch(term, c.name, c.lastMessage))
       : chats;
     return {
       groups: filtered

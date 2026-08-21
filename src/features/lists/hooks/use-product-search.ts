@@ -59,6 +59,16 @@ export function useSubmitNewProduct() {
   });
 }
 
+/** Existing category names for the new-product category picker. */
+export function useCategories(enabled = true) {
+  return useQuery({
+    queryKey: listKeys.categories,
+    queryFn: listApi.fetchCategories,
+    enabled,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 /** Recent search history persisted locally. */
 export function useRecentSearches() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);

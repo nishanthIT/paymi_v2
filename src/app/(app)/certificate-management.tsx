@@ -27,7 +27,7 @@ import { OptionPicker } from '@/features/shop-tools/components/option-picker';
 import { SegmentedTabs } from '@/features/shop-tools/components/segmented-tabs';
 import { ListSkeleton } from '@/features/shop-tools/components/stat-card';
 import { ToolScreen } from '@/features/shop-tools/components/tool-screen';
-import { formatDate, formatMoney, toDateParam } from '@/features/shop-tools/format';
+import { formatDate, formatMoney, formatMoneyTyping, toDateParam } from '@/features/shop-tools/format';
 import { secureStorage } from '@/utils/secureStorage';
 
 type TypeTab = 'all' | CertificateType;
@@ -289,7 +289,7 @@ function CertificateForm({
   const valid = baseValid && typeValid;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{certificate ? 'Edit Certificate' : 'Add Certificate'}</Text>
         {!certificate && (
@@ -328,7 +328,7 @@ function CertificateForm({
         {type === 'INSURANCE' && (
           <>
             <TextField label="Insurance company" value={companyDetails} onChangeText={setCompanyDetails} placeholder="Company & policy details" />
-            <TextField label="Premium (£)" value={premiumAmount} onChangeText={setPremiumAmount} keyboardType="decimal-pad" placeholder="0.00" />
+            <TextField label="Premium (£)" value={premiumAmount} onChangeText={(text) => setPremiumAmount(formatMoneyTyping(text))} keyboardType="decimal-pad" placeholder="0.00" />
             <DateTimeField label="Renewal date" mode="date" value={renewalDate} onChange={setRenewalDate} placeholder="Select date" />
           </>
         )}
