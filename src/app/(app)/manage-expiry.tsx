@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -20,6 +21,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { usePullToRefresh } from '@/hooks/use-query-refresh';
 import {
   addExpiryProduct,
   createExpiryCategory,
@@ -38,6 +40,7 @@ import {
   type ExpirySearchProduct,
   type ExpiryStatus,
 } from '@/features/expiry/api';
+import { subscribeExpiryScan } from '@/features/expiry/scan-bridge';
 import { matchesSearch } from '@/utils/search';
 import { DateTimeField } from '@/features/shop-tools/components/date-time-field';
 import { EmptyState } from '@/features/shop-tools/components/empty-state';
@@ -48,6 +51,9 @@ import { ToolScreen } from '@/features/shop-tools/components/tool-screen';
 import { formatDate, toDateParam } from '@/features/shop-tools/format';
 
 type Tab = 'all' | 'expiring-soon' | 'expired' | 'disposed' | 'categories';
+
+/** Covers the sheet close (180ms) and native modal dismiss animations. */
+const MODAL_SWAP_DELAY_MS = 450;
 
 const statusColor: Record<ExpiryStatus, string> = {
   OK: Colors.light.success,
@@ -62,12 +68,28 @@ const statusColor: Record<ExpiryStatus, string> = {
 export default function ManageExpiryScreen() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [tab, setTab] = useState<Tab>('all');
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+  const [scanned, setScanned] = useState<ExpirySearchProduct | null>(null);
   const [editing, setEditing] = useState<ExpiryProduct | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Reopen the add sheet with the scanned product once the scanner hands it back.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = subscribeExpiryScan((product) => {
+      setScanned(product);
+      // iOS can't present the sheet while the scanner modal is still dismissing.
+      timer = setTimeout(() => setShowAdd(true), MODAL_SWAP_DELAY_MS);
+    });
+    return () => {
+      unsubscribe();
+      clearTimeout(timer);
+    };
+  }, []);
 
   const filter: ExpiryFilter = tab === 'categories' ? 'all' : tab === 'all' ? 'active' : tab;
   const list = useQuery({
@@ -89,6 +111,16 @@ export default function ManageExpiryScreen() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['expiry'] });
   };
+  const { refetch: refetchList } = list;
+  const { refetch: refetchNotifications } = notifications;
+  const refetchListAndAlerts = useCallback(
+    () => Promise.all([refetchList(), refetchNotifications()]),
+    [refetchList, refetchNotifications],
+  );
+  const listRefresh = usePullToRefresh(
+    refetchListAndAlerts,
+    list.fetchStatus === 'paused' || notifications.fetchStatus === 'paused' ? 'paused' : 'idle',
+  );
   const update = useMutation({
     mutationFn: ({ id, input }: { id: string; input: Parameters<typeof updateExpiryProduct>[1] }) =>
       updateExpiryProduct(id, input),
@@ -179,11 +211,8 @@ export default function ManageExpiryScreen() {
               contentContainerStyle={styles.listContent}
               refreshControl={
                 <RefreshControl
-                  refreshing={list.isRefetching}
-                  onRefresh={() => {
-                    list.refetch();
-                    notifications.refetch();
-                  }}
+                  refreshing={listRefresh.refreshing}
+                  onRefresh={listRefresh.onRefresh}
                   tintColor={Colors.light.primary}
                 />
               }
@@ -210,10 +239,24 @@ export default function ManageExpiryScreen() {
 
       <AddExpirySheet
         visible={showAdd}
-        onClose={() => setShowAdd(false)}
+        onClose={() => {
+          setShowAdd(false);
+          setScanned(null);
+        }}
         categories={categories.data ?? []}
+        initialProduct={scanned}
+        onScan={() => {
+          // The sheet modal must be fully gone before the scanner modal can present; the bridge reopens it.
+          setShowAdd(false);
+          setScanned(null);
+          setTimeout(
+            () => router.push({ pathname: '/(app)/scanner', params: { intent: 'expiry' } }),
+            MODAL_SWAP_DELAY_MS,
+          );
+        }}
         onSaved={() => {
           setShowAdd(false);
+          setScanned(null);
           invalidate();
         }}
       />
@@ -343,11 +386,15 @@ function AddExpirySheet({
   visible,
   onClose,
   categories,
+  initialProduct,
+  onScan,
   onSaved,
 }: {
   visible: boolean;
   onClose: () => void;
   categories: ExpiryCategory[];
+  initialProduct?: ExpirySearchProduct | null;
+  onScan: () => void;
   onSaved: () => void;
 }) {
   const { showToast } = useToast();
@@ -360,6 +407,7 @@ function AddExpirySheet({
   const [batchNumber, setBatchNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [askDate, setAskDate] = useState(false);
 
   const create = useMutation({ mutationFn: addExpiryProduct });
 
@@ -369,7 +417,8 @@ function AddExpirySheet({
     if (visible) {
       setQuery('');
       setHits([]);
-      setSelected(null);
+      setSelected(initialProduct ?? null);
+      setAskDate(!!initialProduct);
       setExpiryDate(null);
       setQuantityText('1');
       setBatchNumber('');
@@ -408,6 +457,13 @@ function AddExpirySheet({
               onChangeText={setQuery}
               placeholder="Type a name or scan/type a barcode"
             />
+            <Pressable
+              onPress={onScan}
+              style={({ pressed }) => [styles.scanButton, pressed && { opacity: 0.8 }]}
+            >
+              <Ionicons name="scan" size={16} color={Colors.light.primary} />
+              <Text style={styles.scanButtonText}>Scan & Add Product</Text>
+            </Pressable>
             {searching && <Text style={styles.emptyNote}>Searching…</Text>}
             <ScrollView style={styles.hitsScroll} keyboardShouldPersistTaps="handled">
               {hits.map((hit) => (
@@ -432,7 +488,13 @@ function AddExpirySheet({
           </>
         ) : (
           <>
-            <Pressable style={styles.selectedRow} onPress={() => setSelected(null)}>
+            <Pressable
+              style={styles.selectedRow}
+              onPress={() => {
+                setSelected(null);
+                setAskDate(false);
+              }}
+            >
               <Text style={styles.hitTitle} numberOfLines={1}>
                 {selected.title}
               </Text>
@@ -445,6 +507,7 @@ function AddExpirySheet({
               onChange={setExpiryDate}
               placeholder="Select date"
               minimumDate={new Date()}
+              autoOpen={askDate}
             />
             <View style={styles.pairRow}>
               <View style={styles.flex1}>
@@ -586,6 +649,7 @@ function CategoriesTab({
     onSettled: invalidate,
   });
   const remove = useMutation({ mutationFn: deleteExpiryCategory, onSettled: invalidate });
+  const categoriesRefresh = usePullToRefresh(categories.refetch, categories.fetchStatus);
 
   return (
     <>
@@ -598,8 +662,8 @@ function CategoriesTab({
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
-              refreshing={categories.isRefetching}
-              onRefresh={categories.refetch}
+              refreshing={categoriesRefresh.refreshing}
+              onRefresh={categoriesRefresh.onRefresh}
               tintColor={Colors.light.primary}
             />
           }
@@ -864,6 +928,21 @@ const styles = StyleSheet.create({
   },
   changeLink: {
     ...Typography.caption,
+    fontWeight: '700',
+    color: Colors.light.primary,
+  },
+  scanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.light.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: 10,
+  },
+  scanButtonText: {
+    ...Typography.bodySmall,
     fontWeight: '700',
     color: Colors.light.primary,
   },

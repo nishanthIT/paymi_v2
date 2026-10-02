@@ -1,3 +1,4 @@
+import { API_CONFIG } from '@/config/api';
 import api from '@/services/api';
 
 export type CertificateType = 'INSPECTION' | 'INSURANCE' | 'ELECTRIC' | 'HYGIENE';
@@ -23,6 +24,9 @@ export interface ShopCertificate {
   expired: boolean;
   relevantDate?: string | null;
   imageUrl: string;
+  imageFileName?: string;
+  /** Only returned by the single-certificate endpoint. */
+  imageAvailable?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -51,8 +55,28 @@ function apiError(error: any, fallback: string): Error {
 
 export const certificateKeys = {
   list: (type: string) => ['certificates', 'list', type] as const,
+  detail: (id: string) => ['certificates', 'detail', id] as const,
   alerts: ['certificates', 'alerts'] as const,
 };
+
+/**
+ * Built from the app's API base (not the server-reported host, which can be wrong
+ * behind proxies); versioned by updatedAt so a replaced photo isn't served from cache.
+ */
+export function certificateImageUrl(certificate: Pick<ShopCertificate, 'id' | 'updatedAt'>): string {
+  return `${API_CONFIG.BASE_URL}/certificates/${certificate.id}/image?v=${encodeURIComponent(
+    certificate.updatedAt,
+  )}`;
+}
+
+export async function fetchCertificate(id: string): Promise<ShopCertificate> {
+  try {
+    const response = await api.get(`/certificates/${id}`);
+    return response.data.certificate;
+  } catch (error: any) {
+    throw apiError(error, 'Could not load the certificate');
+  }
+}
 
 export async function fetchCertificates(type?: CertificateType): Promise<ShopCertificate[]> {
   try {

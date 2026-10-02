@@ -1,7 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 
@@ -13,13 +13,29 @@ interface DateTimeFieldProps {
   placeholder?: string;
   minimumDate?: Date;
   maximumDate?: Date;
+  /** Open the picker as soon as the field mounts (native only). */
+  autoOpen?: boolean;
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+  );
 }
 
 function formatValue(value: Date | null, mode: 'date' | 'time'): string | null {
   if (!value) return null;
-  return mode === 'date'
-    ? value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    : value.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (mode === 'time') {
+    return value.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+  const text = value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return isSameDay(value, new Date()) ? `Today · ${text}` : text;
+}
+
+function clamp(date: Date, min?: Date, max?: Date): Date {
+  if (min && date < min) return min;
+  if (max && date > max) return max;
+  return date;
 }
 
 /** Native date/time picker behind a themed field (Android dialog, iOS inline spinner). */
@@ -31,47 +47,83 @@ export function DateTimeField({
   placeholder,
   minimumDate,
   maximumDate,
+  autoOpen,
 }: DateTimeFieldProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => !!autoOpen && Platform.OS !== 'web');
+  // What the picker is showing; committed on Done so an untouched picker still saves its date.
+  const [draft, setDraft] = useState<Date>(() => clamp(value ?? new Date(), minimumDate, maximumDate));
   const display = formatValue(value, mode);
+
+  const openPicker = () => {
+    Keyboard.dismiss();
+    setDraft(clamp(value ?? new Date(), minimumDate, maximumDate));
+    setOpen(true);
+  };
+
+  const confirm = () => {
+    onChange(draft);
+    setOpen(false);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <Pressable
-        onPress={() => setOpen((prev) => !prev)}
-        style={({ pressed }) => [styles.field, pressed && styles.fieldPressed]}
+        onPress={open ? confirm : openPicker}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}: ${display ?? 'not set'}`}
+        style={({ pressed }) => [
+          styles.field,
+          open && styles.fieldOpen,
+          pressed && styles.fieldPressed,
+        ]}
       >
         <Ionicons
           name={mode === 'date' ? 'calendar-outline' : 'time-outline'}
           size={18}
-          color={Colors.light.textSecondary}
+          color={open ? Colors.light.primary : Colors.light.textSecondary}
         />
         <Text style={[styles.value, !display && styles.placeholder]}>
           {display ?? placeholder ?? (mode === 'date' ? 'Select date' : 'Select time')}
         </Text>
-        <Ionicons name="chevron-down" size={16} color={Colors.light.textLight} />
+        <Ionicons
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={16}
+          color={Colors.light.textLight}
+        />
       </Pressable>
-      {open && (
-        <>
+      {open && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={draft}
+          mode={mode}
+          display="default"
+          minimumDate={minimumDate}
+          maximumDate={maximumDate}
+          onChange={(event, date) => {
+            setOpen(false);
+            if (event.type === 'set' && date) onChange(date);
+          }}
+        />
+      )}
+      {open && Platform.OS === 'ios' && (
+        <View style={styles.iosPicker}>
           <DateTimePicker
-            value={value ?? new Date()}
+            value={draft}
             mode={mode}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display="spinner"
             minimumDate={minimumDate}
             maximumDate={maximumDate}
-            onChange={(event, date) => {
-              if (Platform.OS === 'android') setOpen(false);
-              if (event.type !== 'dismissed' && date) onChange(date);
+            onChange={(_event, date) => {
+              if (!date) return;
+              setDraft(date);
+              onChange(date);
             }}
             themeVariant="light"
           />
-          {Platform.OS === 'ios' && (
-            <Pressable style={styles.doneButton} onPress={() => setOpen(false)}>
-              <Text style={styles.doneText}>Done</Text>
-            </Pressable>
-          )}
-        </>
+          <Pressable style={styles.doneButton} onPress={confirm} hitSlop={8}>
+            <Text style={styles.doneText}>Done</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -99,6 +151,16 @@ const styles = StyleSheet.create({
   fieldPressed: {
     backgroundColor: Colors.light.backgroundSecondary,
   },
+  fieldOpen: {
+    borderColor: Colors.light.primary,
+  },
+  iosPicker: {
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.light.backgroundCard,
+    overflow: 'hidden',
+  },
   value: {
     ...Typography.body,
     color: Colors.light.text,
@@ -110,7 +172,7 @@ const styles = StyleSheet.create({
   doneButton: {
     alignSelf: 'flex-end',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.sm,
   },
   doneText: {
     ...Typography.bodyBold,

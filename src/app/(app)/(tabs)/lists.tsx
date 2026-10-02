@@ -11,15 +11,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { CreateListSheet } from '@/features/lists/components/create-list-sheet';
 import { ListCard } from '@/features/lists/components/list-card';
+import { ListCardsSkeleton } from '@/features/lists/components/list-skeletons';
 import { useCreateList, useDeleteList, useLists, useUntrackList } from '@/features/lists/hooks/use-lists';
 import type { ShoppingList } from '@/features/lists/types';
+import { usePullToRefresh, useRefetchOnFocus } from '@/hooks/use-query-refresh';
 import { matchesSearch } from '@/utils/search';
 
 /**
@@ -29,7 +31,9 @@ import { matchesSearch } from '@/utils/search';
 export default function ListsScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { data: lists, isLoading, isRefetching, refetch } = useLists();
+  const { data: lists, isError, fetchStatus, refetch } = useLists();
+  const { refreshing, onRefresh } = usePullToRefresh(refetch, fetchStatus);
+  useRefetchOnFocus(refetch);
   const createList = useCreateList();
   const deleteList = useDeleteList();
   const untrackList = useUntrackList();
@@ -86,7 +90,10 @@ export default function ListsScreen() {
     ]);
   };
 
-  const showEmpty = !isLoading && filteredLists.length === 0;
+  // No cached lists yet: skeleton while loading/restoring, retry state once it gives up.
+  const isOffline = fetchStatus === 'paused';
+  const loadFailed = !lists && fetchStatus !== 'fetching' && (isError || isOffline);
+  const showSkeleton = !lists && !loadFailed;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -132,8 +139,8 @@ export default function ListsScreen() {
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching && !isLoading}
-            onRefresh={refetch}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
             tintColor={Colors.light.primary}
           />
         }
@@ -151,7 +158,42 @@ export default function ListsScreen() {
         )}
         ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
         ListEmptyComponent={
-          showEmpty ? (
+          showSkeleton ? (
+            <Animated.View exiting={FadeOut.duration(200)}>
+              <ListCardsSkeleton />
+            </Animated.View>
+          ) : loadFailed ? (
+            <View style={styles.empty}>
+              <View style={styles.emptyIcon}>
+                <Ionicons
+                  name={isOffline ? 'cloud-offline-outline' : 'alert-circle-outline'}
+                  size={40}
+                  color={Colors.light.primary}
+                />
+              </View>
+              <Text style={styles.emptyTitle}>
+                {isOffline ? 'You’re offline' : 'Couldn’t load your lists'}
+              </Text>
+              <Text style={styles.emptyBody}>
+                {isOffline
+                  ? 'Your lists will load as soon as you’re back online.'
+                  : 'Check your connection and try again.'}
+              </Text>
+              {!isOffline && (
+                <Pressable
+                  onPress={() => refetch()}
+                  style={({ pressed }) => [
+                    styles.newButton,
+                    styles.retryButton,
+                    pressed && styles.newButtonPressed,
+                  ]}
+                >
+                  <Ionicons name="refresh" size={18} color="#FFFFFF" />
+                  <Text style={styles.newButtonText}>Try again</Text>
+                </Pressable>
+              )}
+            </View>
+          ) : (
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
                 <Ionicons name="cart-outline" size={40} color={Colors.light.primary} />
@@ -165,7 +207,7 @@ export default function ListsScreen() {
                   : 'Create your first shopping list to start adding products.'}
               </Text>
             </View>
-          ) : null
+          )
         }
       />
 
@@ -220,6 +262,9 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: '#FFFFFF',
     fontWeight: '700',
+  },
+  retryButton: {
+    marginTop: Spacing.sm,
   },
   searchBar: {
     flexDirection: 'row',

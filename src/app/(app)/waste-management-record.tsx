@@ -2,7 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -273,7 +282,7 @@ function WasteForm({
     setSearching(true);
     const timer = setTimeout(() => {
       searchProducts(itemName.trim())
-        .then((results) => setHits(results.slice(0, 5)))
+        .then(setHits)
         .finally(() => setSearching(false));
     }, 350);
     return () => clearTimeout(timer);
@@ -316,23 +325,39 @@ function WasteForm({
         )}
         {hits.length > 0 && (
           <View style={styles.hitsBox}>
-            {hits.map((hit) => (
-              <Pressable
-                key={hit.id}
-                style={styles.hitRow}
-                onPress={() => {
-                  setProductId(hit.id);
-                  setItemName(hit.title);
-                  if (hit.rrp != null && !priceText) setPriceText(Number(hit.rrp).toFixed(2));
-                  setHits([]);
-                }}
-              >
-                <Ionicons name="cube-outline" size={16} color={Colors.light.primary} />
-                <Text style={styles.hitText} numberOfLines={1}>
-                  {hit.title}
-                </Text>
-              </Pressable>
-            ))}
+            <Text style={styles.hitsCount}>
+              {hits.length} {hits.length === 1 ? 'match' : 'matches'}
+              {hits.length > 4 ? ' · scroll for more' : ''}
+            </Text>
+            <ScrollView
+              style={styles.hitsScroll}
+              nestedScrollEnabled
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator
+              persistentScrollbar
+            >
+              {hits.map((hit, index) => (
+                <Pressable
+                  key={hit.id}
+                  style={({ pressed }) => [
+                    styles.hitRow,
+                    index === hits.length - 1 && styles.hitRowLast,
+                    pressed && styles.hitRowPressed,
+                  ]}
+                  onPress={() => {
+                    setProductId(hit.id);
+                    setItemName(hit.title);
+                    if (hit.rrp != null && !priceText) setPriceText(Number(hit.rrp).toFixed(2));
+                    setHits([]);
+                  }}
+                >
+                  <Ionicons name="cube-outline" size={16} color={Colors.light.primary} />
+                  <Text style={styles.hitText} numberOfLines={2}>
+                    {hit.title}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
         )}
         {searching && <Text style={styles.searchingText}>Searching products…</Text>}
@@ -483,14 +508,33 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.backgroundCard,
     overflow: 'hidden',
   },
+  hitsCount: {
+    ...Typography.caption,
+    color: Colors.light.textSecondary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    backgroundColor: Colors.light.backgroundSecondary,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.light.border,
+  },
+  hitsScroll: {
+    maxHeight: 240,
+  },
   hitRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    minHeight: 48,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.light.border,
+  },
+  hitRowLast: {
+    borderBottomWidth: 0,
+  },
+  hitRowPressed: {
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   hitText: {
     ...Typography.bodySmall,

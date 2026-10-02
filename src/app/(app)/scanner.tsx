@@ -26,6 +26,8 @@ import { useSmartAdd } from '@/features/lists/hooks/use-smart-add';
 import type { Product } from '@/features/lists/types';
 import { emitReportScan } from '@/features/price-reports/scan-bridge';
 import { emitWasteScan } from '@/features/waste/scan-bridge';
+import { emitLabelScan } from '@/features/labels/scan-bridge';
+import { emitExpiryScan } from '@/features/expiry/scan-bridge';
 
 const FRAME_SIZE = 260;
 const beepSource = require('@/assets/sounds/beep.wav');
@@ -39,6 +41,8 @@ export default function ScannerScreen() {
   const isReportIntent = intent === 'report';
   const isCompareIntent = intent === 'compare';
   const isWasteIntent = intent === 'waste';
+  const isLabelIntent = intent === 'label';
+  const isExpiryIntent = intent === 'expiry';
   const router = useRouter();
   const { showToast } = useToast();
   const [permission, requestPermission] = useCameraPermissions();
@@ -100,6 +104,13 @@ export default function ScannerScreen() {
       } catch {}
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
 
+      if (isLabelIntent) {
+        // One detection = one label row; the Labels editor does its own lookup.
+        emitLabelScan(data);
+        router.back();
+        return;
+      }
+
       setIsLookingUp(true);
       try {
         const found = await lookupBarcode(data);
@@ -127,6 +138,16 @@ export default function ScannerScreen() {
             router.back();
             return;
           }
+          if (isExpiryIntent) {
+            emitExpiryScan({
+              id: found.id,
+              title: found.title,
+              barcode: found.barcode,
+              img: typeof found.img === 'string' ? found.img : null,
+            });
+            router.back();
+            return;
+          }
           if (isCompareIntent) {
             // Jump straight into the comparison screen for the scanned product.
             router.replace({
@@ -137,7 +158,7 @@ export default function ScannerScreen() {
           }
           setProduct(found);
         } else {
-          if (isWasteIntent) {
+          if (isWasteIntent || isExpiryIntent) {
             showToast('No product found for this barcode', 'error');
             resumeScanning();
             return;
@@ -150,7 +171,7 @@ export default function ScannerScreen() {
         resumeScanning();
       }
     },
-    [isCompareIntent, isReportIntent, isWasteIntent, lookupBarcode, player, resumeScanning, router, showToast],
+    [isCompareIntent, isExpiryIntent, isLabelIntent, isReportIntent, isWasteIntent, lookupBarcode, player, resumeScanning, router, showToast],
   );
 
   const handleAdd = async (
@@ -379,7 +400,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   lookupOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,

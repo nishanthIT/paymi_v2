@@ -14,6 +14,7 @@ import { fetchToday as fetchCleaningToday } from '@/features/cleaning/api';
 import { cleaningKeys } from '@/features/cleaning/keys';
 import { expiryKeys, fetchExpiryNotifications } from '@/features/expiry/api';
 import { useIsOwner } from '@/features/shop-tools/hooks/use-is-owner';
+import { fetchMyTasks, taskKeys } from '@/features/tasks/api';
 
 interface ShopTool {
   route: Href;
@@ -48,6 +49,13 @@ export default function ProfileScreen() {
     queryFn: fetchCleaningToday,
     staleTime: 60_000,
   });
+  const myTasks = useQuery({
+    queryKey: taskKeys.mine,
+    queryFn: fetchMyTasks,
+    staleTime: 30_000,
+    enabled: user?.userType === 'EMPLOYEE',
+  });
+  const openTaskCount = (myTasks.data ?? []).filter((task) => !task.isCompleted).length;
 
   const cleaningRemaining = cleaningToday.data
     ? cleaningToday.data.summary.totalCount - cleaningToday.data.summary.completedCount
@@ -62,7 +70,13 @@ export default function ProfileScreen() {
         badge: expiryAlerts.data?.length,
         badgeColor: Colors.light.error,
       },
-      { route: '/(app)/task-management', label: 'Tasks', icon: 'checkbox-outline' },
+      {
+        route: '/(app)/task-management',
+        label: 'Tasks',
+        icon: 'checkbox-outline',
+        badge: openTaskCount > 0 ? openTaskCount : undefined,
+        badgeColor: Colors.light.primary,
+      },
       { route: '/(app)/fridge-temperature', label: 'Temperature Log', icon: 'thermometer-outline' },
       {
         route: '/(app)/cleaning-status',
@@ -85,8 +99,8 @@ export default function ProfileScreen() {
         route: '/(app)/supplier-payout-record',
         label: 'Supplier Payouts',
         icon: 'cash-outline',
-        ownerOnly: true,
       },
+      { route: '/(app)/labels', label: 'Labels', icon: 'pricetags-outline' },
       { route: '/(app)/shift-sheet', label: 'Shift Sheet', icon: 'receipt-outline' },
       { route: '/(app)/vat-calculator', label: 'VAT Calculator', icon: 'calculator-outline' },
       { route: '/(app)/profit-calculator', label: 'Profit Calculator', icon: 'trending-up-outline' },

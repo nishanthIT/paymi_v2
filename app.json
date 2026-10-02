@@ -60,17 +60,24 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Paymi to use the camera to scan product barcodes.",
+          "cameraPermission": "Allow Paymi to use the camera to scan product barcodes and photograph your shop certificates.",
           "recordAudioAndroid": false
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Paymi to access your photos so you can share images in chat."
+          "photosPermission": "Allow Paymi to access your photos so you can share images in chat.",
+          "cameraPermission": "Allow Paymi to use the camera to scan product barcodes and photograph your shop certificates."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-asset",
+      "expo-font",
+      "expo-image",
+      "expo-sharing",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

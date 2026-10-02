@@ -104,9 +104,16 @@ export async function startTask(assignmentId: string, isStarted = true): Promise
   }
 }
 
-export async function completeTask(assignmentId: string, isCompleted = true): Promise<void> {
+export async function completeTask(
+  assignmentId: string,
+  isCompleted = true,
+): Promise<{ alreadyCompleted: boolean; completedAt: string | null }> {
   try {
-    await api.put(`/tasks/complete/${assignmentId}`, { isCompleted });
+    const response = await api.put(`/tasks/complete/${assignmentId}`, { isCompleted });
+    return {
+      alreadyCompleted: response.data?.alreadyCompleted === true,
+      completedAt: response.data?.assignment?.completedAt ?? null,
+    };
   } catch (error: any) {
     throw apiError(error, 'Could not complete the task');
   }

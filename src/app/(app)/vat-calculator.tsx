@@ -20,6 +20,7 @@ import { ToolScreen } from '@/features/shop-tools/components/tool-screen';
 import { formatMoney, formatMoneyTyping, parseMoneyInput } from '@/features/shop-tools/format';
 
 const STORAGE_KEY = 'shop-tools.vat-calculator.v1';
+const DEFAULT_RATE = '20';
 const QUICK_RATES = [5, 12.5, 20];
 
 type VatMode = 'exclusive' | 'inclusive';
@@ -28,17 +29,16 @@ type VatMode = 'exclusive' | 'inclusive';
 export default function VatCalculatorScreen() {
   const { showToast } = useToast();
   const [amountText, setAmountText] = useState('');
-  const [rateText, setRateText] = useState('20');
+  const [rateText, setRateText] = useState(DEFAULT_RATE);
   const [mode, setMode] = useState<VatMode>('exclusive');
 
-  // Restore last calculation.
+  // Restore last amount/mode; the rate always starts at the UK standard 20%.
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
       if (!raw) return;
       try {
         const saved = JSON.parse(raw);
         if (saved.amountText) setAmountText(saved.amountText);
-        if (saved.rateText) setRateText(saved.rateText);
         if (saved.mode) setMode(saved.mode);
       } catch {
         // ignore corrupt saved state
@@ -62,11 +62,11 @@ export default function VatCalculatorScreen() {
   // Persist last calculation whenever it changes.
   useEffect(() => {
     if (result) {
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ amountText, rateText, mode })).catch(
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ amountText, mode })).catch(
         () => {},
       );
     }
-  }, [amountText, rateText, mode, result]);
+  }, [amountText, mode, result]);
 
   const summaryText = result
     ? `Net: ${formatMoney(result.net)}\nVAT (${rate}%): ${formatMoney(result.vat)}\nGross: ${formatMoney(result.gross)}`

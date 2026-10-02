@@ -9,6 +9,8 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/contexts/AuthContext';
+import { useIsOwner } from '@/features/shop-tools/hooks/use-is-owner';
 import { OptionPicker } from '@/features/shop-tools/components/option-picker';
 import { DateTimeField } from '@/features/shop-tools/components/date-time-field';
 import { EmptyState } from '@/features/shop-tools/components/empty-state';
@@ -39,10 +41,18 @@ import { matchesSearch } from '@/utils/search';
 type StatusTab = 'all' | 'TO_PAY' | 'PAID';
 type RangeTab = 'today' | '7d' | '30d' | 'custom' | 'all';
 
-/** Supplier payout ledger (owner-only tool, hidden from employees on the dashboard). */
+/** Supplier payout ledger. Employees add payouts and edit their own; owners manage all. */
 export default function SupplierPayoutScreen() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isOwner = useIsOwner();
+
+  // The server's flags are authoritative; the fallback mirrors its rule for older responses.
+  const canEdit = (record: SupplierPayoutRecord) =>
+    record.canEdit ??
+    (isOwner || (record.createdByType === 'EMPLOYEE' && record.createdById === Number(user?.id)));
+  const canDelete = (record: SupplierPayoutRecord) => record.canDelete ?? isOwner;
 
   const [statusTab, setStatusTab] = useState<StatusTab>('all');
   const [range, setRange] = useState<RangeTab>('all');
@@ -209,7 +219,7 @@ export default function SupplierPayoutScreen() {
                 setEditing(item);
                 setShowForm(true);
               }}
-              onLongPress={() => handleDelete(item)}
+              onLongPress={canDelete(item) ? () => handleDelete(item) : undefined}
             >
               <View style={styles.recordRow}>
                 <View style={styles.recordBody}>
@@ -227,7 +237,7 @@ export default function SupplierPayoutScreen() {
                   />
                 </View>
               </View>
-              {item.paymentStatus === 'TO_PAY' && (
+              {item.paymentStatus === 'TO_PAY' && canEdit(item) && (
                 <View style={styles.quickPayRow}>
                   <QuickPay label="Paid · Cash" onPress={() => markPaid(item, 'CASH')} />
                   <QuickPay label="Paid · Card" onPress={() => markPaid(item, 'CARD')} />
@@ -252,6 +262,7 @@ export default function SupplierPayoutScreen() {
       <PayoutForm
         visible={showForm}
         record={editing}
+        readOnly={editing != null && !canEdit(editing)}
         onClose={() => setShowForm(false)}
         saving={create.isPending || update.isPending}
         onSave={(input) => {
@@ -276,15 +287,26 @@ function QuickPay({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.detailRow}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
+}
+
 function PayoutForm({
   visible,
   record,
+  readOnly,
   onClose,
   onSave,
   saving,
 }: {
   visible: boolean;
   record: SupplierPayoutRecord | null;
+  readOnly?: boolean;
   onClose: () => void;
   onSave: (input: SupplierPayoutInput) => void;
   saving: boolean;
@@ -314,6 +336,38 @@ function PayoutForm({
     amount != null &&
     amount > 0 &&
     (status === 'TO_PAY' || method != null);
+
+  if (readOnly && record) {
+    return (
+      <BottomSheet visible={visible} onClose={onClose} scrollable>
+        <View style={styles.sheetContent}>
+          <Text style={styles.sheetTitle}>Payout Details</Text>
+          <DetailRow label="Supplier" value={record.supplier} />
+          <DetailRow label="Amount" value={formatMoney(record.amount)} />
+          <DetailRow
+            label="Status"
+            value={
+              record.paymentStatus === 'PAID'
+                ? `Paid${record.paymentMethod ? ` · ${record.paymentMethod === 'CASH' ? 'Cash' : 'Card'}` : ''}`
+                : 'To pay'
+            }
+          />
+          <DetailRow label="Recorded by" value={record.recordedBy} />
+          <DetailRow label="Recorded" value={formatDateTime(record.createdAt)} />
+          {record.updatedAt !== record.createdAt && (
+            <DetailRow label="Last updated" value={formatDateTime(record.updatedAt)} />
+          )}
+          {!!record.notes && <DetailRow label="Notes" value={record.notes} />}
+          <View style={styles.readOnlyNote}>
+            <Ionicons name="lock-closed-outline" size={14} color={Colors.light.textSecondary} />
+            <Text style={styles.readOnlyText}>
+              Only the shop owner or the person who recorded this payout can edit it.
+            </Text>
+          </View>
+        </View>
+      </BottomSheet>
+    );
+  }
 
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
@@ -450,5 +504,33 @@ const styles = StyleSheet.create({
     ...Typography.h4,
     color: Colors.light.text,
     marginBottom: Spacing.xs,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  detailLabel: {
+    ...Typography.body,
+    color: Colors.light.textSecondary,
+  },
+  detailValue: {
+    ...Typography.bodyBold,
+    color: Colors.light.text,
+    flexShrink: 1,
+    textAlign: 'right',
+  },
+  readOnlyNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.light.backgroundSecondary,
+  },
+  readOnlyText: {
+    ...Typography.caption,
+    color: Colors.light.textSecondary,
+    flex: 1,
   },
 });

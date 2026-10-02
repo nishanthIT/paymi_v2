@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -8,6 +9,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -32,6 +35,8 @@ interface BottomSheetProps {
    * stays reachable while the keyboard is open. Use for multi-field forms.
    */
   scrollable?: boolean;
+  /** Optional surface override (e.g. white Labels sheets). */
+  sheetStyle?: StyleProp<ViewStyle>;
 }
 
 const SPRING = { damping: 22, stiffness: 260, mass: 0.9 };
@@ -47,6 +52,7 @@ export function BottomSheet({
   children,
   keyboardAware,
   scrollable,
+  sheetStyle,
 }: BottomSheetProps) {
   const [mounted, setMounted] = useState(visible);
   const translateY = useSharedValue(600);
@@ -83,7 +89,7 @@ export function BottomSheet({
       }
     });
 
-  const sheetStyle = useAnimatedStyle(() => ({
+  const sheetAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.get() }],
   }));
   const backdropStyle = useAnimatedStyle(() => ({
@@ -92,8 +98,29 @@ export function BottomSheet({
 
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (!keyboardAware || !mounted) return;
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+      setKeyboardHeight(0);
+    };
+  }, [keyboardAware, mounted]);
 
   if (!mounted) return null;
+
+  // Edge-to-edge Android doesn't resize the modal window, so lift the sheet manually.
+  const androidKeyboardPad = Platform.OS === 'android' ? keyboardHeight : 0;
+  const scrollMaxHeight = Math.min(
+    windowHeight * 0.7,
+    windowHeight - keyboardHeight - insets.top - 72,
+  );
 
   // The drag gesture is attached to the handle ONLY. Wrapping the whole sheet
   // (including its TextInputs) in a Pan detector makes iOS treat the first
@@ -102,7 +129,15 @@ export function BottomSheet({
   // while preserving drag-to-dismiss.
   const sheet = (
     <Animated.View
-      style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, Spacing.md) }, sheetStyle]}
+      style={[
+        styles.sheet,
+        {
+          paddingBottom:
+            androidKeyboardPad > 0 ? androidKeyboardPad + Spacing.sm : Math.max(insets.bottom, Spacing.md),
+        },
+        sheetStyle,
+        sheetAnimatedStyle,
+      ]}
     >
       <GestureDetector gesture={pan}>
         <View style={styles.handleArea}>
@@ -111,7 +146,7 @@ export function BottomSheet({
       </GestureDetector>
       {scrollable ? (
         <ScrollView
-          style={{ maxHeight: windowHeight * 0.7 }}
+          style={{ maxHeight: scrollMaxHeight }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled

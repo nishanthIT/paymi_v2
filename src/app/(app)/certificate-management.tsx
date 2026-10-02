@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Linking, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -11,6 +12,7 @@ import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import {
+  certificateImageUrl,
   certificateKeys,
   createCertificate,
   deleteCertificate,
@@ -20,6 +22,11 @@ import {
   type CertificateType,
   type ShopCertificate,
 } from '@/features/certificates/api';
+import { subscribeCertificateEdit } from '@/features/certificates/edit-bridge';
+import {
+  certificateStatusMeta as statusMeta,
+  certificateTypeMeta as typeMeta,
+} from '@/features/certificates/meta';
 import { DateTimeField } from '@/features/shop-tools/components/date-time-field';
 import { EmptyState } from '@/features/shop-tools/components/empty-state';
 import { Fab, RecordCard, StatusPill } from '@/features/shop-tools/components/primitives';
@@ -32,23 +39,11 @@ import { secureStorage } from '@/utils/secureStorage';
 
 type TypeTab = 'all' | CertificateType;
 
-const typeMeta: Record<CertificateType, { label: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  INSPECTION: { label: 'Inspection', icon: 'clipboard-outline' },
-  INSURANCE: { label: 'Insurance', icon: 'shield-checkmark-outline' },
-  ELECTRIC: { label: 'Electric', icon: 'flash-outline' },
-  HYGIENE: { label: 'Hygiene', icon: 'sparkles-outline' },
-};
-
-const statusMeta = {
-  ACTIVE: { label: 'Active', color: Colors.light.success },
-  EXPIRING_SOON: { label: 'Expiring soon', color: Colors.light.warning },
-  EXPIRED: { label: 'Expired', color: Colors.light.error },
-} as const;
-
 /** Certificates & documents vault (owner-only tool). */
 export default function CertificateManagementScreen() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [tab, setTab] = useState<TypeTab>('all');
   const [editing, setEditing] = useState<ShopCertificate | null>(null);
@@ -61,6 +56,16 @@ export default function CertificateManagementScreen() {
       if (token) setAuthHeaders({ Authorization: `Bearer ${token}` });
     });
   }, []);
+
+  // "Edit" on the details screen returns here and opens the form.
+  useEffect(
+    () =>
+      subscribeCertificateEdit((certificate) => {
+        setEditing(certificate);
+        setShowForm(true);
+      }),
+    [],
+  );
 
   const certificates = useQuery({
     queryKey: certificateKeys.list(tab),
@@ -122,15 +127,14 @@ export default function CertificateManagementScreen() {
           }
           renderItem={({ item }) => (
             <RecordCard
-              onPress={() => {
-                setEditing(item);
-                setShowForm(true);
-              }}
+              onPress={() =>
+                router.push({ pathname: '/(app)/certificate/[id]', params: { id: item.id } })
+              }
               onLongPress={() => handleDelete(item)}
             >
               <View style={styles.certRow}>
                 <Image
-                  source={{ uri: item.imageUrl, headers: authHeaders }}
+                  source={{ uri: certificateImageUrl(item), headers: authHeaders }}
                   style={styles.certThumb}
                   contentFit="cover"
                 />
@@ -205,6 +209,12 @@ function describeCertificate(certificate: ShopCertificate): string {
   return certificate.issuedDate ? `Issued ${formatDate(certificate.issuedDate)}` : 'No issue date';
 }
 
+function sanitizeDecimal(text: string): string {
+  const normalised = text.replace(',', '.').replace(/[^0-9.]/g, '');
+  const [whole, ...rest] = normalised.split('.');
+  return rest.length ? `${whole}.${rest.join('')}` : whole;
+}
+
 function CertificateForm({
   visible,
   certificate,
@@ -249,20 +259,54 @@ function CertificateForm({
       setUnitRate(certificate?.unitRate != null ? String(certificate.unitRate) : '');
       setReadingValueDay(certificate?.readingValueDay != null ? String(certificate.readingValueDay) : '');
       setReadingValueNight(certificate?.readingValueNight != null ? String(certificate.readingValueNight) : '');
-      setReadingDateDay(certificate?.readingDateDay ? new Date(certificate.readingDateDay) : null);
-      setReadingDateNight(certificate?.readingDateNight ? new Date(certificate.readingDateNight) : null);
+      setReadingDateDay(certificate?.readingDateDay ? new Date(certificate.readingDateDay) : new Date());
+      setReadingDateNight(certificate?.readingDateNight ? new Date(certificate.readingDateNight) : new Date());
       setContractRenewalDate(
         certificate?.contractRenewalDate ? new Date(certificate.contractRenewalDate) : null,
       );
     }
   }
 
+  const handlePickerResult = (result: ImagePicker.ImagePickerResult) => {
+    if (result.canceled) return;
+    const uri = result.assets?.[0]?.uri;
+    if (uri) setImageUri(uri);
+    else Alert.alert('No photo', 'That image could not be used. Please try another.');
+  };
+
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) setImageUri(result.assets[0].uri);
+    try {
+      handlePickerResult(
+        await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 }),
+      );
+    } catch {
+      Alert.alert('Gallery unavailable', 'Could not open your photo library.');
+    }
+  };
+
+  const takePhoto = async () => {
+    let permission = await ImagePicker.getCameraPermissionsAsync();
+    if (!permission.granted && permission.canAskAgain) {
+      permission = await ImagePicker.requestCameraPermissionsAsync();
+    }
+    if (!permission.granted) {
+      Alert.alert(
+        'Camera access needed',
+        'Allow camera access in Settings to photograph your documents, or choose a photo from your gallery.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ],
+      );
+      return;
+    }
+    try {
+      handlePickerResult(
+        await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8 }),
+      );
+    } catch {
+      Alert.alert('Camera unavailable', 'Could not open the camera on this device.');
+    }
   };
 
   const reminderDays = Number(reminderDaysText);
@@ -272,18 +316,25 @@ function CertificateForm({
     reminderDays <= 60 &&
     (certificate != null || imageUri != null);
 
+  const electricMissing =
+    type === 'ELECTRIC'
+      ? [
+          unitRate.trim() === '' && 'unit rate',
+          readingValueDay.trim() === '' && 'day reading',
+          readingDateDay == null && 'day reading date',
+          readingValueNight.trim() === '' && 'night reading',
+          readingDateNight == null && 'night reading date',
+          contractRenewalDate == null && 'contract renewal date',
+        ].filter((field): field is string => Boolean(field))
+      : [];
+
   const typeValid =
     type === 'INSPECTION'
       ? certificate != null || issuedDate != null
       : type === 'INSURANCE'
         ? renewalDate != null && premiumAmount.trim() !== '' && companyDetails.trim() !== ''
         : type === 'ELECTRIC'
-          ? unitRate.trim() !== '' &&
-            readingValueDay.trim() !== '' &&
-            readingValueNight.trim() !== '' &&
-            readingDateDay != null &&
-            readingDateNight != null &&
-            contractRenewalDate != null
+          ? electricMissing.length === 0
           : true;
 
   const valid = baseValid && typeValid;
@@ -306,18 +357,32 @@ function CertificateForm({
           />
         )}
 
-        <Pressable onPress={pickImage} style={styles.imagePicker}>
-          {imageUri ? (
+        <View style={styles.photoBlock}>
+          <Text style={styles.photoLabel}>
+            {certificate ? 'Replace photo (optional)' : 'Photo of the document (required)'}
+          </Text>
+          {imageUri && (
             <Image source={{ uri: imageUri }} style={styles.imagePreview} contentFit="cover" />
-          ) : (
-            <>
-              <Ionicons name="camera-outline" size={20} color={Colors.light.primary} />
-              <Text style={styles.imagePickerText}>
-                {certificate ? 'Replace photo (optional)' : 'Add photo of the document (required)'}
-              </Text>
-            </>
           )}
-        </Pressable>
+          <View style={styles.pairRow}>
+            <Pressable
+              onPress={takePhoto}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.imagePicker, styles.flex1, pressed && styles.pressed]}
+            >
+              <Ionicons name="camera-outline" size={20} color={Colors.light.primary} />
+              <Text style={styles.imagePickerText}>{imageUri ? 'Retake' : 'Take Photo'}</Text>
+            </Pressable>
+            <Pressable
+              onPress={pickImage}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.imagePicker, styles.flex1, pressed && styles.pressed]}
+            >
+              <Ionicons name="images-outline" size={20} color={Colors.light.primary} />
+              <Text style={styles.imagePickerText}>Choose from Gallery</Text>
+            </Pressable>
+          </View>
+        </View>
 
         {type === 'INSPECTION' && (
           <>
@@ -334,22 +399,16 @@ function CertificateForm({
         )}
         {type === 'ELECTRIC' && (
           <>
-            <TextField label="Unit rate (p/kWh)" value={unitRate} onChangeText={setUnitRate} keyboardType="decimal-pad" />
-            <View style={styles.pairRow}>
-              <View style={styles.flex1}>
-                <TextField label="Day reading" value={readingValueDay} onChangeText={setReadingValueDay} keyboardType="decimal-pad" />
-              </View>
-              <View style={styles.flex1}>
-                <TextField label="Night reading" value={readingValueNight} onChangeText={setReadingValueNight} keyboardType="decimal-pad" />
-              </View>
+            <TextField label="Unit rate (p/kWh)" value={unitRate} onChangeText={(text) => setUnitRate(sanitizeDecimal(text))} keyboardType="decimal-pad" placeholder="0.00" />
+            <View style={styles.readingGroup}>
+              <Text style={styles.readingGroupTitle}>Day meter</Text>
+              <TextField label="Day reading (kWh)" value={readingValueDay} onChangeText={(text) => setReadingValueDay(sanitizeDecimal(text))} keyboardType="decimal-pad" placeholder="e.g. 12345" />
+              <DateTimeField label="Day reading date" mode="date" value={readingDateDay} onChange={setReadingDateDay} maximumDate={new Date()} placeholder="Select date" />
             </View>
-            <View style={styles.pairRow}>
-              <View style={styles.flex1}>
-                <DateTimeField label="Day reading date" mode="date" value={readingDateDay} onChange={setReadingDateDay} placeholder="Select" />
-              </View>
-              <View style={styles.flex1}>
-                <DateTimeField label="Night reading date" mode="date" value={readingDateNight} onChange={setReadingDateNight} placeholder="Select" />
-              </View>
+            <View style={styles.readingGroup}>
+              <Text style={styles.readingGroupTitle}>Night meter</Text>
+              <TextField label="Night reading (kWh)" value={readingValueNight} onChangeText={(text) => setReadingValueNight(sanitizeDecimal(text))} keyboardType="decimal-pad" placeholder="e.g. 6789" />
+              <DateTimeField label="Night reading date" mode="date" value={readingDateNight} onChange={setReadingDateNight} maximumDate={new Date()} placeholder="Select date" />
             </View>
             <DateTimeField label="Contract renewal date" mode="date" value={contractRenewalDate} onChange={setContractRenewalDate} placeholder="Select date" />
           </>
@@ -369,29 +428,40 @@ function CertificateForm({
           placeholder="1–60"
         />
 
+        {electricMissing.length > 0 && (
+          <Text style={styles.missingText}>Still needed: {electricMissing.join(', ')}</Text>
+        )}
+        {!certificate && imageUri == null && (
+          <Text style={styles.missingText}>Add a photo of the document to continue.</Text>
+        )}
+
         <PrimaryButton
           title={certificate ? 'Save Changes' : 'Add Certificate'}
           loading={saving}
           disabled={!valid}
-          onPress={() =>
-            valid &&
+          onPress={() => {
+            if (!valid) return;
+            const isElectric = type === 'ELECTRIC';
+            const isInsurance = type === 'INSURANCE';
+            const hasIssueDates = type === 'INSPECTION' || type === 'HYGIENE';
             onSave({
               type,
               reminderDays,
               imageUri,
-              issuedDate: issuedDate ? toDateParam(issuedDate) : undefined,
-              expiryDate: expiryDate ? toDateParam(expiryDate) : undefined,
-              renewalDate: renewalDate ? toDateParam(renewalDate) : undefined,
-              premiumAmount: premiumAmount.trim() || undefined,
-              companyDetails: companyDetails.trim() || undefined,
-              unitRate: unitRate.trim() || undefined,
-              readingValueDay: readingValueDay.trim() || undefined,
-              readingValueNight: readingValueNight.trim() || undefined,
-              readingDateDay: readingDateDay ? toDateParam(readingDateDay) : undefined,
-              readingDateNight: readingDateNight ? toDateParam(readingDateNight) : undefined,
-              contractRenewalDate: contractRenewalDate ? toDateParam(contractRenewalDate) : undefined,
-            })
-          }
+              issuedDate: hasIssueDates && issuedDate ? toDateParam(issuedDate) : undefined,
+              expiryDate: hasIssueDates && expiryDate ? toDateParam(expiryDate) : undefined,
+              renewalDate: isInsurance && renewalDate ? toDateParam(renewalDate) : undefined,
+              premiumAmount: isInsurance ? premiumAmount.trim() || undefined : undefined,
+              companyDetails: isInsurance ? companyDetails.trim() || undefined : undefined,
+              unitRate: isElectric ? unitRate.trim() || undefined : undefined,
+              readingValueDay: isElectric ? readingValueDay.trim() || undefined : undefined,
+              readingValueNight: isElectric ? readingValueNight.trim() || undefined : undefined,
+              readingDateDay: isElectric && readingDateDay ? toDateParam(readingDateDay) : undefined,
+              readingDateNight: isElectric && readingDateNight ? toDateParam(readingDateNight) : undefined,
+              contractRenewalDate:
+                isElectric && contractRenewalDate ? toDateParam(contractRenewalDate) : undefined,
+            });
+          }}
         />
       </View>
     </BottomSheet>
@@ -445,6 +515,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.sm,
   },
+  photoBlock: {
+    gap: Spacing.sm,
+  },
+  photoLabel: {
+    ...Typography.label,
+    color: Colors.light.textSecondary,
+  },
+  pressed: {
+    backgroundColor: Colors.light.backgroundSecondary,
+  },
+  readingGroup: {
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    paddingBottom: Spacing.md,
+    backgroundColor: Colors.light.backgroundCard,
+  },
+  readingGroupTitle: {
+    ...Typography.bodyBold,
+    color: Colors.light.text,
+    marginBottom: Spacing.sm,
+  },
+  missingText: {
+    ...Typography.caption,
+    color: Colors.light.error,
+    textAlign: 'center',
+  },
   imagePicker: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -455,6 +553,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
     minHeight: 56,
   },
   imagePickerText: {

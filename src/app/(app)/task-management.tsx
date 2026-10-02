@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -32,6 +34,14 @@ import {
   type TaskInput,
   type TaskStatus,
 } from '@/features/tasks/api';
+import {
+  CELEBRATION_MS,
+  TaskActionButton,
+  TaskProgress,
+  type TaskActionState,
+} from '@/features/tasks/components/complete-button';
+
+const completeSound = require('@/assets/sounds/task-complete.wav');
 
 type StatusTab = 'all' | TaskStatus;
 
@@ -315,28 +325,106 @@ function EmployeeTasks() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'todo' | 'done'>('todo');
+  const [overrides, setOverrides] = useState<Record<string, TaskActionState>>({});
+  const inFlight = useRef(new Set<string>());
+  const chime = useAudioPlayer(completeSound);
 
   const tasks = useQuery({ queryKey: taskKeys.mine, queryFn: fetchMyTasks, staleTime: 30_000 });
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tasks'] });
-  const start = useMutation({
-    mutationFn: (assignmentId: string) => startTask(assignmentId),
-    onSettled: invalidate,
-  });
-  const complete = useMutation({
-    mutationFn: (assignmentId: string) => completeTask(assignmentId),
-    onSettled: invalidate,
-  });
 
-  const todo = (tasks.data ?? []).filter((t) => !t.isCompleted);
-  const done = (tasks.data ?? []).filter((t) => t.isCompleted);
+  const all = tasks.data ?? [];
+  const todo = all.filter((t) => !t.isCompleted);
+  const done = all.filter((t) => t.isCompleted);
   const visible = tab === 'todo' ? todo : done;
 
-  const act = (mutation: typeof start, task: MyTask, message: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    mutation.mutate(task.assignmentId, {
-      onSuccess: () => showToast(message, 'success'),
-      onError: (error: any) => showToast(error?.message ?? 'Could not update', 'error'),
+  const setOverride = (id: string, state?: TaskActionState) =>
+    setOverrides((prev) => {
+      if (state) return { ...prev, [id]: state };
+      const { [id]: _removed, ...rest } = prev;
+      return rest;
     });
+
+  const handleStart = async (task: MyTask) => {
+    const id = task.assignmentId;
+    if (inFlight.current.has(id)) return;
+    inFlight.current.add(id);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setOverride(id, 'starting');
+    try {
+      await startTask(id);
+      // Reflect "In progress" only after the backend confirmed.
+      queryClient.setQueryData<MyTask[]>(taskKeys.mine, (prev) =>
+        prev?.map((t) =>
+          t.assignmentId === id
+            ? { ...t, isStarted: true, startedAt: t.startedAt ?? new Date().toISOString() }
+            : t,
+        ),
+      );
+      setOverride(id);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      showToast('Task started — good luck!', 'success');
+      invalidate();
+    } catch (error: any) {
+      setOverride(id);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      showToast(error?.message ?? 'Could not start the task — try again', 'error');
+    } finally {
+      inFlight.current.delete(id);
+    }
+  };
+
+  const handleComplete = async (task: MyTask) => {
+    const id = task.assignmentId;
+    if (inFlight.current.has(id)) return;
+    inFlight.current.add(id);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setOverride(id, 'completing');
+
+    try {
+      const result = await completeTask(id);
+      // Celebrate only once the backend has confirmed.
+      setOverride(id, 'celebrating');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      try {
+        chime.seekTo(0);
+        chime.play();
+      } catch {
+        // sound is best-effort
+      }
+      const remaining = todo.filter((t) => t.assignmentId !== id).length;
+      showToast(
+        result.alreadyCompleted
+          ? 'Already marked as done'
+          : remaining === 0
+            ? 'All tasks complete — brilliant work!'
+            : `Task complete! ${remaining} to go`,
+        'success',
+      );
+
+      // Let the celebration play, then move the card into Completed.
+      setTimeout(() => {
+        queryClient.setQueryData<MyTask[]>(taskKeys.mine, (prev) =>
+          prev?.map((t) =>
+            t.assignmentId === id
+              ? {
+                  ...t,
+                  isCompleted: true,
+                  isStarted: true,
+                  completedAt: result.completedAt ?? new Date().toISOString(),
+                }
+              : t,
+          ),
+        );
+        setOverride(id);
+        inFlight.current.delete(id);
+        invalidate();
+      }, CELEBRATION_MS);
+    } catch (error: any) {
+      inFlight.current.delete(id);
+      setOverride(id);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      showToast(error?.message ?? 'Could not complete the task — try again', 'error');
+    }
   };
 
   return (
@@ -352,10 +440,14 @@ function EmployeeTasks() {
       {tasks.isLoading ? (
         <ListSkeleton rows={5} height={96} />
       ) : (
-        <FlatList
+        <Animated.FlatList
           data={visible}
           keyExtractor={(item) => item.assignmentId}
           contentContainerStyle={styles.listContent}
+          itemLayoutAnimation={LinearTransition.springify().damping(18)}
+          ListHeaderComponent={
+            tab === 'todo' ? <TaskProgress done={done.length} total={all.length} /> : null
+          }
           refreshControl={
             <RefreshControl
               refreshing={tasks.isRefetching}
@@ -363,48 +455,61 @@ function EmployeeTasks() {
               tintColor={Colors.light.primary}
             />
           }
-          renderItem={({ item }) => (
-            <RecordCard>
-              <View style={styles.taskHead}>
-                <Text style={styles.taskTitle} numberOfLines={1}>
-                  {item.title}
-                </Text>
-                <StatusPill
-                  label={item.isCompleted ? 'Done' : item.isStarted ? 'In progress' : 'Pending'}
-                  color={
-                    item.isCompleted
-                      ? Colors.light.success
-                      : item.isStarted
-                        ? Colors.light.primary
-                        : Colors.light.warning
-                  }
-                />
-              </View>
-              {!!item.description && <Text style={styles.taskDesc}>{item.description}</Text>}
-              <AuditLine
-                text={`From ${item.createdBy?.name ?? 'Owner'}${
-                  item.dueDate ? ` · Due ${formatDate(item.dueDate)}` : ''
-                }`}
-              />
-              {!item.isCompleted && (
-                <View style={styles.actionRow}>
-                  {!item.isStarted && (
-                    <PrimaryButton
-                      title="Start"
-                      variant="ghost"
-                      style={styles.actionButton}
-                      onPress={() => act(start, item, 'Task started')}
+          renderItem={({ item }) => {
+            const state: TaskActionState =
+              overrides[item.assignmentId] ??
+              (item.isCompleted ? 'done' : item.isStarted ? 'in_progress' : 'not_started');
+            const celebrating = state === 'celebrating';
+            return (
+              <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(220)}>
+                <RecordCard style={celebrating ? styles.cardCelebrating : undefined}>
+                  <View style={styles.taskHead}>
+                    <Text
+                      style={[styles.taskTitle, item.isCompleted && styles.taskTitleDone]}
+                      numberOfLines={1}
+                    >
+                      {item.title}
+                    </Text>
+                    <StatusPill
+                      label={
+                        item.isCompleted || celebrating
+                          ? 'Done'
+                          : item.isStarted
+                            ? 'In progress'
+                            : 'Pending'
+                      }
+                      color={
+                        item.isCompleted || celebrating
+                          ? Colors.light.success
+                          : item.isStarted
+                            ? Colors.light.primary
+                            : Colors.light.warning
+                      }
                     />
-                  )}
-                  <PrimaryButton
-                    title="Mark Complete"
-                    style={styles.actionButton}
-                    onPress={() => act(complete, item, 'Nice work — task completed')}
+                  </View>
+                  {!!item.description && <Text style={styles.taskDesc}>{item.description}</Text>}
+                  <AuditLine
+                    text={
+                      item.isCompleted && item.completedAt
+                        ? `From ${item.createdBy?.name ?? 'Owner'} · Completed ${formatDate(item.completedAt)}`
+                        : `From ${item.createdBy?.name ?? 'Owner'}${
+                            item.dueDate ? ` · Due ${formatDate(item.dueDate)}` : ''
+                          }`
+                    }
                   />
-                </View>
-              )}
-            </RecordCard>
-          )}
+                  {!item.isCompleted && (
+                    <View style={styles.actionRow}>
+                      <TaskActionButton
+                        state={state}
+                        onStart={() => handleStart(item)}
+                        onComplete={() => handleComplete(item)}
+                      />
+                    </View>
+                  )}
+                </RecordCard>
+              </Animated.View>
+            );
+          }}
           ListEmptyComponent={
             <EmptyState
               icon="checkbox-outline"
@@ -435,6 +540,14 @@ const styles = StyleSheet.create({
     ...Typography.bodyBold,
     color: Colors.light.text,
     flex: 1,
+  },
+  taskTitleDone: {
+    color: Colors.light.textSecondary,
+    textDecorationLine: 'line-through',
+  },
+  cardCelebrating: {
+    borderColor: Colors.light.success,
+    backgroundColor: '#F3FAF3',
   },
   taskDesc: {
     ...Typography.bodySmall,
@@ -515,8 +628,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   actionRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
     marginTop: Spacing.sm,
   },
   actionButton: {

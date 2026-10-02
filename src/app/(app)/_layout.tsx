@@ -32,6 +32,14 @@ export default function AppLayout() {
       <Stack.Screen name="cleaning-status" />
       <Stack.Screen name="incident-logs" />
       <Stack.Screen name="certificate-management" />
+      <Stack.Screen name="certificate/[id]" />
+      <Stack.Screen name="labels/index" />
+      <Stack.Screen name="labels/shelf" />
+      <Stack.Screen name="labels/reduced" />
+      <Stack.Screen name="labels/templates" />
+      <Stack.Screen name="labels/template/[id]" />
+      <Stack.Screen name="labels/mixed" />
+      <Stack.Screen name="labels/runner" />
       <Stack.Screen name="waste-management-record" />
       <Stack.Screen name="supplier-payout-record" />
       <Stack.Screen name="vat-calculator" />

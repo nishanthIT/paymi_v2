@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,14 +15,21 @@ import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/
 
 type ToastType = 'success' | 'error' | 'info';
 
+interface ToastOptions {
+  /** Makes the toast tappable (e.g. navigate to the relevant screen). */
+  onPress?: () => void;
+  durationMs?: number;
+}
+
 interface ToastState {
   id: number;
   message: string;
   type: ToastType;
+  onPress?: () => void;
 }
 
 interface ToastContextValue {
-  showToast: (message: string, type?: ToastType) => void;
+  showToast: (message: string, type?: ToastType, options?: ToastOptions) => void;
 }
 
 const ToastContext = createContext<ToastContextValue>({ showToast: () => {} });
@@ -49,11 +56,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
 
-  const showToast = useCallback((message: string, type: ToastType = 'info') => {
-    if (timer.current) clearTimeout(timer.current);
-    setToast({ id: Date.now(), message, type });
-    timer.current = setTimeout(() => setToast(null), 2400);
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: ToastType = 'info', options?: ToastOptions) => {
+      if (timer.current) clearTimeout(timer.current);
+      setToast({ id: Date.now(), message, type, onPress: options?.onPress });
+      timer.current = setTimeout(() => setToast(null), options?.durationMs ?? 2400);
+    },
+    [],
+  );
 
   const value = useMemo(() => ({ showToast }), [showToast]);
 
@@ -66,14 +76,25 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           entering={FadeInUp.duration(250)}
           exiting={FadeOutUp.duration(200)}
           style={[styles.wrapper, { top: insets.top + Spacing.sm }]}
-          pointerEvents="none"
+          pointerEvents={toast.onPress ? 'box-none' : 'none'}
         >
-          <View style={styles.toast}>
+          <Pressable
+            disabled={!toast.onPress}
+            onPress={() => {
+              const action = toast.onPress;
+              setToast(null);
+              action?.();
+            }}
+            style={({ pressed }) => [styles.toast, pressed && styles.toastPressed]}
+          >
             <Ionicons name={ICONS[toast.type]} size={18} color={ICON_COLORS[toast.type]} />
             <Text style={styles.message} numberOfLines={2}>
               {toast.message}
             </Text>
-          </View>
+            {toast.onPress && (
+              <Ionicons name="chevron-forward" size={14} color={Colors.light.textLight} />
+            )}
+          </Pressable>
         </Animated.View>
       )}
     </ToastContext.Provider>
@@ -100,6 +121,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.border,
     maxWidth: '100%',
     ...Shadows.md,
+  },
+  toastPressed: {
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   message: {
     ...Typography.bodySmall,

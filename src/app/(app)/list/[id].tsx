@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/ui/toast';
@@ -19,6 +19,7 @@ import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/
 import { ExportPdfSheet } from '@/features/lists/components/export-pdf-sheet';
 import { ListProductRow } from '@/features/lists/components/list-product-row';
 import { ListQuickActions } from '@/features/lists/components/list-quick-actions';
+import { ListProductRowsSkeleton } from '@/features/lists/components/list-skeletons';
 import { exportListPdf } from '@/features/lists/pdf/export-list-pdf';
 import {
   useListDetails,
@@ -28,6 +29,7 @@ import {
 } from '@/features/lists/hooks/use-list-details';
 import { useRenameList } from '@/features/lists/hooks/use-lists';
 import type { ListProduct } from '@/features/lists/types';
+import { usePullToRefresh, useRefetchOnFocus } from '@/hooks/use-query-refresh';
 import { matchesSearch } from '@/utils/search';
 
 /**
@@ -40,7 +42,9 @@ export default function ListDetailsScreen() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  const { data: list, isLoading, isRefetching, refetch } = useListDetails(listId);
+  const { data: list, isError, fetchStatus, refetch } = useListDetails(listId);
+  const { refreshing, onRefresh } = usePullToRefresh(refetch, fetchStatus);
+  useRefetchOnFocus(refetch);
   const removeProduct = useRemoveProduct(listId);
   const updateQuantity = useUpdateQuantity(listId);
   const toggleUrgent = useToggleUrgent(listId);
@@ -109,6 +113,11 @@ export default function ListDetailsScreen() {
   const collected = list?.products?.filter((p) => p.isPurchased).length ?? 0;
 
   const onError = (error: Error) => showToast(error.message, 'error');
+
+  // No cached list yet: skeleton while loading/restoring, retry state once it gives up.
+  const isOffline = fetchStatus === 'paused';
+  const loadFailed = !list && fetchStatus !== 'fetching' && (isError || isOffline);
+  const showSkeleton = !list && !loadFailed && !!listId;
 
   const renderItem = ({ item }: { item: ListProduct }) => (
     <Animated.View layout={LinearTransition.springify().damping(20)}>
@@ -208,14 +217,49 @@ export default function ListDetailsScreen() {
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching && !isLoading}
-            onRefresh={refetch}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
             tintColor={Colors.light.primary}
           />
         }
         ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
         ListEmptyComponent={
-          !isLoading ? (
+          showSkeleton ? (
+            <Animated.View exiting={FadeOut.duration(200)}>
+              <ListProductRowsSkeleton />
+            </Animated.View>
+          ) : loadFailed ? (
+            <View style={styles.empty}>
+              <View style={styles.emptyIcon}>
+                <Ionicons
+                  name={isOffline ? 'cloud-offline-outline' : 'alert-circle-outline'}
+                  size={40}
+                  color={Colors.light.primary}
+                />
+              </View>
+              <Text style={styles.emptyTitle}>
+                {isOffline ? 'You’re offline' : 'Couldn’t load this list'}
+              </Text>
+              <Text style={styles.emptyBody}>
+                {isOffline
+                  ? 'This list will load as soon as you’re back online.'
+                  : 'Check your connection and try again.'}
+              </Text>
+              {!isOffline && (
+                <Pressable
+                  onPress={() => refetch()}
+                  style={({ pressed }) => [
+                    styles.collectButton,
+                    styles.retryButton,
+                    pressed && styles.collectPressed,
+                  ]}
+                >
+                  <Ionicons name="refresh" size={14} color="#FFFFFF" />
+                  <Text style={styles.collectText}>Try again</Text>
+                </Pressable>
+              )}
+            </View>
+          ) : (
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
                 <Ionicons name="basket-outline" size={40} color={Colors.light.primary} />
@@ -229,7 +273,7 @@ export default function ListDetailsScreen() {
                   : 'Add products by searching or scanning a barcode.'}
               </Text>
             </View>
-          ) : null
+          )
         }
       />
 
@@ -347,6 +391,10 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: '#FFFFFF',
     fontWeight: '700',
+  },
+  retryButton: {
+    marginTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
   },
   progressTrack: {
     height: 5,

@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AdCarousel } from '@/features/home/components/ad-carousel';
 import { NewsCard } from '@/features/home/components/news-card';
 import { useAdvertisements, useNews, usePromotions } from '@/features/home/hooks/use-home';
+import { usePullToRefresh } from '@/hooks/use-query-refresh';
 
 const NEWS_PREVIEW_COUNT = 6;
 
@@ -29,12 +30,15 @@ export default function HomeScreen() {
   const firstName = user?.name?.split(' ')[0] ?? 'there';
   const newsItems = news.data?.slice(0, NEWS_PREVIEW_COUNT) ?? [];
 
-  const refreshing = ads.isRefetching || news.isRefetching || promotions.isRefetching;
-  const onRefresh = useCallback(() => {
-    ads.refetch();
-    news.refetch();
-    promotions.refetch();
-  }, [ads, news, promotions]);
+  const { refetch: refetchAds } = ads;
+  const { refetch: refetchNews } = news;
+  const { refetch: refetchPromotions } = promotions;
+  const refetchAll = useCallback(
+    () => Promise.all([refetchAds(), refetchNews(), refetchPromotions()]),
+    [refetchAds, refetchNews, refetchPromotions],
+  );
+  const anyPaused = [ads, news, promotions].some((q) => q.fetchStatus === 'paused');
+  const { refreshing, onRefresh } = usePullToRefresh(refetchAll, anyPaused ? 'paused' : 'idle');
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

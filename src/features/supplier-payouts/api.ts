@@ -11,6 +11,11 @@ export interface SupplierPayoutRecord {
   paymentMethod?: PaymentMethod | null;
   notes?: string | null;
   recordedBy: string;
+  createdById?: number;
+  createdByType?: 'ADMIN' | 'CUSTOMER' | 'EMPLOYEE';
+  /** Server-computed for the current user. */
+  canEdit?: boolean;
+  canDelete?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,10 +55,10 @@ export async function fetchPayouts(params: {
 export async function createPayout(input: SupplierPayoutInput): Promise<void> {
   try {
     const record = await api.post('/supplier-payouts', input);
-    // Backend drops `notes` on create — persist it with a follow-up update.
-    const id = record.data?.record?.id;
-    if (input.notes && id) {
-      await api.put(`/supplier-payouts/${id}`, { notes: input.notes }).catch(() => {});
+    // Older backends drop `notes` on create — persist it with a follow-up update.
+    const saved = record.data?.record;
+    if (input.notes && saved?.id && !saved.notes) {
+      await api.put(`/supplier-payouts/${saved.id}`, { notes: input.notes }).catch(() => {});
     }
   } catch (error: any) {
     throw apiError(error, 'Could not save the payout');
