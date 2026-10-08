@@ -94,8 +94,9 @@ export function useTrackList() {
   return useMutation({
     mutationKey: ['lists', 'track'],
     mutationFn: listApi.trackList,
-    onSuccess: () => {
+    onSuccess: (_data, listId) => {
       queryClient.invalidateQueries({ queryKey: listKeys.all });
+      queryClient.invalidateQueries({ queryKey: listKeys.detail(listId) });
     },
   });
 }

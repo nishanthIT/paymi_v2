@@ -5,6 +5,7 @@ export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 export interface TaskAssignment {
   id: string;
   employee: { id: number; name: string; email?: string };
+  isStarted?: boolean;
   isCompleted: boolean;
   completedAt?: string | null;
 }
@@ -69,6 +70,16 @@ export async function fetchMyTasks(): Promise<MyTask[]> {
     return response.data?.tasks ?? [];
   } catch (error: any) {
     throw apiError(error, 'Could not load your tasks');
+  }
+}
+
+/** Shop owner: tasks assigned to one employee. */
+export async function fetchEmployeeTasks(employeeId: number): Promise<ShopTask[]> {
+  try {
+    const response = await api.get('/tasks', { params: { employeeId } });
+    return response.data?.tasks ?? [];
+  } catch (error: any) {
+    throw apiError(error, 'Could not load tasks');
   }
 }
 

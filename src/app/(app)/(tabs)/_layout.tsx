@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Shadows } from '@/constants/theme';
 import { useChatRealtime, useUnreadCount } from '@/features/chat/hooks/use-chats';
+import { useShopFeature } from '@/features/employees/permissions';
 import { useTemperatureAlerts } from '@/features/fridges/hooks/use-temperature-alerts';
 import { useListRealtime } from '@/features/lists/hooks/use-list-realtime';
 import { useTaskNotifications } from '@/features/tasks/hooks/use-task-notifications';
@@ -24,6 +25,7 @@ export default function TabsLayout() {
   // Employees get newly assigned tasks live.
   useTaskNotifications();
   const unreadCount = useUnreadCount();
+  const canUseLists = useShopFeature('feature.lists');
 
   return (
     <Tabs
@@ -58,6 +60,8 @@ export default function TabsLayout() {
         name="lists"
         options={{
           title: 'Lists',
+          // Hidden for employees whose shop owner switched lists off.
+          href: canUseLists ? undefined : null,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'list' : 'list-outline'} size={24} color={color} />
           ),

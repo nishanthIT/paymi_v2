@@ -6,6 +6,13 @@ import { logger } from '@/utils/logger';
 // 401s are handled globally in the api interceptor (silent logout).
 const isSilent401 = (error: any) => error?.silent === true && error?.status === 401;
 
+export interface ShopAccess {
+  shopId: string;
+  shopName?: string | null;
+  role: 'EMPLOYEE' | 'MANAGER' | string;
+  permissions: string[];
+}
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -14,6 +21,8 @@ export interface AuthUser {
   subscriptionStatus?: string;
   trialEndDate?: string;
   shopId?: string;
+  /** Shop membership of a shop employee; independent of any company staff access. */
+  shopAccess?: ShopAccess | null;
   [key: string]: unknown;
 }
 

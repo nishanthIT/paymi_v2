@@ -244,3 +244,52 @@ export function useChangeShop(listId: string) {
     },
   });
 }
+
+function useMoveOutOfList<TInput extends { listProductId: string }>(
+  listId: string,
+  mutationKey: string,
+  mutationFn: (input: TInput) => Promise<listApi.MoveToListResult>,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['lists', mutationKey],
+    mutationFn,
+    onMutate: async ({ listProductId }) => {
+      await queryClient.cancelQueries({ queryKey: listKeys.detail(listId) });
+      const previousDetail = queryClient.getQueryData<ListDetails>(listKeys.detail(listId));
+      patchListProducts(queryClient, listId, (products) =>
+        products.filter((p) => p.id !== listProductId),
+      );
+      return { previousDetail };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previousDetail) {
+        queryClient.setQueryData(listKeys.detail(listId), context.previousDetail);
+      }
+    },
+    onSuccess: (result) => {
+      if (result?.targetListId) {
+        queryClient.invalidateQueries({ queryKey: listKeys.detail(result.targetListId) });
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: listKeys.detail(listId) });
+      queryClient.invalidateQueries({ queryKey: listKeys.all });
+    },
+  });
+}
+
+/** Optimistically moves a list item into another of my lists. */
+export function useMoveToList(listId: string) {
+  return useMoveOutOfList(listId, 'move-to-list', (input: { listProductId: string; targetListId: string }) =>
+    listApi.moveProductToList({ listId, ...input }),
+  );
+}
+
+/** Optimistically moves a list item into its shop's Out of Stock list (created on demand). */
+export function useMarkOutOfStock(listId: string) {
+  return useMoveOutOfList(listId, 'mark-out-of-stock', (input: { listProductId: string }) =>
+    listApi.markProductOutOfStock({ listId, ...input }),
+  );
+}

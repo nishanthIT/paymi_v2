@@ -230,6 +230,10 @@ function TaskForm({
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  // Inactive employees can't take new tasks, but existing assignees stay visible.
+  const assignable = (employees.data ?? []).filter(
+    (emp) => (emp.status ?? 'ACTIVE') === 'ACTIVE' || selectedIds.includes(emp.id),
+  );
 
   const [lastKey, setLastKey] = useState<string | null>(null);
   const key = visible ? (task?.id ?? 'new') : null;
@@ -272,13 +276,13 @@ function TaskForm({
         />
         <View>
           <Text style={styles.fieldLabel}>Assign to</Text>
-          {(employees.data ?? []).length === 0 ? (
+          {assignable.length === 0 ? (
             <Text style={styles.emptyNote}>
-              {employees.isLoading ? 'Loading team…' : 'No employees yet — add your team first.'}
+              {employees.isLoading ? 'Loading team…' : 'No active employees yet — add your team first.'}
             </Text>
           ) : (
             <View style={styles.employeeWrap}>
-              {(employees.data ?? []).map((emp) => {
+              {assignable.map((emp) => {
                 const active = selectedIds.includes(emp.id);
                 return (
                   <Pressable

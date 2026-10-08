@@ -192,6 +192,42 @@ export async function changeProductShop(input: {
   }
 }
 
+export interface MoveToListResult {
+  message: string;
+  targetListId: string;
+  targetListName: string;
+  merged: boolean;
+  /** Only for mark-out-of-stock: true when the Out of Stock list was just created. */
+  created?: boolean;
+}
+
+/** Moves a list item (same shop, quantity, urgency) into another of my lists. */
+export async function moveProductToList(input: {
+  listId: string;
+  listProductId: string;
+  targetListId: string;
+}): Promise<MoveToListResult> {
+  try {
+    const response = await api.put('/lists/moveToList', input);
+    return response.data;
+  } catch (error: any) {
+    throw apiError(error, 'Failed to move product to another list');
+  }
+}
+
+/** Moves a list item into the "Out of Stock · <shop>" list, creating it if needed. */
+export async function markProductOutOfStock(input: {
+  listId: string;
+  listProductId: string;
+}): Promise<MoveToListResult> {
+  try {
+    const response = await api.put('/lists/markOutOfStock', input);
+    return response.data;
+  } catch (error: any) {
+    throw apiError(error, 'Failed to mark product as out of stock');
+  }
+}
+
 export async function searchProducts(query: string): Promise<Product[]> {
   const term = query.trim();
   if (term.length < 2) return [];

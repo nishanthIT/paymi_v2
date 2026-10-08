@@ -10,6 +10,7 @@ export interface ShoppingList {
   /** Set when this list is shared from another owner (tracked, not duplicated). */
   copiedFromName?: string | null;
   copiedFromId?: string | null;
+  isShared?: boolean;
 }
 
 export interface ListProduct {
@@ -50,6 +51,12 @@ export interface ListDetails {
   updatedAt: string;
   shopId?: string | null;
   creatorType?: string;
+  /** Employee/admin who created the list (when it isn't the caller's own). */
+  createdByName?: string | null;
+  /** The caller copied this list into their own lists (live, same list). */
+  copiedByMe?: boolean;
+  /** False when the shop owner is only previewing an employee's list. */
+  canEdit?: boolean;
   products: ListProduct[];
 }
 

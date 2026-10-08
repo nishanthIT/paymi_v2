@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { AppState } from 'react-native';
 import authService, {
   AuthUser,
   LoginCredentials,
@@ -69,6 +70,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     return unsubscribe;
   }, []);
+
+  // Owners can change an employee's shop access at any time; pick it up when the app is reopened.
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const sub = AppState.addEventListener('change', async (state) => {
+      if (state !== 'active') return;
+      try {
+        const fresh = await authService.restoreSession();
+        if (fresh) setUser(fresh);
+      } catch (error: any) {
+        logger.warn('Access refresh failed:', error?.message);
+      }
+    });
+    return () => sub.remove();
+  }, [status]);
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const response = await authService.login(credentials);

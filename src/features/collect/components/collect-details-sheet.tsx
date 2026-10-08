@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -14,6 +14,7 @@ import {
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { useCompareProduct } from '@/features/compare/hooks/use-compare-product';
+import { useLists } from '@/features/lists/hooks/use-lists';
 import type { ListProduct } from '@/features/lists/types';
 import { useShopPrice } from '@/features/price-reports/hooks';
 import { formatSizeLabel } from '@/utils/pack-size';
@@ -28,6 +29,13 @@ interface CollectDetailsSheetProps {
   /** Move this list item to the same product at another shop. */
   onChangeShop?: (listProductId: string, productAtShopId: string) => void;
   changingShop?: boolean;
+  /** List currently being collected (excluded from the move targets). */
+  listId?: string;
+  /** Move this list item into another existing list. */
+  onMoveToList?: (listProductId: string, targetListId: string) => void;
+  /** Move this list item into its shop's Out of Stock list. */
+  onMarkOutOfStock?: (listProductId: string) => void;
+  movingList?: boolean;
 }
 
 function money(value: number | null | undefined) {
@@ -43,6 +51,10 @@ export function CollectDetailsSheet({
   onToggleUrgent,
   onChangeShop,
   changingShop,
+  listId,
+  onMoveToList,
+  onMarkOutOfStock,
+  movingList,
 }: CollectDetailsSheetProps) {
   const { data: livePrice } = useShopPrice(
     product?.productId ?? null,
@@ -52,6 +64,15 @@ export function CollectDetailsSheet({
   const canChangeShop = !!product && !product.bundlePromotionId && !!onChangeShop;
   const compare = useCompareProduct(canChangeShop ? product?.productId : undefined);
   const otherShops = (compare.data?.shops ?? []).filter((s) => s.shopId !== product?.shopId);
+
+  const canMoveList =
+    !!product && !product.bundlePromotionId && !product.isPurchased && (!!onMoveToList || !!onMarkOutOfStock);
+  const [listPickerFor, setListPickerFor] = useState<string | null>(null);
+  const listPickerOpen = !!product && listPickerFor === product.id;
+  const { data: allLists, isLoading: listsLoading } = useLists();
+  const otherLists = (allLists ?? []).filter(
+    (l) => l.id !== listId && !l.id.startsWith('optimistic-'),
+  );
 
   if (!product) return <BottomSheet visible={false} onClose={onClose}>{null}</BottomSheet>;
 
@@ -201,6 +222,93 @@ export function CollectDetailsSheet({
                 </View>
               ))
             )}
+          </View>
+        )}
+
+        {canMoveList && (
+          <View style={styles.shopsSection}>
+            <Text style={styles.shopsTitle}>Product unavailable?</Text>
+
+            {onMarkOutOfStock && (
+              <Pressable
+                onPress={() => onMarkOutOfStock(product.id)}
+                disabled={movingList}
+                style={({ pressed }) => [
+                  styles.actionRow,
+                  (pressed || movingList) && { opacity: 0.7 },
+                ]}
+              >
+                <View style={[styles.actionIcon, styles.actionIconDanger]}>
+                  <Ionicons name="remove-circle-outline" size={18} color={Colors.light.error} />
+                </View>
+                <View style={styles.shopInfo}>
+                  <Text style={[styles.shopName, { color: Colors.light.error }]}>
+                    Mark as Out of Stock
+                  </Text>
+                  <Text style={styles.actionHint} numberOfLines={2}>
+                    Moves to “Out of Stock · {product.shopName || 'Unknown Shop'}” to buy later
+                  </Text>
+                </View>
+                {movingList && <ActivityIndicator size="small" color={Colors.light.error} />}
+              </Pressable>
+            )}
+
+            {onMoveToList && (
+              <Pressable
+                onPress={() => setListPickerFor(listPickerOpen ? null : product.id)}
+                style={({ pressed }) => [styles.actionRow, pressed && { opacity: 0.7 }]}
+              >
+                <View style={styles.actionIcon}>
+                  <Ionicons name="list-outline" size={18} color={Colors.light.primary} />
+                </View>
+                <View style={styles.shopInfo}>
+                  <Text style={styles.shopName}>Move to another list</Text>
+                  <Text style={styles.actionHint}>Pick one of your existing lists</Text>
+                </View>
+                <Ionicons
+                  name={listPickerOpen ? 'chevron-up' : 'chevron-down'}
+                  size={18}
+                  color={Colors.light.textSecondary}
+                />
+              </Pressable>
+            )}
+
+            {onMoveToList && listPickerOpen &&
+              (listsLoading ? (
+                <ActivityIndicator size="small" color={Colors.light.primary} style={styles.shopsLoading} />
+              ) : otherLists.length === 0 ? (
+                <Text style={styles.shopsEmpty}>You have no other lists yet.</Text>
+              ) : (
+                otherLists.map((target) => (
+                  <View key={target.id} style={styles.shopRow}>
+                    <View style={styles.shopInfo}>
+                      <Text style={styles.shopName} numberOfLines={1}>
+                        {target.name}
+                      </Text>
+                      <Text style={styles.actionHint}>
+                        {target.itemCount} item{target.itemCount === 1 ? '' : 's'}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => onMoveToList(product.id, target.id)}
+                      disabled={movingList}
+                      style={({ pressed }) => [
+                        styles.moveButton,
+                        (pressed || movingList) && { opacity: 0.7 },
+                      ]}
+                    >
+                      {movingList ? (
+                        <ActivityIndicator size="small" color="#FFFFFF" />
+                      ) : (
+                        <>
+                          <Ionicons name="arrow-redo" size={14} color="#FFFFFF" />
+                          <Text style={styles.moveButtonText}>Move</Text>
+                        </>
+                      )}
+                    </Pressable>
+                  </View>
+                ))
+              ))}
           </View>
         )}
       </ScrollView>
@@ -400,6 +508,32 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     fontWeight: '800',
     color: '#FFFFFF',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.light.backgroundCard,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  actionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.light.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionIconDanger: {
+    backgroundColor: `${Colors.light.error}1A`,
+  },
+  actionHint: {
+    ...Typography.caption,
+    color: Colors.light.textSecondary,
   },
   detailRow: {
     flexDirection: 'row',

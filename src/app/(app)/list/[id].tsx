@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -114,6 +115,16 @@ export default function ListDetailsScreen() {
 
   const onError = (error: Error) => showToast(error.message, 'error');
 
+  const confirmRemove = (item: ListProduct) =>
+    Alert.alert('Remove item', `Remove "${item.productName}" from this list?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => removeProduct.mutate(item.productId, { onError }),
+      },
+    ]);
+
   // No cached list yet: skeleton while loading/restoring, retry state once it gives up.
   const isOffline = fetchStatus === 'paused';
   const loadFailed = !list && fetchStatus !== 'fetching' && (isError || isOffline);
@@ -126,7 +137,7 @@ export default function ListDetailsScreen() {
         onQuantityChange={(quantity) =>
           updateQuantity.mutate({ listProductId: item.id, quantity }, { onError })
         }
-        onRemove={() => removeProduct.mutate(item.productId, { onError })}
+        onRemove={() => confirmRemove(item)}
         onToggleUrgent={() => toggleUrgent.mutate(item.id, { onError })}
       />
     </Animated.View>

@@ -22,6 +22,8 @@ export default function AppLayout() {
       <Stack.Screen name="collect" />
       <Stack.Screen name="report-price" />
       <Stack.Screen name="employees" />
+      <Stack.Screen name="employee/[id]" />
+      <Stack.Screen name="employee/list/[listId]" />
       <Stack.Screen name="chat/[id]" />
       <Stack.Screen name="news/[id]" />
       <Stack.Screen name="promotions" />
@@ -31,6 +33,7 @@ export default function AppLayout() {
       <Stack.Screen name="fridge-temperature" />
       <Stack.Screen name="cleaning-status" />
       <Stack.Screen name="incident-logs" />
+      <Stack.Screen name="age-restriction-records" />
       <Stack.Screen name="certificate-management" />
       <Stack.Screen name="certificate/[id]" />
       <Stack.Screen name="labels/index" />

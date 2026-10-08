@@ -11,7 +11,14 @@ import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/
 import { CollectDetailsSheet } from '@/features/collect/components/collect-details-sheet';
 import { CollectProductCard } from '@/features/collect/components/collect-product-card';
 import { ShopSelector, type ShopSummary } from '@/features/collect/components/shop-selector';
-import { useListDetails, useTogglePurchased, useToggleUrgent, useChangeShop } from '@/features/lists/hooks/use-list-details';
+import {
+  useChangeShop,
+  useListDetails,
+  useMarkOutOfStock,
+  useMoveToList,
+  useTogglePurchased,
+  useToggleUrgent,
+} from '@/features/lists/hooks/use-list-details';
 import type { ListProduct } from '@/features/lists/types';
 import { useSubmitPriceReport } from '@/features/price-reports/hooks';
 
@@ -30,6 +37,8 @@ export default function CollectScreen() {
   const toggle = useTogglePurchased(listId ?? '');
   const toggleUrgent = useToggleUrgent(listId ?? '');
   const changeShop = useChangeShop(listId ?? '');
+  const moveToList = useMoveToList(listId ?? '');
+  const markOutOfStock = useMarkOutOfStock(listId ?? '');
   const submitReport = useSubmitPriceReport();
 
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
@@ -359,6 +368,38 @@ export default function CollectScreen() {
             },
           )
         }
+        listId={listId}
+        movingList={moveToList.isPending || markOutOfStock.isPending}
+        onMoveToList={(listProductId, targetListId) => {
+          setDetailsId(null);
+          moveToList.mutate(
+            { listProductId, targetListId },
+            {
+              onSuccess: (result) => showToast(result?.message ?? 'Moved to the selected list', 'success'),
+              onError: (error: any) => {
+                if (!error?.silent) showToast(error?.message ?? 'Could not move item', 'error');
+              },
+            },
+          );
+        }}
+        onMarkOutOfStock={(listProductId) => {
+          setDetailsId(null);
+          markOutOfStock.mutate(
+            { listProductId },
+            {
+              onSuccess: (result) =>
+                showToast(
+                  result?.created
+                    ? `Created “${result.targetListName}” and moved item`
+                    : (result?.message ?? 'Marked as out of stock'),
+                  'success',
+                ),
+              onError: (error: any) => {
+                if (!error?.silent) showToast(error?.message ?? 'Could not mark out of stock', 'error');
+              },
+            },
+          );
+        }}
       />
     </SafeAreaView>
   );

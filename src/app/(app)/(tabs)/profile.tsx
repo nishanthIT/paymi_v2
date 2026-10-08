@@ -14,6 +14,8 @@ import { fetchToday as fetchCleaningToday } from '@/features/cleaning/api';
 import { cleaningKeys } from '@/features/cleaning/keys';
 import { expiryKeys, fetchExpiryNotifications } from '@/features/expiry/api';
 import { useIsOwner } from '@/features/shop-tools/hooks/use-is-owner';
+import { useCanManageShopEmployees } from '@/features/employees/hooks';
+import { useShopFeatures, type ShopFeature } from '@/features/employees/permissions';
 import { fetchMyTasks, taskKeys } from '@/features/tasks/api';
 
 interface ShopTool {
@@ -21,6 +23,8 @@ interface ShopTool {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   ownerOnly?: boolean;
+  /** Shop permission an employee needs to see this tool. */
+  feature?: ShopFeature;
   badge?: number;
   badgeColor?: string;
 }
@@ -29,6 +33,8 @@ interface ShopTool {
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const isOwner = useIsOwner();
+  const canManageEmployees = useCanManageShopEmployees();
+  const hasFeature = useShopFeatures();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -37,6 +43,7 @@ export default function ProfileScreen() {
     queryKey: expiryKeys.notifications,
     queryFn: fetchExpiryNotifications,
     staleTime: 60_000,
+    enabled: hasFeature('feature.expiry'),
   });
   const certificateAlerts = useQuery({
     queryKey: certificateKeys.alerts,
@@ -48,12 +55,13 @@ export default function ProfileScreen() {
     queryKey: cleaningKeys.today,
     queryFn: fetchCleaningToday,
     staleTime: 60_000,
+    enabled: hasFeature('feature.cleaning'),
   });
   const myTasks = useQuery({
     queryKey: taskKeys.mine,
     queryFn: fetchMyTasks,
     staleTime: 30_000,
-    enabled: user?.userType === 'EMPLOYEE',
+    enabled: user?.userType === 'EMPLOYEE' && hasFeature('feature.tasks'),
   });
   const openTaskCount = (myTasks.data ?? []).filter((task) => !task.isCompleted).length;
 
@@ -67,6 +75,7 @@ export default function ProfileScreen() {
         route: '/(app)/manage-expiry',
         label: 'Manage Expiry',
         icon: 'calendar-outline',
+        feature: 'feature.expiry',
         badge: expiryAlerts.data?.length,
         badgeColor: Colors.light.error,
       },
@@ -74,18 +83,26 @@ export default function ProfileScreen() {
         route: '/(app)/task-management',
         label: 'Tasks',
         icon: 'checkbox-outline',
+        feature: 'feature.tasks',
         badge: openTaskCount > 0 ? openTaskCount : undefined,
         badgeColor: Colors.light.primary,
       },
-      { route: '/(app)/fridge-temperature', label: 'Temperature Log', icon: 'thermometer-outline' },
+      { route: '/(app)/fridge-temperature', label: 'Temperature Log', icon: 'thermometer-outline', feature: 'feature.fridges' },
       {
         route: '/(app)/cleaning-status',
         label: 'Cleaning',
         icon: 'sparkles-outline',
+        feature: 'feature.cleaning',
         badge: cleaningRemaining > 0 ? cleaningRemaining : undefined,
         badgeColor: Colors.light.warning,
       },
-      { route: '/(app)/incident-logs', label: 'Incident Logs', icon: 'warning-outline' },
+      { route: '/(app)/incident-logs', label: 'Incident Logs', icon: 'warning-outline', feature: 'feature.incidents' },
+      {
+        route: '/(app)/age-restriction-records',
+        label: 'Age Restriction Records',
+        icon: 'shield-checkmark-outline',
+        feature: 'feature.age_records',
+      },
       {
         route: '/(app)/certificate-management',
         label: 'Certificates',
@@ -94,18 +111,19 @@ export default function ProfileScreen() {
         badge: certificateAlerts.data?.length,
         badgeColor: Colors.light.error,
       },
-      { route: '/(app)/waste-management-record', label: 'Waste Log', icon: 'trash-outline' },
+      { route: '/(app)/waste-management-record', label: 'Waste Log', icon: 'trash-outline', feature: 'feature.waste' },
       {
         route: '/(app)/supplier-payout-record',
         label: 'Supplier Payouts',
         icon: 'cash-outline',
+        feature: 'feature.supplier_payouts',
       },
       { route: '/(app)/labels', label: 'Labels', icon: 'pricetags-outline' },
-      { route: '/(app)/shift-sheet', label: 'Shift Sheet', icon: 'receipt-outline' },
+      { route: '/(app)/shift-sheet', label: 'Shift Sheet', icon: 'receipt-outline', feature: 'feature.shift_sheet' },
       { route: '/(app)/vat-calculator', label: 'VAT Calculator', icon: 'calculator-outline' },
       { route: '/(app)/profit-calculator', label: 'Profit Calculator', icon: 'trending-up-outline' },
     ] as ShopTool[]
-  ).filter((tool) => isOwner || !tool.ownerOnly);
+  ).filter((tool) => (isOwner || !tool.ownerOnly) && hasFeature(tool.feature));
 
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
@@ -137,7 +155,11 @@ export default function ProfileScreen() {
           {!!user?.userType && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {user.userType === 'CUSTOMER' ? 'SHOP OWNER' : String(user.userType)}
+                {user.userType === 'CUSTOMER'
+                  ? 'SHOP OWNER'
+                  : user.userType === 'EMPLOYEE'
+                    ? 'SHOP EMPLOYEE'
+                    : String(user.userType)}
               </Text>
             </View>
           )}
@@ -158,10 +180,10 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.menu}>
-          {isOwner && (
+          {canManageEmployees && (
             <MenuRow
               icon="people-outline"
-              label="Manage Employees"
+              label="Shop Employees"
               onPress={() => router.push('/(app)/employees')}
             />
           )}

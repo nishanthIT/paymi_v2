@@ -43,9 +43,9 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
         </Text>
         {list.copiedFromName ? (
           <View style={styles.sharedRow}>
-            <Ionicons name="people-outline" size={12} color={Colors.light.textLight} />
+            <Ionicons name="sync-outline" size={12} color={Colors.light.textLight} />
             <Text style={styles.sharedText} numberOfLines={1}>
-              Shared by {list.copiedFromName}
+              Copied from {list.copiedFromName} · live
             </Text>
           </View>
         ) : null}
