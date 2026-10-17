@@ -13,7 +13,7 @@ import {
   type LabelDraft,
 } from '../model/draft';
 import type { CatalogueLookupResult, LabelItem } from '../model/label-item';
-import { draftStorageKey } from '../model/library';
+import { draftStorageKey, labelIdentity } from '../model/storage-scope';
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -28,7 +28,7 @@ function storageKey(userId: string, shopId: string, toolId: string) {
  */
 export function useLabelDraft(toolId: string) {
   const { user } = useAuth();
-  const key = user ? storageKey(String(user.id), String(user.shopId ?? 'none'), toolId) : null;
+  const key = user ? storageKey(labelIdentity(user.userType, user.id), String(user.shopId ?? 'none'), toolId) : null;
 
   const [draft, dispatch] = useReducer(draftReducer, toolId, emptyDraft);
   const [hydrated, setHydrated] = useState(false);

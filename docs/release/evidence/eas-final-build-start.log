@@ -1,0 +1,74 @@
+★ eas-cli@24.12.1 is now available.
+To upgrade, run:
+npm install -g eas-cli
+Proceeding with outdated version.
+
+
+⚠️ Detected that your app uses Expo Go for development, this is not recommended when building production apps.
+Learn more: https://expo.fyi/why-not-build-expo-go-for-production
+To suppress this warning, set EAS_BUILD_NO_EXPO_GO_WARNING=true.
+
+No environment variables with visibility "Plain text" and "Sensitive" found for the "production" environment on EAS.
+Environment variables loaded from the "production" build profile "env" configuration: EXPO_PUBLIC_ENV.
+
+- Incrementing versionCode from 11 to 12.
+✔ Incremented versionCode from 11 to 12.
+
+
+🤖 Android build
+android.versionCode field in app config is ignored when version source is set to remote, but this value will still be in the manifest available via expo-constants. It's recommended to remove this value from app config.
+✔ Using remote Android credentials (Expo server)
+✔ Using Keystore from configuration: Build Credentials Dx5snx2fkz (default)
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+- Uploading to EAS Build (0 / 6.8 MB)
+✔ Uploaded to EAS 3s
+- Computing project fingerprint
+✔ Computed project fingerprint
+No environment variables with visibility "Plain text" and "Sensitive" found for the "production" environment on EAS.
+Environment variables loaded from the "production" build profile "env" configuration: EXPO_PUBLIC_ENV.
+
+- Incrementing buildNumber from 30 to 31.
+✔ Incremented buildNumber from 30 to 31.
+
+🍏 iOS build
+ios.buildNumber field in app config is ignored when version source is set to remote, but this value will still be in the manifest available via expo-constants. It's recommended to remove this value from app config.
+✔ Using remote iOS credentials (Expo server)
+
+Distribution Certificate is not validated for non-interactive builds.
+Using App Store Connect API Key from EAS credentials service.
+- Fetching Apple provisioning profiles
+✔ Fetched Apple provisioning profiles
+
+Project Credentials Configuration
+
+Project                   @n1sh/my-app
+Bundle Identifier         com.n1sh.paymi
+                          
+App Store Configuration   
+                          
+Distribution Certificate  
+Serial Number             4A970278A314D95B0AD7703EB26EAC9F
+Expiration Date           Wed, 03 Mar 2027 12:16:05 GMT+0530
+Apple Team                P27N26SPGC (Nishanth Anandhan (Individual))
+Updated                   7 months ago
+                          
+Provisioning Profile      
+Developer Portal ID       FB88B7VJKA
+Status                    active
+Expiration                Wed, 03 Mar 2027 12:16:05 GMT+0530
+Apple Team                P27N26SPGC (Nishanth Anandhan (Individual))
+Updated                   2 months ago
+                          
+All credentials are ready to build @n1sh/my-app (com.n1sh.paymi)
+
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+- Uploading to EAS Build (0 / 6.8 MB)
+✔ Uploaded to EAS 2s
+- Computing project fingerprint
+✔ Computed project fingerprint
+
+See 🤖 Android logs: https://expo.dev/accounts/n1sh/projects/my-app/builds/d6141c83-c239-461d-a08b-67fa72577628
+See 🍏 iOS logs: https://expo.dev/accounts/n1sh/projects/my-app/builds/efadae4a-9b8a-46c3-a923-d0fbbc3b7b3b
+

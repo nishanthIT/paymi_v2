@@ -1,3 +1,4 @@
+import { LegacyLabelNotice } from './legacy-label-notice';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -67,6 +68,7 @@ export function LabelsScreen({
       <View style={styles.headerZone}>
         <LabelsHeader title={title} right={right} onBack={onBack} />
         {headerBottom}
+        <LegacyLabelNotice />
       </View>
       <View style={styles.body}>{children}</View>
     </SafeAreaView>

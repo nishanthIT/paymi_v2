@@ -1,0 +1,32 @@
+✔ startup checks actual schema and supplies safe actionable diagnostics (70.252491ms)
+✔ startup rejects unapplied list migrations before accepting broken list requests (13.089713ms)
+✔ database fallback survives new instances and expires strings, hashes, lists and sets (86.100832ms)
+✔ concurrent rate limits have atomic increments and TTL, database failure stays fail closed (29.035586ms)
+Redis ready; durable PostgreSQL fallback ready
+Redis ready; durable PostgreSQL fallback ready
+✔ real Redis outage and reconnection cannot resurrect consumed or stale values (150.616044ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ additive migration preserves historical customer reports and earnings and enforces typed ownership (1203.842452ms)
+📋 New price report created by CUSTOMER 1 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+📋 New price report created by EMPLOYEE 1 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+📋 New price report created by ADMIN 1 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+📋 New price report created by EMPLOYEE 500 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+✔ colliding customer/employee/admin IDs submit attributable reports and read only their own history (121.514551ms)
+✔ only authorized reviewers see identities and responses never expose account credentials (81.631347ms)
+✔ both approval aliases preserve customer-only rewards and record the actual reviewer type (43.565662ms)
+✔ concurrent customer approvals award once and terminal reports cannot be re-rejected (46.818466ms)
+📋 New price report created by EMPLOYEE 1 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+📋 New price report created by ADMIN 1 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+✔ reject aliases retain typed attribution, do not award earnings, and return not-found accurately (73.910996ms)
+📋 New price report created by EMPLOYEE 1 for product cmvbpm5kr000daqbupv4eau83 at shop cmvbpm5kb0000aqbuj5qk7ma0
+✔ invalid prices do not create malformed reports and zero current prices are preserved (87.03288ms)
+✔ personal deletion cascades only typed authored reports and clears reviewer links without harming colliding accounts (189.154941ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5959.17447

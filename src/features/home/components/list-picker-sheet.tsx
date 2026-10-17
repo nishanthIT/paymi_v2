@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { useLists } from '@/features/lists/hooks/use-lists';
+import { collapseOutOfStockLists } from '@/features/lists/out-of-stock';
 import type { ShoppingList } from '@/features/lists/types';
 
 interface ListPickerSheetProps {
@@ -19,7 +20,8 @@ interface ListPickerSheetProps {
 
 /** Bottom sheet to choose which shopping list a product should be added to. */
 export function ListPickerSheet({ visible, productName, loadingListId, onSelect, onClose }: ListPickerSheetProps) {
-  const { data: lists, isLoading } = useLists();
+  const { data: allLists, isLoading } = useLists();
+  const lists = allLists ? collapseOutOfStockLists(allLists).filter(list => !list.id.startsWith('optimistic-')) : undefined;
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>

@@ -1,6 +1,7 @@
 import type { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { canUseShopFeature } from './access';
 
 export type ShopFeature =
   | 'feature.lists'
@@ -90,14 +91,12 @@ export function accessSummary(permissions: string[], feature: ShopFeature): stri
 }
 
 /** Owners always have every shop tool; employees only what their owner switched on (read access). */
-export function useShopFeature(feature: ShopFeature | undefined): boolean {
+export function useShopFeature(feature: ShopFeature | undefined, level: AccessLevel = 'read'): boolean {
   const { user } = useAuth();
-  if (!feature || user?.userType !== 'EMPLOYEE') return true;
-  return !!user.shopAccess?.permissions?.includes(feature);
+  return canUseShopFeature(user, feature, level);
 }
 
 export function useShopFeatures(): (feature: ShopFeature | undefined) => boolean {
   const { user } = useAuth();
-  return (feature) =>
-    !feature || user?.userType !== 'EMPLOYEE' || !!user.shopAccess?.permissions?.includes(feature);
+  return (feature) => canUseShopFeature(user, feature);
 }

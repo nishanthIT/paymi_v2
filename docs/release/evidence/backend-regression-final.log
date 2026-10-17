@@ -1,0 +1,211 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ public deletion resource needs no app and does not embed credentials or permit framing (442.37419ms)
+✔ request reauthenticates current account, is idempotent, and status requires a private receipt (95.104385ms)
+✔ owner deletion preserves staff, co-owner, workspace, tasks and shared lists; files and stale sessions are removed (83.405376ms)
+✔ employee deletion cannot remove another role with the same ID; file errors remain retryable (18.881005ms)
+✔ admin deletion removes the account without deleting its managed shop (17.700446ms)
+✔ former employees can request deletion with credentials without regaining workspace access (26.09754ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ shop owner creates employees
+  ✔ creates only a shop membership in the owner's own shop, never company membership (247.713234ms)
+  ✔ a client-submitted shopId for another shop is rejected (5.770122ms)
+  ✔ a shop owner cannot assign company roles or permissions (245.393604ms)
+✔ shop owner creates employees (955.21983ms)
+▶ shop employees and owners cannot reach company administration
+  ✔ shop employee gets 403 on every company endpoint (54.736025ms)
+  ✔ shop owner gets 403 on every company endpoint (42.755652ms)
+  ✔ previously unauthenticated company endpoints now require a token (2.343408ms)
+  ✔ a forged EMPLOYEE token for a shop employee still has no company access (7.108262ms)
+✔ shop employees and owners cannot reach company administration (532.093317ms)
+📡 Emitted list_created to shop_cmv5intl10002aqac79prpi4g_lists
+▶ cross-shop isolation
+  ✔ owner B only sees Bravo employees (6.706033ms)
+  ✔ owner B cannot read or change an Alpha employee by id (7.546763ms)
+  ✔ owner B cannot track, read or claim Alpha lists or shop (40.416084ms)
+  ✔ Bravo employee cannot read Alpha lists (216.357109ms)
+  ✔ admin customer view cannot be pointed at another customer's shop (11.124426ms)
+✔ cross-shop isolation (935.688043ms)
+📡 Emitted list_created to shop_cmv5intl10002aqac79prpi4g_lists
+▶ deactivation and stale sessions
+  ✔ inactive employee loses access on an existing token; lists are kept (893.687255ms)
+📡 Emitted list_created to shop_cmv5intl10002aqac79prpi4g_lists
+  ✔ removing an employee keeps the account and lists but revokes access (439.124722ms)
+  ✔ bumping the session version invalidates old tokens (429.141657ms)
+✔ deactivation and stale sessions (1762.156741ms)
+▶ single shop role
+  ✔ the shop manager role no longer exists and only the owner manages employees (432.489152ms)
+  ✔ a regular shop employee cannot manage employees (423.824963ms)
+✔ single shop role (856.473988ms)
+▶ company staff
+  ✔ staff keep exactly their granted company permissions (34.439332ms)
+  ✔ deactivated company membership revokes existing sessions (36.288732ms)
+  ✔ company staff list contains only company staff (12.591069ms)
+  ✔ staff managers cannot grant permissions they do not hold (75.666908ms)
+✔ company staff (159.319003ms)
+▶ dual membership
+  ✔ company and shop permissions are checked independently (687.168337ms)
+  ✔ a shop owner cannot attach an existing company staff account to their shop (5.905554ms)
+✔ dual membership (693.231474ms)
+▶ Customers → Customer details → Employees
+  ✔ shows the customer's shop employees, status counts and their lists (22.556113ms)
+  ✔ viewing customer employees grants them no company access (215.679086ms)
+✔ Customers → Customer details → Employees (238.394284ms)
+▶ realtime shop rooms
+  ✔ only members/owner of a shop may join its list room (6.063397ms)
+✔ realtime shop rooms (6.183341ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires explicit acceptance and rejects content larger than the server limit (565.199827ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (49.203357ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (313.74851ms)
+✔ moderation removes reported content from histories and summaries and records a decision (37.867349ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (81.370611ms)
+✔ socket clients cannot relay a forged message or sender identity (135.602407ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (53.864481ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ additive SQL and pre-schema inspection preserve every existing table row (574.320588ms)
+✔ single verified supermarket becomes default without changing IDs, names, employees or business data (15.055923ms)
+✔ rerunning is idempotent and stale reports are rejected (20.136032ms)
+✔ default FK rejects another owner and supplier ownership fails even through direct database writes (6.021227ms)
+✔ multiple verified shops retain legacy/default state; explicit selection does not mutate any pointer (11.343158ms)
+✔ ambiguous and incomplete ownership is reviewed without guessing, copying or creating shops (44.800088ms)
+✔ recovery restores defaults only, retaining ownerships and all existing records; it is repeatable (37.469539ms)
+✔ existing owner and employee login still work; employee default never grants owner rights or disabled features (101.921535ms)
+✔ registration commits one named first shop and default; lost response retry works after OTP consumption (464.56849ms)
+✔ concurrent registration commits one account, shop, chat and receipt (32.808635ms)
+✔ concurrent HTTP onboarding retries all return the same committed shop (1434.934774ms)
+✔ registration cannot recreate an existing employee as a customer, even with a verified code (210.593523ms)
+✔ provisioning failure after account creation rolls every write back and permits retry (22.259695ms)
+✔ supplier prices and original employees/operational data remain byte-equivalent throughout (18.202714ms)
+✔ pure classification never infers a second owner from operational records or missing defaults (0.24362ms)
+✔ CLI requires a target, binds reports to it, supports reviewed local apply/recovery and refuses unapproved remote writes (551.628424ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ chats
+  ✔ shop employees use their own shop group chat but not another shop's (133.491649ms)
+  ✔ existing conversations still load and accept messages (25.059429ms)
+  ✔ chat user selectors are scoped: owner sees own shop employees, company staff can reach customers for support (47.339041ms)
+  ✔ sockets: rooms are authorized and per-user events do not leak across account types (531.197762ms)
+✔ chats (2550.799963ms)
+▶ tasks
+  ✔ owner assigns only own active shop employees; employee works the task (80.465886ms)
+  ✔ editing a task keeps existing assignments and their progress, including deactivated employees (73.939859ms)
+✔ tasks (155.271681ms)
+▶ deactivation side effects
+  ✔ deactivated employee leaves the shop chat, notifications and selectors; history is kept; reactivation restores (476.333428ms)
+  ✔ status survives a refresh and failed actions report errors (11.823554ms)
+📡 Emitted list_created to shop_cmv5io3hv0002aqsbv2p4mz7d_lists
+  ✔ lists stay with their shop and creator (72.841897ms)
+✔ deactivation side effects (561.512314ms)
+📡 Emitted list_created to shop_cmv5io3hv0002aqsbv2p4mz7d_lists
+📡 Emitted list_updated to shop_cmv5io3hv0002aqsbv2p4mz7d_lists
+▶ per-tool shop access (read / write / edit)
+  ✔ owner switches tools and access levels for one employee; API and notifications follow (144.935514ms)
+  ✔ task progress needs write access, not edit (39.963273ms)
+✔ per-tool shop access (read / write / edit) (185.311011ms)
+📡 Emitted list_created to shop_cmv5io3hv0002aqsbv2p4mz7d_lists
+📦 Fetching list from DATABASE (no cache): cmv5io654001xaqsbj5e63jp6
+📦 Database isPurchased states: []
+Found 1 in-stock shops with product cmv5io3ia000daqsbte5vhi03
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv5io3hv0002aqsbv2p4mz7d_lists
+📦 Fetching list from DATABASE (no cache): cmv5io654001xaqsbj5e63jp6
+📦 Database isPurchased states: [
+  {
+    id: 'cmv5io6he0021aqsb91mndd4k',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+▶ employee lists: owner views, copies and stays in sync
+  ✔ owner opens an employee list, copies it, and sees new items live (489.406709ms)
+✔ employee lists: owner views, copies and stays in sync (489.674632ms)
+▶ company views
+  ✔ company staff page never lists shop employees; customer details lists them per shop (127.038108ms)
+✔ company views (127.19334ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+﹣ create → deactivate → reactivate survives 0ms DB latency (422.37497ms) # set TEST_DB_LATENCY_MS
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ employee membership migration
+  ✔ dry run classifies by provenance and writes nothing (14.406738ms)
+  ✔ apply maps employees to the right shop, removes unverified company access and keeps history (58.18556ms)
+  ✔ migrated accounts get the right access and stale tokens stop working (113.611118ms)
+  ✔ rerunning is a no-op and does not duplicate memberships or re-invalidate sessions (22.213232ms)
+  ✔ resolving a review explicitly assigns a shop without touching lists (40.72905ms)
+  ✔ rollback removes only rows the run created (16.888856ms)
+✔ employee membership migration (685.008298ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ second shop creation is transactional and concurrent/lost-response retries create exactly one shop (515.479981ms)
+✔ directory, default, and explicit selection require verified CUSTOMER ownership (51.685517ms)
+📡 Emitted list_created to shop_cmv5io8x90002aq4gm50s420p_lists
+📡 Emitted list_created to shop_cmv5io99w000gaq4g2khr4gow_lists
+Found 1 in-stock shops with product cmv5io8xi000daq4g445kh8nm
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv5io8x90002aq4gm50s420p_lists
+📦 Fetching list from DATABASE (no cache): cmv5io9cm000maq4gvq5hkctc
+📦 Database isPurchased states: [
+  {
+    id: 'cmv5io9dv000qaq4gdy3t6ndv',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+Found 1 in-stock shops with product cmv5io8xi000daq4g445kh8nm
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv5io99w000gaq4g2khr4gow_lists
+📦 Fetching list from DATABASE (no cache): cmv5io9cz000oaq4g5a7npadi
+📦 Database isPurchased states: [
+  {
+    id: 'cmv5io9f7000saq4gzul5e3z9',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✅ Toggle purchased request: {
+  listId: 'cmv5io9cm000maq4gvq5hkctc',
+  listProductId: 'cmv5io9dv000qaq4gdy3t6ndv',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+🗑️ Cache invalidated for list: cmv5io9cm000maq4gvq5hkctc
+📡 Emitted list_product_updated to shop_cmv5io8x90002aq4gm50s420p_lists
+✅ Purchased status toggled: { listProductId: 'cmv5io9dv000qaq4gdy3t6ndv', isPurchased: true }
+✔ lists, Collect Mode and retail stock are isolated; supplier prices and stock remain unchanged (181.096751ms)
+✔ employee access is explicit per shop, feature-specific, and never grants creation or company access (557.708228ms)
+✔ operational records and history IDs never cross supermarkets (194.635327ms)
+✔ company supplier endpoints cannot mutate or transfer into customer shops (34.805661ms)
+✔ list backfill preserves data, reports ambiguity, and supports repeatable apply and recovery (52.86114ms)
+✔ company supermarket directory is separate, searchable, permission-controlled and auditable (87.95607ms)
+✔ waste, age records, payouts, shifts, certificates and private photos remain shop-scoped (208.405882ms)
+✔ release migrations upgrade the prior schema without replacing account IDs, passwords, ownership or tasks (96.921615ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ logout durably revokes only that session and disconnects its socket; retries succeed (488.240756ms)
+✔ password recovery invalidates customer and admin tokens and prevents OTP reuse (848.319817ms)
+✔ legacy version-zero tokens remain valid until revocation, and bearer wins over cookie (3.897805ms)
+✔ an expired legacy trial does not limit the free release or spend saved points (31.450421ms)
+✔ explicit credentials cannot authenticate as the previous cookie account (0.688885ms)
+✔ missing and known fallback signing secrets fail closed (0.331042ms)
+✔ production cookies require TLS and resist cross-site requests (0.538607ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ chiller, freezer and legacy freezer limits survive create, edit and reload; alerts use saved range (758.313816ms)
+✔ both age record APIs accept either, both or neither product details; current records can clear fields (249.271447ms)
+✔ payouts persist, list, filter and keep their automatic creation timestamp on edits (79.476811ms)
+✔ additive age migration preserves existing rows and allows independent null fields (11.255502ms)
+ℹ tests 96
+ℹ suites 16
+ℹ pass 95
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 28081.313481

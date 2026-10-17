@@ -1,0 +1,23 @@
+{
+  "checkedDate": "2026-10-15",
+  "timezone": "Asia/Kolkata",
+  "algorithm": "SHA-256",
+  "files": {
+    "product-A-backend/src/services/accessControl.js": "af0bb404e0f51ee9fa108a6718063e595ab882352cb2c8541585684e98ae2127",
+    "product-A-backend/src/services/listItems.js": "e9c5da039e649ebfa14534609f4e4317a2075a9d921ded7b24d6676b5a6c0fb1",
+    "product-A-backend/src/services/listSummaries.js": "2589b604fb34bea936f449eabd6875209c50db807e4ca805615e3b0065c53799",
+    "product-A-backend/src/services/multiLayerCache.js": "3c8864c3f98e9f134555c99e9d5fa73eb70ea99b1db7caa1766f685d4e636ad6",
+    "product-A-backend/src/controller/makeList.js": "e2fe7a518d4ebfa60319d32d29f8e9f513ec28248cbc734c1004050492326678",
+    "product-A-backend/src/routes/listRoutes.js": "a0ae61b72ac23fb41184c73ad653ad4327aec8c08140914e748f473048111f6c",
+    "product-A-backend/src/routes/shopRoutes.js": "a9b655687e33bbc01545fbb18d2f728468a28f69c1d8c75222254d33d4c59b20",
+    "product-A-backend/tests/shopWorkflows.test.js": "75345fd1839692492e17370141e67ad3485f39de83e9b522da368c6a17faeea6",
+    "product-A-backend/tests/multiLayerCache.test.js": "8a580c2e2be1a9b6529d7ab7fd64035a3a75bbfe9b6132e0fc02db0ae87b64d1",
+    "paymi_v2/src/services/api.ts": "ae88d3885b023fb8d364f00e046212e95798679713d1427c265844909a41022a",
+    "paymi_v2/src/contexts/AuthContext.tsx": "f955e56b56e6f8e960be58f06b71bb45865c514fc81b65c4de48e6a32436c9f8",
+    "paymi_v2/src/features/lists/replay.ts": "a32dacbf980b7074fc3798d125d966ade9834efd58f5932d28e966bc32fde4a5",
+    "paymi_v2/src/features/lists/api.ts": "0e4cfa65b32c4b0b0d6b26463d643d34fd2500a5b0920c7e0ead8c07f973d0f8",
+    "paymi_v2/src/features/lists/hooks/use-list-details.ts": "adb0db2fb2b1a170b06e927ffd602670d1ae1e2826ee9e084eb13e9fca1f9209",
+    "paymi_v2/src/features/supermarkets/selection.ts": "6cb14940a117f5ddecb808b5c52d99473437c8ecdc2973701432f47ab2155482",
+    "paymi_v2/src/features/employees/access.ts": "a254f1eabe9f53fd2eb2a36d94ec7b40e4f8044c4838c6ca90f92394c3d61af2"
+  }
+}

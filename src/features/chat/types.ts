@@ -16,6 +16,8 @@ export interface ChatSummary {
   type: ChatType;
   lastMessage?: string | null;
   lastMessageTime?: string | null;
+  lastActivityAt?: string | null;
+  createdAt?: string;
   unreadCount: number;
   participants: ChatParticipant[];
   otherParticipants: ChatParticipant[];

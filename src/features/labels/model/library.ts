@@ -37,15 +37,7 @@ export interface PrintJob {
 export const MAX_JOBS = 25;
 export const MAX_NAME = 60;
 
-export const draftStorageKey = (userId: string, shopId: string, toolId: string) => `labels.draft.v1.${shopId}.${userId}.${toolId}`;
-
-export function libraryKeys(userId: string, shopId: string) {
-  return {
-    saved: `labels.saved.v1.${shopId}.${userId}`,
-    jobs: `labels.jobs.v1.${shopId}.${userId}`,
-    draftPrefix: draftStorageKey(userId, shopId, ''),
-  };
-}
+export { draftStorageKey, libraryKeys } from './storage-scope';
 
 export const snapshot = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 

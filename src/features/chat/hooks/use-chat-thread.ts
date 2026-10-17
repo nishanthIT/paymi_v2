@@ -131,7 +131,8 @@ export function useSendMessage(chatId: string) {
 export function useDeleteMessage(chatId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (messageId: string) => deleteChatMessage(messageId),
+    // Unsent optimistic messages have no server record to delete.
+    mutationFn: (messageId: string) => messageId.startsWith('pending-') ? Promise.resolve() : deleteChatMessage(messageId),
     onMutate: async (messageId) => {
       await queryClient.cancelQueries({ queryKey: chatKeys.thread(chatId) });
       const previous = queryClient.getQueryData<ThreadData>(chatKeys.thread(chatId));
@@ -171,10 +172,31 @@ export function useThreadRealtime(chatId: string, messages: ChatMessage[]) {
       const onStopTyping = (info: { name?: string }) => {
         setTypingUsers((current) => current.filter((n) => n !== (info?.name ?? 'Someone')));
       };
+      const refresh = () => {
+        joinChatRoom(chatId);
+        void queryClient.invalidateQueries({ queryKey: chatKeys.thread(chatId) });
+      };
+      const onMessage = (message: ChatMessage) => {
+        if (message.chatId !== chatId) return;
+        upsertThreadMessage(queryClient, chatId, { ...message, isOwnMessage: message.senderId === Number(user?.id) && message.senderType === user?.userType });
+      };
+      const onDeleted = ({ messageId, chatId: removedChat }: { messageId: string; chatId: string }) => {
+        if (removedChat === chatId) removeThreadMessage(queryClient, chatId, messageId);
+      };
+      // Deep links can mount a thread without the tabs' global listener. Rejoin and
+      // refetch after reconnect so missed moderation events cannot leave stale content.
+      socket.on('connect', refresh);
+      socket.on('message_received', onMessage);
+      socket.on('message_deleted', onDeleted);
+      socket.on('chats_changed', refresh);
       socket.on('user_typing', onTyping);
       socket.on('user_stopped_typing', onStopTyping);
 
       cleanup = () => {
+        socket.off('connect', refresh);
+        socket.off('message_received', onMessage);
+        socket.off('message_deleted', onDeleted);
+        socket.off('chats_changed', refresh);
         socket.off('user_typing', onTyping);
         socket.off('user_stopped_typing', onStopTyping);
         leaveChatRoom(chatId);
@@ -185,7 +207,7 @@ export function useThreadRealtime(chatId: string, messages: ChatMessage[]) {
       cancelled = true;
       cleanup?.();
     };
-  }, [chatId]);
+  }, [chatId, queryClient, user?.id, user?.userType]);
 
   // Mark unread incoming messages as read whenever new ones arrive.
   const markedRef = useRef<Set<string>>(new Set());

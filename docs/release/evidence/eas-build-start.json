@@ -1,0 +1,76 @@
+[
+  {
+    "id": "a855a5d0-dd76-4523-b758-5770e0faec11",
+    "status": "NEW",
+    "platform": "ANDROID",
+    "artifacts": {},
+    "fingerprint": {
+      "id": "01a13283-ba22-7b7d-8af9-e5c722aa3d84",
+      "hash": "e0005223b58ef1ba94fbfbe7546750dd798235fa"
+    },
+    "initiatingActor": {
+      "id": "d598a01d-2698-4bdd-a4fe-efdbc6e63753",
+      "displayName": "n1sh"
+    },
+    "logFiles": [],
+    "app": {
+      "id": "1708b933-6a0c-41fe-986a-d74cef94aad9",
+      "name": "my-app",
+      "slug": "my-app",
+      "ownerAccount": {
+        "id": "fd836422-bf4e-44e8-a30c-9668dcde4817",
+        "name": "n1sh"
+      }
+    },
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "sdkVersion": "57.0.0",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "11",
+    "gitCommitHash": "abd957166519f26f8ff0a0132bec32adc2078be4",
+    "gitCommitMessage": "All changes are done",
+    "priority": "NORMAL",
+    "createdAt": "2026-10-12T23:47:36.041Z",
+    "updatedAt": "2026-10-12T23:47:36.041Z",
+    "expirationDate": "2026-11-11T23:47:36.085Z",
+    "isForIosSimulator": false
+  },
+  {
+    "id": "57eeca9a-6fdd-4f6c-ac29-f537581ef014",
+    "status": "NEW",
+    "platform": "IOS",
+    "artifacts": {},
+    "fingerprint": {
+      "id": "01a13284-0fc7-7148-a507-e1656d76bcad",
+      "hash": "d38ccaea2b48473ab31f20013b0e9327aafa2a3f"
+    },
+    "initiatingActor": {
+      "id": "d598a01d-2698-4bdd-a4fe-efdbc6e63753",
+      "displayName": "n1sh"
+    },
+    "logFiles": [],
+    "app": {
+      "id": "1708b933-6a0c-41fe-986a-d74cef94aad9",
+      "name": "my-app",
+      "slug": "my-app",
+      "ownerAccount": {
+        "id": "fd836422-bf4e-44e8-a30c-9668dcde4817",
+        "name": "n1sh"
+      }
+    },
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "sdkVersion": "57.0.0",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "30",
+    "gitCommitHash": "abd957166519f26f8ff0a0132bec32adc2078be4",
+    "gitCommitMessage": "All changes are done",
+    "priority": "NORMAL",
+    "createdAt": "2026-10-12T23:47:57.996Z",
+    "updatedAt": "2026-10-12T23:47:57.996Z",
+    "expirationDate": "2026-11-11T23:47:58.017Z",
+    "isForIosSimulator": false
+  }
+]

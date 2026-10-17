@@ -1,0 +1,46 @@
+[
+  {
+    "check": "mobile-tests",
+    "command": [
+      "node",
+      "--import",
+      "./scripts/register-ts-hook.mjs",
+      "--test",
+      "--test-isolation=none",
+      "tests/shop-tools.test.mjs",
+      "tests/supermarket-isolation.test.mjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "check": "typecheck-final",
+    "command": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit"
+    ],
+    "exitCode": 0
+  },
+  {
+    "check": "lint-final",
+    "command": [
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "."
+    ],
+    "exitCode": 0
+  },
+  {
+    "check": "expo-export",
+    "command": [
+      "node",
+      "node_modules/expo/bin/cli",
+      "export",
+      "--platform",
+      "all",
+      "--output-dir",
+      "/tmp/paymi-release-export"
+    ],
+    "exitCode": 0
+  }
+]

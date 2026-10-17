@@ -1,0 +1,130 @@
+{
+  "checkedAt": "2026-10-17T06:31:31.176Z",
+  "tests": [
+    {
+      "route": "/api/health",
+      "status": 200,
+      "durationMs": 6958,
+      "services": {
+        "sessions": "ready",
+        "moderation": {
+          "state": "ready",
+          "lastPollAt": "2026-10-17T06:31:56.443Z"
+        }
+      },
+      "cache": {
+        "connected": false,
+        "mode": "postgresql",
+        "persistence": "postgresql"
+      }
+    },
+    {
+      "route": "/api/lists",
+      "status": 200,
+      "durationMs": 13022,
+      "count": 9
+    },
+    {
+      "route": "/api/lists/out-of-stock",
+      "status": 200,
+      "durationMs": 13104,
+      "count": 5
+    },
+    {
+      "route": "/api/lists/:existing-out-of-stock-list",
+      "status": 200,
+      "durationMs": 14535,
+      "count": 1
+    },
+    {
+      "route": "/api/lists/:existing-out-of-stock-list",
+      "status": 200,
+      "durationMs": 12178,
+      "count": 4
+    },
+    {
+      "route": "/api/lists/:ordinary-list",
+      "status": 200,
+      "durationMs": 13113,
+      "count": 1
+    }
+  ],
+  "schema": {
+    "sessions": "ready",
+    "moderation": "ready",
+    "cache": "ready",
+    "lists": "ready"
+  },
+  "before": {
+    "List": {
+      "count": 96,
+      "digest": "eabaeb1fbd73aed71dc53e51664f07e9"
+    },
+    "ListProduct": {
+      "count": 3903,
+      "digest": "613aafb4c3ca1bed534ca241fe811e67"
+    },
+    "Chat": {
+      "count": 33,
+      "digest": "28ae5a2cd8b8a8b72c2e99a4dca024b4"
+    },
+    "Message": {
+      "count": 66,
+      "digest": "9b02b545931f65a931355a58da7ff262"
+    },
+    "ChatParticipant": {
+      "count": 77,
+      "digest": "49dec99f1170b81abe9fab777566216b"
+    },
+    "PriceReport": {
+      "count": 4,
+      "digest": "fe937ebad067e2a8e2cd032f522fcdea"
+    },
+    "Customer": {
+      "count": 21,
+      "digest": "e78605b466aaeeb168930c1511e0d791"
+    }
+  },
+  "aggregateMatchesAccessibleStoredRows": true,
+  "after": {
+    "List": {
+      "count": 96,
+      "digest": "eabaeb1fbd73aed71dc53e51664f07e9"
+    },
+    "ListProduct": {
+      "count": 3903,
+      "digest": "613aafb4c3ca1bed534ca241fe811e67"
+    },
+    "Chat": {
+      "count": 33,
+      "digest": "28ae5a2cd8b8a8b72c2e99a4dca024b4"
+    },
+    "Message": {
+      "count": 66,
+      "digest": "9b02b545931f65a931355a58da7ff262"
+    },
+    "ChatParticipant": {
+      "count": 77,
+      "digest": "49dec99f1170b81abe9fab777566216b"
+    },
+    "PriceReport": {
+      "count": 4,
+      "digest": "fe937ebad067e2a8e2cd032f522fcdea"
+    },
+    "Customer": {
+      "count": 21,
+      "digest": "e78605b466aaeeb168930c1511e0d791"
+    }
+  },
+  "existingDataUnchanged": true,
+  "migrations": [
+    {
+      "migration_name": "20261016160000_out_of_stock_origin",
+      "applied": true
+    },
+    {
+      "migration_name": "20261017160000_typed_price_reporters",
+      "applied": true
+    }
+  ]
+}

@@ -1,16 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown, FadeInUp, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, FadeInUp, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { ImageViewer } from '@/components/ui/image-viewer';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { CollectDetailsSheet } from '@/features/collect/components/collect-details-sheet';
 import { CollectProductCard } from '@/features/collect/components/collect-product-card';
-import { ShopSelector, type ShopSummary } from '@/features/collect/components/shop-selector';
+import { collectionProducts, summarizeCollectionShops } from '@/features/collect/model';
+import { ShopSelector } from '@/features/collect/components/shop-selector';
 import {
   useChangeShop,
   useListDetails,
@@ -19,6 +21,9 @@ import {
   useTogglePurchased,
   useToggleUrgent,
 } from '@/features/lists/hooks/use-list-details';
+import { useShopFeature } from '@/features/employees/permissions';
+import { usePullToRefresh, useRefetchOnFocus } from '@/hooks/use-query-refresh';
+import { OUT_OF_STOCK_ID } from '@/features/lists/out-of-stock';
 import type { ListProduct } from '@/features/lists/types';
 import { useSubmitPriceReport } from '@/features/price-reports/hooks';
 
@@ -33,7 +38,11 @@ export default function CollectScreen() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
   const router = useRouter();
   const { showToast } = useToast();
-  const { data: list, isLoading, isFetching } = useListDetails(listId ?? '');
+  const { data: list, isLoading, isFetching, isError, fetchStatus, refetch } = useListDetails(listId ?? '');
+  const { refreshing, onRefresh } = usePullToRefresh(refetch, fetchStatus);
+  useRefetchOnFocus(refetch);
+  const hasEdit = useShopFeature('feature.lists', 'edit');
+  const canEdit = hasEdit && list?.canEdit !== false;
   const toggle = useTogglePurchased(listId ?? '');
   const toggleUrgent = useToggleUrgent(listId ?? '');
   const changeShop = useChangeShop(listId ?? '');
@@ -46,6 +55,7 @@ export default function CollectScreen() {
   const [aisle, setAisle] = useState<string | null>(null);
   const [urgentOnly, setUrgentOnly] = useState(false);
   const [detailsId, setDetailsId] = useState<string | null>(null);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
 
   const products = useMemo(() => list?.products ?? [], [list?.products]);
   // Look up live so the sheet reflects fresh data once a background refetch lands.
@@ -56,22 +66,7 @@ export default function CollectScreen() {
   const collected = products.filter((p) => p.isPurchased).length;
   const total = products.length;
 
-  const shops = useMemo<ShopSummary[]>(() => {
-    const map = new Map<string, ShopSummary>();
-    for (const p of products) {
-      const id = p.shopId || 'unknown';
-      const entry = map.get(id) ?? {
-        shopId: id,
-        shopName: p.shopName || 'Unknown shop',
-        total: 0,
-        collected: 0,
-      };
-      entry.total += 1;
-      if (p.isPurchased) entry.collected += 1;
-      map.set(id, entry);
-    }
-    return Array.from(map.values()).sort((a, b) => b.total - a.total);
-  }, [products]);
+  const shops = useMemo(() => summarizeCollectionShops(products), [products]);
 
   // Products at the selected shop (before category/aisle filters) drive the
   // filter chip options so options always match what is on screen.
@@ -103,27 +98,10 @@ export default function CollectScreen() {
 
   const hasUrgent = useMemo(() => shopProducts.some((p) => p.isUrgent), [shopProducts]);
 
-  const visible = useMemo(() => {
-    let items = shopProducts;
-    if (urgentOnly) items = items.filter((p) => p.isUrgent);
-    if (category) items = items.filter((p) => p.category === category);
-    if (aisle) items = items.filter((p) => (p.aielNumber || p.locationCode) === aisle);
-    // Bundle items stay grouped (bundles first); within the rest: uncollected
-    // first, then aisle order, then name.
-    return [...items].sort((a, b) => {
-      const bundleA = a.bundlePromotionId ?? '';
-      const bundleB = b.bundlePromotionId ?? '';
-      if (!!bundleA !== !!bundleB) return bundleA ? -1 : 1;
-      if (bundleA !== bundleB) return bundleA.localeCompare(bundleB);
-      if (bundleA && !!a.isFreeItem !== !!b.isFreeItem) return a.isFreeItem ? 1 : -1;
-      if (a.isPurchased !== b.isPurchased) return a.isPurchased ? 1 : -1;
-      const aisleA = a.aielNumber || a.locationCode || '';
-      const aisleB = b.aielNumber || b.locationCode || '';
-      if (aisleA !== aisleB)
-        return aisleA.localeCompare(aisleB, undefined, { numeric: true, sensitivity: 'base' });
-      return a.productName.localeCompare(b.productName);
-    });
-  }, [shopProducts, category, aisle, urgentOnly]);
+  const visible = useMemo(
+    () => collectionProducts(shopProducts, { category, aisle, urgentOnly }),
+    [shopProducts, category, aisle, urgentOnly],
+  );
 
   // Interleave a header row before each bundle group so the employee sees
   // which products belong together, the free item, and live bundle progress.
@@ -169,13 +147,14 @@ export default function CollectScreen() {
 
   const handleToggle = useCallback(
     (product: ListProduct) => {
+      if (!canEdit) return;
       toggle.mutate(product.id, {
         onError: (error: any) => {
           if (!error?.silent) showToast(error?.message ?? 'Could not update item', 'error');
         },
       });
     },
-    [toggle, showToast],
+    [toggle, showToast, canEdit],
   );
 
   const handleSubmitPrice = useCallback(
@@ -279,19 +258,10 @@ export default function CollectScreen() {
         </View>
       )}
 
-      {allDone ? (
-        <Animated.View entering={ZoomIn.duration(400)} style={styles.doneState}>
-          <View style={styles.doneIcon}>
-            <Ionicons name="checkmark-done" size={44} color={Colors.light.success} />
-          </View>
-          <Text style={styles.doneTitle}>All collected!</Text>
-          <Text style={styles.doneBody}>
-            Every item on this list is in your basket. Nice work.
-          </Text>
-        </Animated.View>
-      ) : (
         <FlatList
           data={rows}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListHeaderComponent={allDone ? <Text style={styles.doneTitle}>All collected!</Text> : list && isError ? <Text style={styles.emptyText}>Couldn’t refresh. Pull down to retry.</Text> : null}
           keyExtractor={(row) => (row.type === 'product' ? row.item.id : row.key)}
           renderItem={({ item: row }) =>
             row.type === 'bundle-header' ? (
@@ -328,8 +298,10 @@ export default function CollectScreen() {
               >
                 <CollectProductCard
                   product={row.item}
+                  readOnly={!canEdit}
                   onToggle={handleToggle}
                   onOpenDetails={(p) => setDetailsId(p.id)}
+                  onPreviewImage={setPreviewUri}
                   onSubmitPrice={handleSubmitPrice}
                 />
               </Animated.View>
@@ -340,23 +312,31 @@ export default function CollectScreen() {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Ionicons name="funnel-outline" size={32} color={Colors.light.textLight} />
-              <Text style={styles.emptyText}>No items match these filters.</Text>
+              {isLoading && fetchStatus !== 'paused' ? <ActivityIndicator color={Colors.light.primary} /> : <>
+                <Text style={styles.emptyText}>{isError ? 'Couldn’t load this list.' : fetchStatus === 'paused' && !list ? 'You’re offline. Reconnect to load this list.' : 'No items match these filters.'}</Text>
+                {isError && <Pressable onPress={() => refetch()} accessibilityRole="button"><Text style={styles.emptyText}>Try again</Text></Pressable>}
+              </>}
             </View>
           }
         />
-      )}
 
+      <ImageViewer
+        uri={previewUri}
+        visible={!!previewUri}
+        onClose={() => setPreviewUri(null)}
+        presentation="preview"
+      />
       <CollectDetailsSheet
         product={details}
         isLoading={isLoading || isFetching}
         onClose={() => setDetailsId(null)}
-        onToggleUrgent={(listProductId) =>
+        onToggleUrgent={canEdit ? (listProductId) =>
           toggleUrgent.mutate(listProductId, {
             onError: (error) => showToast(error.message, 'error'),
-          })
+          }) : undefined
         }
         changingShop={changeShop.isPending}
-        onChangeShop={(listProductId, productAtShopId) =>
+        onChangeShop={canEdit ? (listProductId, productAtShopId) =>
           changeShop.mutate(
             { listProductId, productAtShopId },
             {
@@ -366,11 +346,11 @@ export default function CollectScreen() {
               },
               onError: (error) => showToast(error.message, 'error'),
             },
-          )
+          ) : undefined
         }
         listId={listId}
         movingList={moveToList.isPending || markOutOfStock.isPending}
-        onMoveToList={(listProductId, targetListId) => {
+        onMoveToList={canEdit ? (listProductId, targetListId) => {
           setDetailsId(null);
           moveToList.mutate(
             { listProductId, targetListId },
@@ -381,8 +361,8 @@ export default function CollectScreen() {
               },
             },
           );
-        }}
-        onMarkOutOfStock={(listProductId) => {
+        } : undefined}
+        onMarkOutOfStock={canEdit && listId !== OUT_OF_STOCK_ID ? (listProductId) => {
           setDetailsId(null);
           markOutOfStock.mutate(
             { listProductId },
@@ -399,7 +379,7 @@ export default function CollectScreen() {
               },
             },
           );
-        }}
+        } : undefined}
       />
     </SafeAreaView>
   );

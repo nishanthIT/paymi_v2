@@ -1,0 +1,111 @@
+{
+  "checkedAt": "2026-10-16T09:14:53.791072+00:00",
+  "checks": [
+    {
+      "name": "backend focused",
+      "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test node --test --test-concurrency=1 tests/outOfStock.test.js tests/multiSupermarkets.test.js tests/toolEntryRefinements.test.js tests/shopTools.test.js",
+      "executed": true,
+      "exitCode": 0,
+      "counts": {
+        "tests": 21,
+        "pass": 21,
+        "fail": 0,
+        "skipped": 0
+      },
+      "log": "feature-focused-backend-tests.log"
+    },
+    {
+      "name": "backend final lists",
+      "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test node --test --test-concurrency=1 tests/outOfStock.test.js tests/shopWorkflows.test.js",
+      "executed": true,
+      "exitCode": 0,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "skipped": 0
+      },
+      "log": "feature-out-of-stock-final-backend.log"
+    },
+    {
+      "name": "backend final full",
+      "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test node --test --test-concurrency=1 tests/*.test.js",
+      "executed": true,
+      "exitCode": 0,
+      "counts": {
+        "tests": 144,
+        "pass": 143,
+        "fail": 0,
+        "skipped": 1
+      },
+      "log": "feature-full-backend-tests.log"
+    },
+    {
+      "name": "mobile final full",
+      "command": "node --import ./scripts/register-ts-hook.mjs --test --test-isolation=none tests/*.test.mjs",
+      "executed": true,
+      "exitCode": 0,
+      "counts": {
+        "tests": 36,
+        "pass": 36,
+        "fail": 0,
+        "skipped": 0
+      },
+      "log": "feature-mobile-tests.log"
+    },
+    {
+      "name": "mobile focused final",
+      "command": "node --import ./scripts/register-ts-hook.mjs --test --test-isolation=none tests/out-of-stock.test.mjs",
+      "executed": true,
+      "exitCode": 0,
+      "counts": {
+        "tests": 7,
+        "pass": 7,
+        "fail": 0,
+        "skipped": 0
+      },
+      "log": "feature-out-of-stock-mobile-tests.log"
+    },
+    {
+      "name": "TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "executed": true,
+      "exitCode": 0,
+      "log": "feature-typecheck.log"
+    },
+    {
+      "name": "ESLint",
+      "command": "node node_modules/eslint/bin/eslint.js .",
+      "executed": true,
+      "exitCode": 0,
+      "log": "feature-lint.log"
+    },
+    {
+      "name": "paymi_v2 whitespace",
+      "command": "git diff --check",
+      "executed": true,
+      "exitCode": 0
+    },
+    {
+      "name": "product-A-backend whitespace",
+      "command": "git diff --check",
+      "executed": true,
+      "exitCode": 0
+    }
+  ],
+  "nodeVersion": "v24.19.0",
+  "testDatabase": {
+    "host": "127.0.0.1",
+    "port": 55441,
+    "name": "paymi_moderation_test",
+    "cluster": "/tmp/paymi-features-pg",
+    "state": "stopped after verification"
+  },
+  "limitations": [
+    "One conditional latency test skipped; not rerun for this batch.",
+    "No enabled app/browser UI surfaces; native keyboard, picker, scrolling and installed-device workflows NOT TESTED.",
+    "No main-database mutations, hosted deployment, native build or store action in this batch.",
+    "Existing release/provider/moderation-operation blockers are unchanged."
+  ],
+  "sourceEvidence": "feature-source-sha256.json"
+}

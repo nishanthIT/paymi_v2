@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
@@ -48,7 +48,10 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
     [tierData],
   );
 
-  useEffect(() => {
+  const resetKey = `${visible}:${product?.id}`;
+  const [previousResetKey, setPreviousResetKey] = useState(resetKey);
+  if (previousResetKey !== resetKey) {
+    setPreviousResetKey(resetKey);
     if (visible) {
       setQuantity(1);
       setSelectedOptionId(null);
@@ -56,7 +59,7 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
       setTrackStock(false);
       setStockText('');
     }
-  }, [visible, product?.id]);
+  }
 
   if (!product) return null;
 

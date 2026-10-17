@@ -1,0 +1,9 @@
+# Public resources and hosting evidence
+
+Local implementation: product-A-backend/src/routes/publicResources.js and public/release/. Routes: GET /support, GET /account-deletion and static /release-resources/account-deletion.js/style.css. No app installation, app session or personal inbox belonging to the developer is needed to open them. Deletion uses the account holder's password; recovery uses their own verified email. A private random receipt retrieves minimal status after account removal. Secrets are not placed in URLs, browser persistence or public documents. CSP disallows framing and third-party scripts; forms use same-origin API requests.
+
+Candidate links after authorized deployment: https://backend.h7tex.com/support and https://backend.h7tex.com/account-deletion. **Neither is verified live for this code.** Existing paymi.co.uk could proxy/host the same routes, using the same backend rather than duplicating it. Do not submit candidate links until clean-browser HTTPS checks succeed from UK and India and account recovery/deletion works.
+
+Privacy and full terms are drafts only. No /privacy route is advertised as an approved policy. Existing freeprivacypolicy URL in mobile environment was not successfully retrieved and cannot be treated as accurate. Owner/provider gaps in privacy-data.md must be resolved, then serve reviewed HTML at a stable public URL and link it before sign-in and in both store forms. Google Play requires an active public non-PDF policy, not a publicly editable draft or geographic/login wall.
+
+A public HEAD probe on12 October2026 returned HTTP403 for the backend health/support/deletion endpoints and paymi.co.uk from this environment (evidence/public-url-checks.json). This does not identify whether the restriction is the server, edge or this environment; it does not prove reviewer access. Investigate before using these URLs in store forms.

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
@@ -35,13 +35,16 @@ export function ExportPdfSheet({ visible, products, exporting, onClose, onExport
   const [shopQuery, setShopQuery] = useState('');
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const resetKey = visible;
+  const [previousResetKey, setPreviousResetKey] = useState(resetKey);
+  if (previousResetKey !== resetKey) {
+    setPreviousResetKey(resetKey);
     if (visible) {
       setIncludeBarcodes(false);
       setShopQuery('');
       setSelectedShopId(null);
     }
-  }, [visible]);
+  }
 
   const shops = useMemo<ExportShopOption[]>(() => {
     const map = new Map<string, ExportShopOption>();

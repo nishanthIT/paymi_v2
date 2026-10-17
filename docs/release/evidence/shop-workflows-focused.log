@@ -1,0 +1,89 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📡 Emitted list_created to shop_cmv8yqdr30002aqzo2hcv581w_lists
+Found 1 in-stock shops with product cmv8yqdri000daqzopxw28lev
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv8yqdr30002aqzo2hcv581w_lists
+📦 Fetching list from DATABASE (no cache): cmv8yqehg000laqzob27dbpa9
+📦 Database isPurchased states: [
+  {
+    id: 'cmv8yqei1000naqzokb4pvwql',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✔ write-only shop employee creates a list and adds three cases in one request (1030.119505ms)
+Found 1 in-stock shops with product cmv8yqdri000daqzopxw28lev
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+Found 1 in-stock shops with product cmv8yqdri000daqzopxw28lev
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+Found 1 in-stock shops with product cmv8yqdri000daqzopxw28lev
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+📡 Emitted list_product_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+✔ concurrent additions preserve the sum and do not create duplicate logical products (67.459529ms)
+📡 Emitted list_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+📡 Emitted list_created to shop_cmv8yqdr30002aqzo2hcv581w_lists
+📡 Emitted list_deleted to shop_cmv8yqdr30002aqzo2hcv581w_lists
+✔ lists and employees remain current without the retired list-cache dependency (82.353115ms)
+[productSearch] indexed 1 products in 8ms
+Searching for barcode: 5000000000001
+Product found: Test Cola 330ml
+✔ product search, detail, barcode and list prices load for the employee (42.54539ms)
+📡 Emitted list_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+📦 Update quantity request: {
+  listId: 'cmv8yqehg000laqzob27dbpa9',
+  productAtShopId: undefined,
+  listProductId: 'cmv8yqei1000naqzokb4pvwql',
+  quantity: 8,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+📡 Emitted list_product_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+✅ Quantity updated: { listProductId: 'cmv8yqei1000naqzokb4pvwql', quantity: 8 }
+📦 Update quantity request: {
+  listId: 'cmv8yqehg000laqzob27dbpa9',
+  productAtShopId: undefined,
+  listProductId: 'cmv8yqei1000naqzokb4pvwql',
+  quantity: 1.5,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+✅ Toggle purchased request: {
+  listId: 'cmv8yqehg000laqzob27dbpa9',
+  listProductId: 'cmv8yqei1000naqzokb4pvwql',
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmv8yqdr30002aqzo2hcv581w_lists
+✅ Purchased status toggled: { listProductId: 'cmv8yqei1000naqzokb4pvwql', isPurchased: true }
+📦 Fetching list from DATABASE (no cache): cmv8yqehg000laqzob27dbpa9
+📦 Database isPurchased states: [
+  {
+    id: 'cmv8yqei1000naqzokb4pvwql',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+📦 Fetching list from DATABASE (no cache): cmv8yqehg000laqzob27dbpa9
+📦 Database isPurchased states: [
+  {
+    id: 'cmv8yqei1000naqzokb4pvwql',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+✔ employee access changes apply immediately and management cannot cross shops (347.505478ms)
+📡 Emitted list_created to shop_cmv8yqdrc0008aqzopdjgba89_lists
+✔ summary preserves legacy admin-owned lists and distinguishes typed IDs and shop scopes (17.282805ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2196.350927

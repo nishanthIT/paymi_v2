@@ -27,13 +27,13 @@ const URLS = {
 } as const;
 
 // Log which URL is being used
-console.log(`🌐 API Config: ENV=${ENV}, IS_WEB=${IS_WEB}, LOCAL_URL=${URLS.LOCAL}`);
+
 
 // ============================================
 // 🎯 ACTIVE CONFIGURATION
 // ============================================
 type Environment = 'LOCAL' | 'PRODUCTION';
-const ENVIRONMENT: Environment = (ENV === 'LOCAL' ? 'LOCAL' : 'PRODUCTION') as Environment;
+const ENVIRONMENT: Environment = (__DEV__ && ENV === 'LOCAL' ? 'LOCAL' : 'PRODUCTION') as Environment;
 
 const BASE_URL = ENVIRONMENT === 'PRODUCTION' ? URLS.PRODUCTION : URLS.LOCAL;
 
@@ -44,7 +44,7 @@ export const API_CONFIG = {
   // Core URLs
   BASE_URL: `${BASE_URL}/api`,
   SOCKET_URL: BASE_URL,
-  TIMEOUT: API_TIMEOUT,
+  TIMEOUT: Number.isFinite(API_TIMEOUT) && API_TIMEOUT > 0 ? API_TIMEOUT : 20000,
   
   // Environment info
   ENVIRONMENT,

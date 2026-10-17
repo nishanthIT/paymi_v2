@@ -29,8 +29,10 @@ import { getProductImageUrl } from '@/utils/product-image';
 
 interface CollectProductCardProps {
   product: ListProduct;
+  readOnly?: boolean;
   onToggle: (product: ListProduct) => void;
   onOpenDetails: (product: ListProduct) => void;
+  onPreviewImage: (uri: string) => void;
   /** Resolves when the wrong-price report was accepted. */
   onSubmitPrice: (product: ListProduct, reportedPrice: number) => Promise<void>;
 }
@@ -46,10 +48,13 @@ function formatPrice(value: number | null | undefined) {
  */
 export const CollectProductCard = memo(function CollectProductCard({
   product,
+  readOnly: requestedReadOnly = false,
   onToggle,
   onOpenDetails,
+  onPreviewImage,
   onSubmitPrice,
 }: CollectProductCardProps) {
+  const readOnly = requestedReadOnly || product.id.startsWith('optimistic-');
   const [priceOpen, setPriceOpen] = useState(false);
   const [priceValue, setPriceValue] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -97,12 +102,17 @@ export const CollectProductCard = memo(function CollectProductCard({
 
   return (
     <Animated.View style={[styles.card, purchased && styles.cardPurchased]}>
-      <Pressable
-        style={styles.body}
-        onPress={() => onOpenDetails(product)}
-        android_ripple={{ color: Colors.light.backgroundSecondary }}
-      >
-        <View style={styles.imageWrap}>
+      <View style={styles.body}>
+        <Pressable
+          style={styles.imageWrap}
+          disabled={!imageUrl}
+          accessibilityRole="button"
+          accessibilityLabel={`Preview image of ${product.productName}`}
+          onPress={(event) => {
+            event.stopPropagation();
+            if (imageUrl) onPreviewImage(imageUrl);
+          }}
+        >
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
           ) : (
@@ -113,9 +123,15 @@ export const CollectProductCard = memo(function CollectProductCard({
               <Text style={styles.qtyBadgeText}>×{product.quantity}</Text>
             </View>
           )}
-        </View>
+        </Pressable>
 
-        <View style={styles.info}>
+        <Pressable
+          style={({ pressed }) => [styles.info, pressed && { opacity: 0.7 }]}
+          onPress={() => onOpenDetails(product)}
+          disabled={product.id.startsWith('optimistic-')}
+          accessibilityRole="button"
+          accessibilityLabel={`View details for ${product.productName}`}
+        >
           <View style={styles.nameRow}>
             <Text
               style={[styles.name, purchased && styles.nameCollected]}
@@ -167,18 +183,19 @@ export const CollectProductCard = memo(function CollectProductCard({
               </Text>
             )}
           </View>
-        </View>
+        </Pressable>
 
-        <Pressable onPress={handleToggle} hitSlop={12} style={styles.checkTouch}>
+        <Pressable onPress={handleToggle} disabled={readOnly} accessibilityRole="checkbox"
+          accessibilityLabel={`Collected ${product.productName}`} accessibilityState={{ checked: purchased, disabled: readOnly }} hitSlop={12} style={styles.checkTouch}>
           <Animated.View
             style={[styles.checkbox, purchased && styles.checkboxChecked, checkStyle]}
           >
             {purchased && <Ionicons name="checkmark" size={18} color="#FFFFFF" />}
           </Animated.View>
         </Pressable>
-      </Pressable>
+      </View>
 
-      {!purchased && !priceOpen && !reported && (
+      {!product.id.startsWith('optimistic-') && !purchased && !priceOpen && !reported && (
         <Pressable style={styles.priceWrongLink} onPress={() => setPriceOpen(true)} hitSlop={6}>
           <Ionicons name="pricetag-outline" size={13} color={Colors.light.textSecondary} />
           <Text style={styles.priceWrongText}>Price wrong?</Text>

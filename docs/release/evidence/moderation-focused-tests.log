@@ -1,0 +1,34 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires no rules acceptance and rejects content larger than the server limit (665.092767ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (102.303666ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (362.59052ms)
+✔ moderation removes reported content from histories and summaries and records a decision (55.971918ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (102.060788ms)
+✔ socket clients cannot relay a forged message or sender identity (141.959031ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (39.431361ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📎 Saving file with extension: .txt from mimetype: text/plain
+✔ new and existing accounts send, receive and upload without any acceptance row (942.312049ms)
+✔ report identity, explanation and exact snapshot persist; own and inaccessible reports fail; races dedupe (82.245238ms)
+✔ all admin operations reject customer and delegated staff, and never expose reporter details publicly (163.705533ms)
+✔ admin can filter, investigate context, record internal notes and transition status without restricting account (176.858137ms)
+✔ account suspension denies existing sessions, login and socket reconnect; expiry and early reactivation preserve data (207.649989ms)
+✔ chat and account restrictions are independent, custom durations expire and chat blocks direct API writes (54.041964ms)
+✔ individual deletion preserves evidence, other authors and report status; concurrent requests are idempotent (29.833309ms)
+✔ bulk deletion requires both confirmations, survives retry/restart and preserves newer messages and other authors (336.425459ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ report snapshots preserve reported content and protected attachments after author deletion (696.018621ms)
+✔ suspension applies to all sessions and uploads/typing while private workspace operations stay accessible (358.594839ms)
+✔ removal revokes reused attachment access and notifies active clients, while evidence remains admin-only (276.606258ms)
+✔ release migrations upgrade the prior schema without replacing account IDs, passwords, ownership or tasks (117.568466ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7371.623849

@@ -58,11 +58,16 @@ export function BottomSheet({
   const translateY = useSharedValue(600);
   const backdrop = useSharedValue(0);
 
+  const [previousVisible, setPreviousVisible] = useState(visible);
+  if (previousVisible !== visible) {
+    setPreviousVisible(visible);
+    if (visible) setMounted(true);
+  }
+
   const unmount = useCallback(() => setMounted(false), []);
 
   useEffect(() => {
     if (visible) {
-      setMounted(true);
       translateY.set(withSpring(0, SPRING));
       backdrop.set(withTiming(1, { duration: 220 }));
     } else if (mounted) {

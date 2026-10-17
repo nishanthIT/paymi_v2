@@ -1,0 +1,15 @@
+✔ one overview card combines only already accessible legacy/canonical lists without mutating raw IDs or tracked access (1.17194ms)
+✔ supplier identity, original rows and quantities survive grouping even when supplier/product names match (4.731598ms)
+✔ quantity, urgency and collection updates affect the real row/source only and never merge duplicate products (0.17108ms)
+✔ failed move restores its removed source while retaining concurrent changes to another accessible list (0.138176ms)
+✔ ordinary destination pickers retain only original accessible lists, never a virtual or legacy out-of-stock target (0.103961ms)
+✔ original-list management includes empty and tracked sources with real identities (0.088637ms)
+✔ failed optimistic move keeps its observer and reports the error after the live row disappears (1.434934ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 285.921974

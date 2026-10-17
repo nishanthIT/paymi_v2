@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Pressable,
@@ -203,7 +204,18 @@ export default function EmployeesScreen() {
         )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          employeesQuery.isPending ? null : search ? (
+          employeesQuery.isPending && employeesQuery.fetchStatus !== 'paused' ? (
+            <View style={styles.centerState}><ActivityIndicator color={Colors.light.primary} /><Text style={styles.centerBody}>Loading employees…</Text></View>
+          ) : employeesQuery.isError || employeesQuery.fetchStatus === 'paused' ? (
+            <View style={styles.centerState} accessibilityRole="alert">
+              <Ionicons name="alert-circle-outline" size={40} color={Colors.light.textLight} />
+              <Text style={styles.centerTitle}>Couldn’t load employees</Text>
+              <Text style={styles.centerBody}>{employeesQuery.error?.message || 'You’re offline. Reconnect to load your team.'}</Text>
+              <Pressable accessibilityRole="button" onPress={() => employeesQuery.refetch()} style={styles.action}>
+                <Text style={styles.actionText}>Try again</Text>
+              </Pressable>
+            </View>
+          ) : search ? (
             <View style={styles.centerState}>
               <Ionicons name="search-outline" size={40} color={Colors.light.textLight} />
               <Text style={styles.centerTitle}>No matches</Text>

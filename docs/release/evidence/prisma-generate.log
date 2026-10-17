@@ -1,0 +1,23 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.4.1) to ./node_modules/@prisma/client in 242ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+
+warn Versions of prisma@6.2.1 and @prisma/client@6.4.1 don't match.
+This might lead to unexpected behavior.
+Please make sure they have the same version.
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.2.1 -> 8.0.0-rc.22                  │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘

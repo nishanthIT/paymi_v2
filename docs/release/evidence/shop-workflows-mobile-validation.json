@@ -1,0 +1,54 @@
+{
+  "checkedDate": "2026-10-15",
+  "timezone": "Asia/Kolkata",
+  "repository": "/home/n1sh/Start_up/Paymi/paymi_v2",
+  "workingTree": "Existing uncommitted changes preserved; checks ran against the current working tree.",
+  "checks": [
+    {
+      "command": "/usr/bin/node --import ./scripts/register-ts-hook.mjs --test --test-isolation=none tests/*.test.mjs",
+      "executed": true,
+      "exitCode": 0,
+      "result": "PASS",
+      "tests": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "/usr/bin/node node_modules/typescript/bin/tsc --noEmit",
+      "executed": true,
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "/usr/bin/node node_modules/eslint/bin/eslint.js .",
+      "executed": true,
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "executed": true,
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "workflowRegressionCoverage": [
+    "Shop selection recovery after initial directory failure; revoked active shops do not silently choose another workspace.",
+    "Employee list read/write/edit permissions reject missing or mismatched membership scope.",
+    "Persisted React Query list mutations hydrate and resume with their original list IDs and complete API payloads, including quantity, urgency, stock, moves, and shared lists.",
+    "Older paused mutations without a verifiable list ID are rejected without making a target-list request.",
+    "Existing session, typed account/shop cache isolation, chat ordering/cache, label scope, temperature, and local date tests."
+  ],
+  "sourceReview": [
+    "AuthContext loads only the current typed account's cached shop directory after a transport failure. A successful refresh replaces the directory and permission projection. A previously unavailable directory can recover the verified saved/default/sole shop; a revoked active shop clears selection without moving queued writes to another shop.",
+    "List creation and product addition controls require Write. Rename, quantity editing, urgency, removal and collection controls require Edit. Server authorization remains necessary for every request.",
+    "Employee and product-search screens distinguish failed/offline requests from an empty result and provide retry controls.",
+    "Product addition sends one request containing quantity instead of making a second request that requires Edit access. Backend contract validation is recorded separately."
+  ],
+  "limitations": [
+    "These checks do not prove installed Android/iOS UI behavior or signed release readiness.",
+    "No native build, device automation, store action, or production data mutation was performed by this mobile validation.",
+    "The user reports the screens are working; comprehensive device checks still need the device-tests.md checklist."
+  ]
+}

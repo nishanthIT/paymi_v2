@@ -1,0 +1,268 @@
+{
+  "Info": {
+    "DTCompiler": "com.apple.compilers.llvm.clang.1_0",
+    "CFBundleInfoDictionaryVersion": "6.0",
+    "DTPlatformVersion": "26.5",
+    "CFBundleName": "Paymi",
+    "DTSDKName": "iphoneos26.5",
+    "NSPhotoLibraryUsageDescription": "Allow Paymi to select photos for chat, incident records, certificates, age-restriction records and labels.",
+    "CFBundleIcons": {
+      "CFBundlePrimaryIcon": {
+        "CFBundleIconFiles": [
+          "AppIcon60x60"
+        ],
+        "CFBundleIconName": "AppIcon"
+      }
+    },
+    "CFBundleDisplayName": "Paymi",
+    "DTSDKBuild": "23F81a",
+    "NSCameraUsageDescription": "Allow Paymi to scan product barcodes and take photos for certificates and age-restriction records.",
+    "CFBundleShortVersionString": "1.1.0",
+    "CFBundleSupportedPlatforms": [
+      "iPhoneOS"
+    ],
+    "DTPlatformBuild": "23F81a",
+    "CFBundlePackageType": "APPL",
+    "DTXcodeBuild": "17F113",
+    "CFBundleDevelopmentRegion": "en",
+    "MinimumOSVersion": "16.4",
+    "CFBundleVersion": "30",
+    "UIDeviceFamily": [
+      1,
+      2
+    ],
+    "CFBundleIdentifier": "com.n1sh.paymi",
+    "DTXcode": "2660",
+    "CFBundleExecutable": "Paymi",
+    "NSAppTransportSecurity": {
+      "NSAllowsArbitraryLoads": false
+    },
+    "CFBundleIcons~ipad": {
+      "CFBundlePrimaryIcon": {
+        "CFBundleIconFiles": [
+          "AppIcon60x60",
+          "AppIcon76x76"
+        ],
+        "CFBundleIconName": "AppIcon"
+      }
+    },
+    "CFBundleSignature": "????",
+    "DTPlatformName": "iphoneos",
+    "CFBundleURLTypes": [
+      {
+        "CFBundleURLSchemes": [
+          "paymi",
+          "com.n1sh.paymi"
+        ]
+      }
+    ]
+  },
+  "provisioning": {
+    "cmsSignatureVerifiedWithoutChainValidation": true,
+    "expiration": "2027-03-03 06:46:05",
+    "team": [
+      "P27N26SPGC"
+    ],
+    "entitlements": {
+      "beta-reports-active": true,
+      "application-identifier": "P27N26SPGC.com.n1sh.paymi",
+      "keychain-access-groups": [
+        "P27N26SPGC.*",
+        "com.apple.token"
+      ],
+      "get-task-allow": false,
+      "com.apple.developer.team-identifier": "P27N26SPGC"
+    },
+    "deviceRestricted": false
+  },
+  "privacyManifests": {
+    "Payload/Paymi.app/React-timing_privacy.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "35F9.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    },
+    "Payload/Paymi.app/ExpoSystemUI_privacy.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false,
+      "NSPrivacyTrackingDomains": [],
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "CA92.1"
+          ]
+        }
+      ]
+    },
+    "Payload/Paymi.app/ExpoConstants_privacy.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false,
+      "NSPrivacyTrackingDomains": [],
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "CA92.1"
+          ]
+        }
+      ]
+    },
+    "Payload/Paymi.app/React-cxxreact_privacy.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    },
+    "Payload/Paymi.app/ExpoDevice_privacy.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false,
+      "NSPrivacyTrackingDomains": [],
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "35F9.1"
+          ]
+        }
+      ]
+    },
+    "Payload/Paymi.app/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "CA92.1"
+          ]
+        },
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "35F9.1"
+          ]
+        },
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    },
+    "Payload/Paymi.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    },
+    "Payload/Paymi.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    },
+    "Payload/Paymi.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        },
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "35F9.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    },
+    "Payload/Paymi.app/RNCAsyncStorage_resources.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        }
+      ]
+    },
+    "Payload/Paymi.app/React-Core_privacy.bundle/PrivacyInfo.xcprivacy": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "C617.1"
+          ]
+        },
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "CA92.1"
+          ]
+        }
+      ],
+      "NSPrivacyCollectedDataTypes": [],
+      "NSPrivacyTracking": false
+    }
+  },
+  "signatureFiles": [
+    "Payload/Paymi.app/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoModulesJSI.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/hermesvm.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoFont.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoCamera.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoCameraBarcodeScanning.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/SDWebImageWebPCoder.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoModulesCore.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/React.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/SDWebImageAVIFCoder.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/libavif.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/SDWebImageSVGCoder.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoImage.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ReactNativeDependencies.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoPrint.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoModulesWorklets.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/SDWebImage.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ExpoFileSystem.framework/_CodeSignature/CodeResources",
+    "Payload/Paymi.app/Frameworks/ZXingObjC.framework/_CodeSignature/CodeResources"
+  ],
+  "bundledJS": [
+    "Payload/Paymi.app/main.jsbundle"
+  ],
+  "archiveEntries": 212,
+  "limitations": [
+    "Linux inspection is not Apple codesign --verify or App Store processing validation",
+    "No installed-device results",
+    "Profile certificate chain not independently validated"
+  ]
+}

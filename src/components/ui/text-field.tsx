@@ -40,12 +40,12 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
       borderColor: error
         ? Colors.light.error
         : interpolateColor(
-            focus.value,
+            focus.get(),
             [0, 1],
             [Colors.light.border, Colors.light.primary],
           ),
-      shadowOpacity: 0.12 * focus.value,
-      elevation: 2 * focus.value,
+      shadowOpacity: 0.12 * focus.get(),
+      elevation: 2 * focus.get(),
     }));
 
     return (
@@ -62,15 +62,16 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
           )}
           <TextInput
             ref={ref}
+            accessibilityLabel={label}
             style={styles.input}
             placeholderTextColor={Colors.light.textLight}
             secureTextEntry={isHidden}
             onFocus={(e) => {
-              focus.value = withTiming(1, { duration: 150 });
+              focus.set(withTiming(1, { duration: 150 }));
               inputProps.onFocus?.(e);
             }}
             onBlur={(e) => {
-              focus.value = withTiming(0, { duration: 150 });
+              focus.set(withTiming(0, { duration: 150 }));
               inputProps.onBlur?.(e);
             }}
             {...inputProps}

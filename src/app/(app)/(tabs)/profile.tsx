@@ -6,7 +6,6 @@ import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { PrimaryButton } from '@/components/ui/primary-button';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { certificateKeys, fetchCertificateAlerts } from '@/features/certificates/api';
@@ -135,6 +134,8 @@ export default function ProfileScreen() {
           setIsLoggingOut(true);
           try {
             await logout();
+          } catch (error) {
+            Alert.alert('Sign-out storage issue', error instanceof Error ? error.message : 'Could not erase saved sign-in data. Please retry.');
           } finally {
             setIsLoggingOut(false);
           }
@@ -165,7 +166,10 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>Shop Tools</Text>
+        <Text style={styles.sectionTitle}>My Supermarket</Text>
+        <View style={styles.menu}>
+          <MenuRow icon="storefront-outline" label="My Supermarket" onPress={() => router.push('/(app)/supermarkets')} />
+        </View>
         <View style={styles.grid}>
           {tools.map((tool) => (
             <ToolCard
@@ -179,28 +183,14 @@ export default function ProfileScreen() {
           ))}
         </View>
 
+        <Text style={styles.sectionTitle}>Shop Tools / Account</Text>
         <View style={styles.menu}>
-          {canManageEmployees && (
-            <MenuRow
-              icon="people-outline"
-              label="Shop Employees"
-              onPress={() => router.push('/(app)/employees')}
-            />
-          )}
-          <MenuRow
-            icon="pricetag-outline"
-            label="Report a Wrong Price"
-            onPress={() => router.push('/(app)/report-price')}
-          />
-        </View>
-
-        <View style={styles.footer}>
-          <PrimaryButton
-            title="Log Out"
-            onPress={handleLogout}
-            loading={isLoggingOut}
-            variant="ghost"
-          />
+          {canManageEmployees && <MenuRow icon="people-outline" label="Shop Employees" onPress={() => router.push('/(app)/employees')} />}
+          <MenuRow icon="pricetag-outline" label="Report a Wrong Price" onPress={() => router.push('/(app)/report-price')} />
+          <MenuRow icon="log-out-outline" label={isLoggingOut ? 'Logging out…' : 'Log Out'} disabled={isLoggingOut} onPress={handleLogout} />
+          <MenuRow icon="trash-outline" label="Delete Personal Account" onPress={() => router.push('/account-deletion')} />
+          <MenuRow icon="information-circle-outline" label="About PayMi" onPress={() => router.push('/about')} />
+          <MenuRow icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => router.push({ pathname: '/about', params: { privacy: '1' } })} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -231,10 +221,12 @@ function ToolCard({ tool, onPress }: { tool: ShopTool; onPress: () => void }) {
 }
 
 function MenuRow({
+  disabled = false,
   icon,
   label,
   onPress,
 }: {
+  disabled?: boolean;
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
@@ -242,6 +234,8 @@ function MenuRow({
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
       style={({ pressed }) => [styles.menuRow, pressed && styles.menuRowPressed]}
     >
       <View style={styles.menuIcon}>

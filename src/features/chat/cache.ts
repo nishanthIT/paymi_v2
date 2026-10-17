@@ -1,3 +1,4 @@
+import { conversationActivity } from './dates';
 import type { InfiniteData, QueryClient } from '@tanstack/react-query';
 
 import { chatKeys } from './keys';
@@ -51,12 +52,17 @@ export function patchChatSummary(
     const next = chats.map((chat) => {
       if (chat.id !== chatId) return chat;
       found = true;
-      return patch(chat);
+      const updated = patch(chat);
+      // Late socket deliveries can update unread counts, but must not replace a newer preview.
+      if (conversationActivity(updated) < conversationActivity(chat)) {
+        return { ...updated, lastMessage: chat.lastMessage, lastMessageTime: chat.lastMessageTime, lastActivityAt: chat.lastActivityAt };
+      }
+      return updated;
     });
     // Most recent conversation first.
     return next.sort(
       (a, b) =>
-        new Date(b.lastMessageTime ?? 0).getTime() - new Date(a.lastMessageTime ?? 0).getTime(),
+        conversationActivity(b) - conversationActivity(a),
     );
   });
   return found;

@@ -5,12 +5,7 @@ import Animated, { FadeInRight, LinearTransition } from 'react-native-reanimated
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 
-export interface ShopSummary {
-  shopId: string;
-  shopName: string;
-  total: number;
-  collected: number;
-}
+import type { ShopSummary } from '../model';
 
 interface ShopSelectorProps {
   shops: ShopSummary[];

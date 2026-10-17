@@ -1,0 +1,36 @@
+src/pages/AddProduct.tsx(90,20): error TS2740: Type '{ onClick: () => void; id: number; name: string; category: string; price: number; image: string; availability: number; key: number; }' is missing the following properties from type 'ProductCardProps': title, productUrl, caseSize, packetSize, and 4 more.
+src/pages/Chat.tsx(102,34): error TS2304: Cannot find name 'formatMessageForUI'.
+src/pages/Chat.tsx(323,32): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"personal"' have no overlap.
+src/pages/Chat.tsx(324,53): error TS2345: Argument of type '"personal"' is not assignable to parameter of type 'SetStateAction<"PERSONAL" | "GROUP">'.
+src/pages/Chat.tsx(331,32): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(332,53): error TS2345: Argument of type '"group"' is not assignable to parameter of type 'SetStateAction<"PERSONAL" | "GROUP">'.
+src/pages/Chat.tsx(340,34): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"personal"' have no overlap.
+src/pages/Chat.tsx(385,42): error TS2339: Property 'avatar' does not exist on type 'Chat'.
+src/pages/Chat.tsx(386,46): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(387,22): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(395,29): error TS2551: Property 'lastMessageTime' does not exist on type 'Chat'. Did you mean 'lastMessage'?
+src/pages/Chat.tsx(402,24): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(403,65): error TS2322: Type 'ChatParticipant[]' is not assignable to type 'ReactNode'.
+  Type 'ChatParticipant[]' is not assignable to type 'Iterable<ReactNode>'.
+    The types returned by '[Symbol.iterator]().next(...)' are incompatible between these types.
+      Type 'IteratorResult<ChatParticipant, any>' is not assignable to type 'IteratorResult<ReactNode, any>'.
+        Type 'IteratorYieldResult<ChatParticipant>' is not assignable to type 'IteratorResult<ReactNode, any>'.
+          Type 'IteratorYieldResult<ChatParticipant>' is not assignable to type 'IteratorYieldResult<ReactNode>'.
+            Type 'ChatParticipant' is not assignable to type 'ReactNode'.
+src/pages/Chat.tsx(405,29): error TS2339: Property 'unreadCount' does not exist on type 'Chat'.
+src/pages/Chat.tsx(407,33): error TS2339: Property 'unreadCount' does not exist on type 'Chat'.
+src/pages/Chat.tsx(427,50): error TS2339: Property 'avatar' does not exist on type 'Chat'.
+src/pages/Chat.tsx(428,46): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(429,22): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(436,22): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(473,48): error TS2339: Property 'isOwnMessage' does not exist on type 'Message'.
+src/pages/Chat.tsx(477,33): error TS2339: Property 'isOwnMessage' does not exist on type 'Message'.
+src/pages/Chat.tsx(482,33): error TS2339: Property 'isOwnMessage' does not exist on type 'Message'.
+src/pages/Chat.tsx(482,49): error TS2367: This comparison appears to be unintentional because the types '"PERSONAL" | "GROUP"' and '"group"' have no overlap.
+src/pages/Chat.tsx(483,76): error TS2339: Property 'senderName' does not exist on type 'Message'.
+src/pages/Chat.tsx(486,61): error TS2339: Property 'isOwnMessage' does not exist on type 'Message'.
+src/pages/Chat.tsx(487,34): error TS2339: Property 'timestamp' does not exist on type 'Message'.
+src/pages/Shops.tsx(33,42): error TS2304: Cannot find name 'Shop'.
+src/pages/Shops.tsx(89,13): error TS2322: Type '(id: number) => Promise<void>' is not assignable to type '(id: string) => void'.
+  Types of parameters 'id' and 'id' are incompatible.
+    Type 'string' is not assignable to type 'number'.

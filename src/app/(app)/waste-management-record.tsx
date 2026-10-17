@@ -1,3 +1,4 @@
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -37,7 +38,6 @@ import {
   fetchWaste,
   searchProducts,
   wasteKeys,
-  type ProductSearchHit,
   type WasteInput,
   type WasteReason,
   type WasteRecord,
@@ -253,8 +253,6 @@ function WasteForm({
   const [reducedPriceText, setReducedPriceText] = useState('');
   const [reason, setReason] = useState<WasteReason>('DAMAGED');
   const [reasonNote, setReasonNote] = useState('');
-  const [hits, setHits] = useState<ProductSearchHit[]>([]);
-  const [searching, setSearching] = useState(false);
 
   const [wasVisible, setWasVisible] = useState(false);
   if (visible !== wasVisible) {
@@ -269,24 +267,19 @@ function WasteForm({
       setReducedPriceText('');
       setReason('DAMAGED');
       setReasonNote('');
-      setHits([]);
     }
   }
 
   // Debounced product lookup while typing the item name.
-  useEffect(() => {
-    if (!visible || productId || itemName.trim().length < 2) {
-      setHits([]);
-      return;
-    }
-    setSearching(true);
-    const timer = setTimeout(() => {
-      searchProducts(itemName.trim())
-        .then(setHits)
-        .finally(() => setSearching(false));
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [itemName, productId, visible]);
+  const searchTerm = useDebouncedValue(itemName.trim(), 350);
+  const searchEnabled = visible && !productId && searchTerm.length >= 2 && searchTerm === itemName.trim();
+  const search = useQuery({
+    queryKey: ['waste-product-lookup', searchTerm],
+    queryFn: () => searchProducts(searchTerm),
+    enabled: searchEnabled,
+  });
+  const hits = searchEnabled ? search.data ?? [] : [];
+  const searching = searchEnabled && search.isFetching;
 
   const quantity = Number(quantityText);
   const price = parseMoneyInput(priceText);
@@ -348,8 +341,7 @@ function WasteForm({
                     setProductId(hit.id);
                     setItemName(hit.title);
                     if (hit.rrp != null && !priceText) setPriceText(Number(hit.rrp).toFixed(2));
-                    setHits([]);
-                  }}
+                                }}
                 >
                   <Ionicons name="cube-outline" size={16} color={Colors.light.primary} />
                   <Text style={styles.hitText} numberOfLines={2}>

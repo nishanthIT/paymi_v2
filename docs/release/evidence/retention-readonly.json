@@ -1,0 +1,104 @@
+{
+  "checkedDate": "2026-10-12",
+  "readOnly": true,
+  "databaseProvider": "Neon PostgreSQL",
+  "tables": [
+    "ActionLog",
+    "Admin",
+    "Advertisement",
+    "AgeRestrictedRecord",
+    "AgeRestrictionRecord",
+    "BundlePromotion",
+    "BundlePromotionBuyItem",
+    "BundlePromotionGetItem",
+    "Category",
+    "Chat",
+    "ChatParticipant",
+    "CleaningArea",
+    "CleaningLog",
+    "CompanyStaffMembership",
+    "Customer",
+    "EmployeeAccessReview",
+    "Empolyee",
+    "ExpiryCategory",
+    "ExpiryProduct",
+    "Fridge",
+    "FridgeTemperatureLog",
+    "IncidentLog",
+    "List",
+    "ListProduct",
+    "Message",
+    "MessageRead",
+    "News",
+    "PriceReport",
+    "PriceTier",
+    "Product",
+    "ProductAtShop",
+    "ProductPromotion",
+    "ProductReview",
+    "Promotion",
+    "RegistrationReceipt",
+    "ShiftSheetRecord",
+    "Shop",
+    "ShopCertificate",
+    "ShopEmployeeMembership",
+    "SupermarketAdminAccessLog",
+    "SupermarketCreationReceipt",
+    "SupermarketMigrationReview",
+    "SupermarketMigrationRun",
+    "SupermarketOwnership",
+    "SupermarketProductState",
+    "SupplierPayoutRecord",
+    "Task",
+    "TaskAssignment",
+    "TrackedList",
+    "WasteRecord",
+    "_ProductToPromotion",
+    "_prisma_migrations"
+  ],
+  "counts": {
+    "Admin": 2,
+    "Customer": 21,
+    "Empolyee": 25,
+    "Message": 64,
+    "ChatParticipant": 77,
+    "SupermarketOwnership": 9,
+    "IncidentLog": 7,
+    "AgeRestrictionRecord": 3,
+    "ShopCertificate": 11
+  },
+  "recentMigrations": [
+    {
+      "migration_name": "20261012100000_optional_age_record_products",
+      "finished_at": "2026-10-12T04:51:37.880Z"
+    },
+    {
+      "migration_name": "20261011160000_multisupermarket_operations",
+      "finished_at": "2026-10-12T03:12:01.256Z"
+    },
+    {
+      "migration_name": "20261011120000_default_supermarket_ownership",
+      "finished_at": "2026-10-12T03:11:59.003Z"
+    },
+    {
+      "migration_name": "20261008150000_shop_access_levels_single_role",
+      "finished_at": "2026-10-08T02:56:27.936Z"
+    },
+    {
+      "migration_name": "20261008090000_default_shop_feature_permissions",
+      "finished_at": "2026-10-08T02:16:16.431Z"
+    },
+    {
+      "migration_name": "20261007120000_separate_company_staff_and_shop_employees",
+      "finished_at": "2026-10-07T17:33:58.136Z"
+    }
+  ],
+  "configuredServices": [
+    "MAIL_HOST",
+    "MAIL_USER",
+    "MAIL_PASS",
+    "EMAIL_USER"
+  ],
+  "automaticRetentionJobsFound": false,
+  "caveat": "No provider console or backup lifecycle configuration was accessible; source audit only for retention jobs."
+}

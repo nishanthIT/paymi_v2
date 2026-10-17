@@ -4,7 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -14,6 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TextField } from '@/components/ui/text-field';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
@@ -56,6 +57,8 @@ export default function ScannerScreen() {
 
   const scanLock = useRef(false);
   const lastBarcode = useRef<string | null>(null);
+  const [manualBarcode, setManualBarcode] = useState('');
+  const [manualMode, setManualMode] = useState(false);
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [notFoundBarcode, setNotFoundBarcode] = useState<string | null>(null);
@@ -192,30 +195,29 @@ export default function ScannerScreen() {
     if (outcome === 'added') resumeScanning();
   };
 
-  if (!permission) {
-    return <View style={styles.permissionScreen} />;
-  }
-
-  if (!permission.granted) {
-    return (
-      <SafeAreaView style={styles.permissionScreen}>
-        <View style={styles.permissionContent}>
-          <View style={styles.permissionIcon}>
-            <Ionicons name="camera-outline" size={40} color={Colors.light.primary} />
-          </View>
-          <Text style={styles.permissionTitle}>Camera access needed</Text>
-          <Text style={styles.permissionBody}>
-            Allow camera access to scan product barcodes straight into your list.
-          </Text>
-          <PrimaryButton title="Allow Camera" onPress={requestPermission} />
-          <PrimaryButton title="Go Back" variant="ghost" onPress={() => router.back()} />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const manualEntry = (
+    <SafeAreaView style={styles.permissionScreen}>
+      <View style={styles.permissionContent}>
+        <Text style={styles.permissionTitle}>Enter a barcode</Text>
+        <Text style={styles.permissionBody}>Type the product barcode, or allow camera access to scan it.</Text>
+        <TextField label="Product barcode" value={manualBarcode} onChangeText={setManualBarcode}
+          autoCapitalize="none" autoCorrect={false} maxLength={64} />
+        <PrimaryButton title="Look Up Product" loading={isLookingUp} disabled={!manualBarcode.trim()}
+          onPress={() => handleBarcodeScanned({ data: manualBarcode.trim() })} />
+        <PrimaryButton title={permission?.granted ? "Use Camera" : permission?.canAskAgain ? "Allow Camera" : "Open Settings"}
+          variant="ghost" onPress={() => {
+            if (permission?.granted) { setManualMode(false); return; }
+            const action = permission?.canAskAgain ? requestPermission() : Linking.openSettings();
+            action.catch(() => showToast('Unable to open camera settings. Please try again.', 'error'));
+          }} />
+        <PrimaryButton title="Go Back" variant="ghost" onPress={() => router.back()} />
+      </View>
+    </SafeAreaView>
+  );
 
   return (
     <View style={styles.container}>
+      {!permission?.granted || manualMode ? manualEntry : <>
       <CameraView
         style={StyleSheet.absoluteFill}
         facing="back"
@@ -259,8 +261,10 @@ export default function ScannerScreen() {
             )}
           </View>
           <Text style={styles.hint}>Align the barcode inside the frame</Text>
+          <PrimaryButton title="Enter Barcode Manually" onPress={() => setManualMode(true)} />
         </View>
       </SafeAreaView>
+      </>}
 
       <ProductSheet
         product={product}

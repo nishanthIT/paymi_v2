@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-13",
+  "method": "Unauthenticated GET, Mozilla/5.0 client header",
+  "results": [
+    {
+      "url": "https://backend.h7tex.com/support",
+      "status": 404
+    },
+    {
+      "url": "https://backend.h7tex.com/account-deletion",
+      "status": 404
+    },
+    {
+      "url": "https://backend.h7tex.com/api/promotions/public",
+      "status": 401
+    },
+    {
+      "url": "https://paymi.co.uk",
+      "status": 200,
+      "contentType": "text/html",
+      "hasPaymi": false,
+      "hasKaliam": false,
+      "bytesSampled": 1388
+    }
+  ]
+}

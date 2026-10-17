@@ -1,0 +1,14 @@
+✔ temperature input preserves negatives and zero while rejecting unfinished or malformed values (0.905134ms)
+✔ payout date filters cover the full local day including midnight across UTC boundaries (0.44523ms)
+✔ restored active/default preference never grants access or guesses among multiple shops (0.172633ms)
+✔ persistent cache names separate identity type, user, and supermarket (0.110404ms)
+✔ pending offline mutations block switching and replay only in their restored shop cache (5.978633ms)
+✔ uploads block switching, and scope generations invalidate stale responses even after switching back (0.277202ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 247.723768

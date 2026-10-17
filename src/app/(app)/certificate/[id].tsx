@@ -1,3 +1,4 @@
+import { getSupermarketScope } from '@/features/supermarkets/scope';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -85,8 +86,9 @@ export default function CertificateDetailsScreen() {
   const [downloading, setDownloading] = useState<'save' | 'share' | null>(null);
 
   useEffect(() => {
+    const scope = getSupermarketScope();
     secureStorage.getToken().then((token) => {
-      if (token) setAuthHeaders({ Authorization: `Bearer ${token}` });
+      if (token && scope.id && scope.generation === getSupermarketScope().generation) setAuthHeaders({ Authorization: `Bearer ${token}`, 'X-Supermarket-Id': scope.id });
     });
   }, []);
 

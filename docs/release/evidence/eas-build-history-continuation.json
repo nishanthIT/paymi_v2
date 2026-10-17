@@ -1,0 +1,67 @@
+[
+  {
+    "id": "bfa873b4-d640-482e-9859-c8c637d20a7d",
+    "status": "FINISHED",
+    "platform": "IOS",
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "29",
+    "gitCommitHash": "abd957166519f26f8ff0a0132bec32adc2078be4",
+    "createdAt": "2026-10-08T03:21:35.715Z",
+    "completedAt": "2026-10-08T03:30:55.685Z"
+  },
+  {
+    "id": "bc750199-c6be-4fa7-96d6-c4b7d735aeb3",
+    "status": "FINISHED",
+    "platform": "IOS",
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "28",
+    "gitCommitHash": "abd957166519f26f8ff0a0132bec32adc2078be4",
+    "createdAt": "2026-10-08T03:19:55.595Z",
+    "completedAt": "2026-10-08T03:25:38.934Z"
+  },
+  {
+    "id": "870f3e60-8bf4-457e-8649-7fd9a8eba17a",
+    "status": "FINISHED",
+    "platform": "IOS",
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "27",
+    "gitCommitHash": "b3dfed4f13d4995cbc20ab44e4e8a678b1798a82",
+    "createdAt": "2026-10-02T18:52:17.423Z",
+    "completedAt": "2026-10-02T18:57:32.144Z"
+  },
+  {
+    "id": "5434d288-c7bf-443a-92fa-35b017a9667d",
+    "status": "ERRORED",
+    "platform": "IOS",
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "26",
+    "gitCommitHash": "ed15fd4de7bec21b1983fc960a211138f8e7a35f",
+    "createdAt": "2026-10-02T18:47:34.051Z",
+    "completedAt": "2026-10-02T18:48:17.659Z"
+  },
+  {
+    "id": "09adfe36-3d93-4416-9cf9-5a05b01d4cee",
+    "status": "ERRORED",
+    "platform": "IOS",
+    "distribution": "STORE",
+    "buildProfile": "production",
+    "appIdentifier": "com.n1sh.paymi",
+    "appVersion": "1.1.0",
+    "appBuildVersion": "25",
+    "gitCommitHash": "ed15fd4de7bec21b1983fc960a211138f8e7a35f",
+    "createdAt": "2026-10-02T17:51:01.140Z",
+    "completedAt": "2026-10-02T17:51:45.191Z"
+  }
+]

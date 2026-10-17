@@ -1,0 +1,33 @@
+{
+  "package": "com.n1sh.paymi",
+  "versionCode": "2",
+  "usesSdk": {
+    "{http://schemas.android.com/apk/res/android}minSdkVersion": "24",
+    "{http://schemas.android.com/apk/res/android}targetSdkVersion": "36"
+  },
+  "permissions": [
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.CAMERA",
+    "android.permission.INTERNET",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.VIBRATE",
+    "android.permission.ACCESS_WIFI_STATE",
+    "android.permission.USE_BIOMETRIC",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.WAKE_LOCK",
+    "com.n1sh.paymi.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "features": [],
+  "cleartext": "false",
+  "allowBackup": "true",
+  "exportedComponents": [
+    {
+      "tag": "activity",
+      "name": "com.n1sh.paymi.MainActivity"
+    },
+    {
+      "tag": "receiver",
+      "name": "androidx.profileinstaller.ProfileInstallReceiver"
+    }
+  ]
+}

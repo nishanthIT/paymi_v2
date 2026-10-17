@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-17T06:29:56.517Z",
+  "migration": "20261016160000_out_of_stock_origin",
+  "applied": false,
+  "columnPresent": true,
+  "existingListProducts": {
+    "count": 3903,
+    "digest": "e0655263c6bd041c8169f0344a07c5e6"
+  },
+  "existingFieldsUnchanged": true,
+  "migrationLedger": "Use prisma migrate resolve --applied only after this successful verification"
+}

@@ -1,0 +1,44 @@
+✔ label drafts, saved work and print history separate colliding roles and shops without importing ambiguous legacy data (0.936505ms)
+✔ offline identity cannot restore an expired, malformed or different-role session (0.239195ms)
+✔ conversation dates use local time, Yesterday and older dates across year boundaries (9.064441ms)
+✔ activity sorting survives stale timestamps and out-of-order socket messages (1.401445ms)
+✔ simultaneous global and open-thread delivery does not duplicate messages; moderation removes every cached page copy (0.8963ms)
+✔ thread dates use the viewer calendar day, including midnight and historical years (0.421973ms)
+✔ Yesterday follows local calendar dates across both UK daylight-saving boundaries (0.184408ms)
+✔ day separators stay above the oldest message in each day across loaded pages (0.190765ms)
+✔ floating date follows the top visible inverted row regardless of event order or offscreen messages (0.150875ms)
+✔ shop recovery restores employee list access after an initial directory outage without switching a revoked workspace (0.202238ms)
+✔ shop read/write/edit controls fail closed for missing, mismatched and read-only memberships (0.085055ms)
+✔ persisted list edits resume after restart with original IDs, quantity, urgency and stock, including moves and shared lists (3.885531ms)
+✔ legacy offline edits without list identity are rejected without contacting an arbitrary list (0.541903ms)
+✔ one overview card combines only already accessible legacy/canonical lists without mutating raw IDs or tracked access (0.323169ms)
+✔ supplier identity, original rows and quantities survive grouping even when supplier/product names match (0.857862ms)
+✔ quantity, urgency and collection updates affect the real row/source only and never merge duplicate products (0.186013ms)
+✔ failed move restores its removed source while retaining concurrent changes to another accessible list (0.182569ms)
+✔ ordinary destination pickers retain only original accessible lists, never a virtual or legacy out-of-stock target (0.125524ms)
+✔ original-list management includes empty and tracked sources with real identities (0.108518ms)
+✔ failed optimistic move keeps its observer and reports the error after the live row disappears (2.86144ms)
+✔ manual sale separates VAT, net revenue, margin and markup (0.39651ms)
+✔ target margin and target markup use distinct inverse formulas (0.160733ms)
+✔ VAT and profit adjustments recalculate rounded target selling prices (0.123897ms)
+✔ case and bulk totals retain fractional unit costs without cumulative rounding (0.105786ms)
+✔ rounded target prices achieve the percentage even with fractional unit costs (0.095367ms)
+✔ manual losses and zero values produce finite results and honest undefined ratios (0.085712ms)
+✔ invalid quantities, percentages and excessive values cannot produce misleading results (0.172442ms)
+✔ decimal input supports pounds and fractional percentages without interpreting garbage as zero (0.268343ms)
+✔ temperature input preserves negatives and zero while rejecting unfinished or malformed values (0.231777ms)
+✔ payout date filters cover the full local day including midnight across UTC boundaries (0.174419ms)
+✔ restored active/default preference never grants access or guesses among multiple shops (0.080598ms)
+✔ persistent cache names separate identity type, user, and supermarket (0.097016ms)
+✔ pending offline mutations block switching and replay only in their restored shop cache (2.481505ms)
+✔ uploads block switching, and scope generations invalidate stale responses even after switching back (0.249936ms)
+✔ freezer keypad defaults below zero, explicit plus preserves abnormal positive readings, and fridges remain positive (0.186307ms)
+✔ category search preserves legacy selections, deduplicates names, and only offers a distinct new category (0.156366ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 441.979279

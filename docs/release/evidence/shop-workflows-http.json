@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-15T03:10:21.050Z",
+  "fingerprints": {
+    "Chat": {
+      "count": 33,
+      "digest": "38e6f448aa6080bef867b9d5950262c0"
+    },
+    "Message": {
+      "count": 65,
+      "digest": "2b6f3f0ef59a2d07bf9bca0556b73b01"
+    },
+    "ChatParticipant": {
+      "count": 77,
+      "digest": "182d81de90af07abbb64f7696d995630"
+    },
+    "List": {
+      "count": 96,
+      "digest": "7ece330b15a56ddcd856a6a7b9cefd9a"
+    },
+    "ListProduct": {
+      "count": 3997,
+      "digest": "cbcdd76cdd2bdd0dd5b0de970c37fa2f"
+    },
+    "ShopEmployeeMembership": {
+      "count": 9,
+      "digest": "15e97b0744485f08fb3a4e4e3065bd59"
+    },
+    "Product": {
+      "count": 66545,
+      "digest": "b6135609507c33e585ac39e8b9b570c9"
+    },
+    "ProductAtShop": {
+      "count": 13310,
+      "digest": "43c25d8347d0ed62861158a500894762"
+    }
+  },
+  "tests": [
+    {
+      "route": "/api/health",
+      "status": 200,
+      "durationMs": 4929
+    },
+    {
+      "route": "/api/shop/supermarkets",
+      "status": 200,
+      "durationMs": 14619,
+      "count": 1
+    },
+    {
+      "route": "/api/lists",
+      "status": 200,
+      "durationMs": 6646,
+      "count": 9
+    },
+    {
+      "route": "/api/employees",
+      "status": 200,
+      "durationMs": 9220,
+      "count": 2
+    },
+    {
+      "route": "/api/products/search?q=milk",
+      "status": 200,
+      "durationMs": 15054,
+      "count": 20
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { cachedSessionMatches } from '@/utils/cached-session';
 import { isAxiosError } from 'axios';
 import api from './api';
 import { secureStorage } from '@/utils/secureStorage';
@@ -69,8 +70,7 @@ function toAuthError(error: unknown, fallback: string): Error {
 class AuthService {
   private async persistSession(response: AuthResponse): Promise<void> {
     if (response.token) {
-      await secureStorage.setToken(response.token);
-      await secureStorage.setUser(JSON.stringify(response.user));
+      await secureStorage.setSession(response.token, JSON.stringify(response.user));
     }
   }
 
@@ -169,7 +169,7 @@ class AuthService {
       const user: AuthUser | undefined = response.data?.user;
       if (user) {
         await secureStorage.setUser(JSON.stringify(user));
-        logger.log('Session restored for', user.email);
+        logger.log('Session restored');
         return user;
       }
       return null;
@@ -180,7 +180,7 @@ class AuthService {
       }
       // Network/server error: keep the session alive using cached user data.
       const cached = await this.getStoredUser();
-      if (cached) {
+      if (cachedSessionMatches(token, cached)) {
         logger.warn('Could not validate session online, using cached user');
         return cached;
       }

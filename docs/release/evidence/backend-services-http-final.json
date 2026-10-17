@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-10-14T04:24:22.938Z",
+  "tests": [
+    {
+      "route": "/api/health",
+      "status": 200,
+      "durationMs": 4477,
+      "services": {
+        "sessions": "ready",
+        "moderation": {
+          "state": "ready",
+          "lastPollAt": "2026-10-14T04:24:26.786Z"
+        }
+      },
+      "cache": {
+        "connected": true,
+        "mode": "redis",
+        "persistence": "postgresql"
+      }
+    },
+    {
+      "route": "/api/auth/me",
+      "status": 200,
+      "durationMs": 11179
+    },
+    {
+      "route": "/api/chat",
+      "status": 200,
+      "durationMs": 18077,
+      "conversations": 9,
+      "groups": 5,
+      "direct": 4
+    }
+  ]
+}

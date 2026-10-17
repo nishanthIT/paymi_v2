@@ -97,7 +97,7 @@ export default function ReportPriceScreen() {
     } catch (error: any) {
       if (!error?.silent) showToast(error?.message ?? 'Could not submit report', 'error');
     }
-  }, [product, shop, parsedPrice, submit, priceQuery.data?.price, showToast]);
+  }, [product, shop, parsedPrice, submit, priceQuery.data, showToast]);
 
   if (submitted) {
     return (

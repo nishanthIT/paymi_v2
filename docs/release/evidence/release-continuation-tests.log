@@ -1,0 +1,66 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ public deletion resource needs no app and does not embed credentials or permit framing (578.729928ms)
+✔ request reauthenticates current account, is idempotent, and status requires a private receipt (82.901664ms)
+✔ owner deletion preserves staff, co-owner, workspace, tasks and shared lists; files and stale sessions are removed (50.99048ms)
+✔ employee deletion cannot remove another role with the same ID; file errors remain retryable (15.733727ms)
+✔ admin deletion removes the account without deleting its managed shop (11.470303ms)
+✔ former employees can request deletion with credentials without regaining workspace access (13.96576ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires explicit acceptance and rejects content larger than the server limit (610.234904ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (63.828284ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (356.185511ms)
+✔ moderation removes reported content from histories and summaries and records a decision (35.495347ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (47.448477ms)
+✔ socket clients cannot relay a forged message or sender identity (136.993049ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (60.265188ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ a failed provider purge leaves deletion retryable and revokes all old sessions before erasure (517.383461ms)
+✖ verified ledger replay erases a restored account, preserves shared shops, rejects old tokens and advances ID sequences (8.022916ms)
+✔ Redis deletion failures propagate instead of silently falling back to local memory (0.511752ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ report snapshots preserve only reported content and protected attachments after author deletion (649.398858ms)
+✔ suspension applies to all sessions and uploads/typing while private workspace operations stay accessible (337.537916ms)
+✔ removal revokes reused attachment access and notifies active clients, while evidence remains admin-only (238.734373ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ anonymous promotions expose only current published wholesaler offers and cannot grant workspace access (492.754268ms)
+✔ release migrations upgrade the prior schema without replacing account IDs, passwords, ownership or tasks (82.866978ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 20
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8077.461311
+
+✖ failing tests:
+
+test at tests/deletionRecovery.test.js:21:1
+✖ verified ledger replay erases a restored account, preserves shared shops, rejects old tokens and advances ID sequences (8.022916ms)
+  PrismaClientValidationError: 
+  Invalid `prisma.customer.create()` invocation:
+  
+  {
+    data: {
+      id: 1,
+      name: "Restored fixture",
+      email: "alpha-owner@shop.test",
+      password: "$2b$04$O5UGXYchEx9BLq2hhipVEOLezsYMJNmfERx6.qWUPkxN75OVuIsYm",
+  +   mobile: String
+    }
+  }
+  
+  Argument `mobile` is missing.
+      at Pn (/home/n1sh/Start_up/Paymi/product-A-backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+      at Un.handleRequestError (/home/n1sh/Start_up/Paymi/product-A-backend/node_modules/@prisma/client/runtime/library.js:121:7090)
+      at Un.handleAndLogRequestError (/home/n1sh/Start_up/Paymi/product-A-backend/node_modules/@prisma/client/runtime/library.js:121:6771)
+      at Un.request (/home/n1sh/Start_up/Paymi/product-A-backend/node_modules/@prisma/client/runtime/library.js:121:6478)
+      at async l (/home/n1sh/Start_up/Paymi/product-A-backend/node_modules/@prisma/client/runtime/library.js:130:9644)
+      at async TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/product-A-backend/tests/deletionRecovery.test.js:25:20)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)

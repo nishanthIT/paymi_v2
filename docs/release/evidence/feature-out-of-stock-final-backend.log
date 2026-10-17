@@ -1,0 +1,123 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ concurrent unavailable items from different suppliers use one list and preserve row IDs and quantities (816.089216ms)
+📦 Fetching list from DATABASE (no cache): cmvar0e39000qaqwzrfwv15vp
+📦 Database isPurchased states: [
+  {
+    id: 'cmvar0e3c000saqwz57ba6obr',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+✔ consolidated read includes legacy and new supplier groups without rewriting history (85.416632ms)
+✔ collection preserves existing account, tracking, shop and read/edit permissions (616.397187ms)
+📦 Update quantity request: {
+  listId: 'cmvar0e5u000uaqwzvcmj3q18',
+  productAtShopId: undefined,
+  listProductId: 'cmvar0e35000maqwz5miplhbr',
+  quantity: 4,
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+📡 Emitted list_product_updated to shop_cmvar0dlv0002aqwz4e8opx3r_lists
+✅ Quantity updated: { listProductId: 'cmvar0e35000maqwz5miplhbr', quantity: 4 }
+✅ Toggle purchased request: {
+  listId: 'cmvar0e5u000uaqwzvcmj3q18',
+  listProductId: 'cmvar0e35000maqwz5miplhbr',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvar0dlv0002aqwz4e8opx3r_lists
+✅ Purchased status toggled: { listProductId: 'cmvar0e35000maqwz5miplhbr', isPurchased: true }
+✔ original item IDs support editing, collecting and moving back to an ordinary list (112.060867ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📡 Emitted list_created to shop_cmvar0fk80002aq1aswb23t3q_lists
+Found 1 in-stock shops with product cmvar0fl0000daq1arfbtghr9
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvar0fk80002aq1aswb23t3q_lists
+📦 Fetching list from DATABASE (no cache): cmvar0gfv000laq1atybwh933
+📦 Database isPurchased states: [
+  {
+    id: 'cmvar0ggy000naq1aj2e8qpqu',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✔ write-only shop employee creates a list and adds three cases in one request (1304.50261ms)
+Found 1 in-stock shops with product cmvar0fl0000daq1arfbtghr9
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+Found 1 in-stock shops with product cmvar0fl0000daq1arfbtghr9
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+Found 1 in-stock shops with product cmvar0fl0000daq1arfbtghr9
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+📡 Emitted list_product_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+✔ concurrent additions preserve the sum and do not create duplicate logical products (117.977516ms)
+📡 Emitted list_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+📡 Emitted list_created to shop_cmvar0fk80002aq1aswb23t3q_lists
+📡 Emitted list_deleted to shop_cmvar0fk80002aq1aswb23t3q_lists
+✔ lists and employees remain current without the retired list-cache dependency (141.043426ms)
+[productSearch] indexed 1 products in 17ms
+Searching for barcode: 5000000000001
+Product found: Test Cola 330ml
+✔ product search, detail, barcode and list prices load for the employee (95.014698ms)
+📡 Emitted list_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+📦 Update quantity request: {
+  listId: 'cmvar0gfv000laq1atybwh933',
+  productAtShopId: undefined,
+  listProductId: 'cmvar0ggy000naq1aj2e8qpqu',
+  quantity: 8,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+📡 Emitted list_product_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+✅ Quantity updated: { listProductId: 'cmvar0ggy000naq1aj2e8qpqu', quantity: 8 }
+📦 Update quantity request: {
+  listId: 'cmvar0gfv000laq1atybwh933',
+  productAtShopId: undefined,
+  listProductId: 'cmvar0ggy000naq1aj2e8qpqu',
+  quantity: 1.5,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+✅ Toggle purchased request: {
+  listId: 'cmvar0gfv000laq1atybwh933',
+  listProductId: 'cmvar0ggy000naq1aj2e8qpqu',
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvar0fk80002aq1aswb23t3q_lists
+✅ Purchased status toggled: { listProductId: 'cmvar0ggy000naq1aj2e8qpqu', isPurchased: true }
+📦 Fetching list from DATABASE (no cache): cmvar0gfv000laq1atybwh933
+📦 Database isPurchased states: [
+  {
+    id: 'cmvar0ggy000naq1aj2e8qpqu',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+📦 Fetching list from DATABASE (no cache): cmvar0gfv000laq1atybwh933
+📦 Database isPurchased states: [
+  {
+    id: 'cmvar0ggy000naq1aj2e8qpqu',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+✔ employee access changes apply immediately and management cannot cross shops (556.412915ms)
+📡 Emitted list_created to shop_cmvar0fkr0008aq1aoqced1cd_lists
+✔ summary preserves legacy admin-owned lists and distinguishes typed IDs and shop scopes (18.539334ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5729.565397

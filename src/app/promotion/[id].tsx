@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -29,6 +30,7 @@ const toNumber = (value: number | string | null): number | null => {
 export default function PromotionProductsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
@@ -101,7 +103,7 @@ export default function PromotionProductsScreen() {
               product={item}
               addedToList={addedTo[item.id] ?? null}
               adding={addMutation.isPending && pickingFor?.id === item.id}
-              onAdd={() => setPickingFor(item)}
+              onAdd={() => isAuthenticated ? setPickingFor(item) : router.push('/(auth)/login')}
             />
           </Animated.View>
         )}
@@ -113,13 +115,14 @@ export default function PromotionProductsScreen() {
         }
       />
 
-      <ListPickerSheet
+      {!isAuthenticated && <Text style={styles.emptyText}>Browse offers freely. Sign in to save products to your private shop lists.</Text>}
+      {isAuthenticated && <ListPickerSheet
         visible={!!pickingFor}
         productName={pickingFor?.title}
         loadingListId={loadingListId}
         onSelect={handleSelectList}
         onClose={() => loadingListId == null && setPickingFor(null)}
-      />
+      />}
     </SafeAreaView>
   );
 }

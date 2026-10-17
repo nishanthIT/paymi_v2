@@ -8,13 +8,17 @@ import {
   StyleSheet,
   Switch,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { ImageViewer } from '@/components/ui/image-viewer';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { useCompareProduct } from '@/features/compare/hooks/use-compare-product';
 import { useLists } from '@/features/lists/hooks/use-lists';
+import { OUT_OF_STOCK_ID, isOutOfStockList, ordinaryListTargets } from '@/features/lists/out-of-stock';
 import type { ListProduct } from '@/features/lists/types';
 import { useShopPrice } from '@/features/price-reports/hooks';
 import { formatSizeLabel } from '@/utils/pack-size';
@@ -33,7 +37,7 @@ interface CollectDetailsSheetProps {
   listId?: string;
   /** Move this list item into another existing list. */
   onMoveToList?: (listProductId: string, targetListId: string) => void;
-  /** Move this list item into its shop's Out of Stock list. */
+  /** Move this list item into Out of Stock, grouped by supplier shop. */
   onMarkOutOfStock?: (listProductId: string) => void;
   movingList?: boolean;
 }
@@ -43,9 +47,9 @@ function money(value: number | null | undefined) {
   return `£${Number(value).toFixed(2)}`;
 }
 
-/** Full product details for a Collect Mode item, including live shop price. */
+/** Shared list-item details, with optional Collect Mode actions. */
 export function CollectDetailsSheet({
-  product,
+  product: selectedProduct,
   isLoading,
   onClose,
   onToggleUrgent,
@@ -56,9 +60,16 @@ export function CollectDetailsSheet({
   onMarkOutOfStock,
   movingList,
 }: CollectDetailsSheetProps) {
+  // Retain the content during the sheet's exit animation instead of collapsing it.
+  const [lastProduct, setLastProduct] = useState(selectedProduct);
+  if (selectedProduct && selectedProduct !== lastProduct) setLastProduct(selectedProduct);
+  const product = selectedProduct ?? lastProduct;
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const { data: livePrice } = useShopPrice(
-    product?.productId ?? null,
-    product?.shopId ?? null,
+    selectedProduct?.productId ?? null,
+    selectedProduct?.shopId ?? null,
   );
   // Bundle items are locked to their shop, so skip the comparison fetch for them.
   const canChangeShop = !!product && !product.bundlePromotionId && !!onChangeShop;
@@ -66,13 +77,18 @@ export function CollectDetailsSheet({
   const otherShops = (compare.data?.shops ?? []).filter((s) => s.shopId !== product?.shopId);
 
   const canMoveList =
-    !!product && !product.bundlePromotionId && !product.isPurchased && (!!onMoveToList || !!onMarkOutOfStock);
+    !!product && !product.bundlePromotionId && (!!onMoveToList || !!onMarkOutOfStock);
   const [listPickerFor, setListPickerFor] = useState<string | null>(null);
   const listPickerOpen = !!product && listPickerFor === product.id;
   const { data: allLists, isLoading: listsLoading } = useLists();
-  const otherLists = (allLists ?? []).filter(
-    (l) => l.id !== listId && !l.id.startsWith('optimistic-'),
-  );
+  const otherLists = ordinaryListTargets(allLists ?? [], listId);
+  const sourceIsOutOfStock = listId === OUT_OF_STOCK_ID || isOutOfStockList(allLists?.find(list => list.id === listId)?.name ?? '');
+  const originalList = otherLists.find(list => list.id === product?.outOfStockSourceListId);
+  const closeDetails = () => {
+    setPreviewUri(null);
+    setListPickerFor(null);
+    onClose();
+  };
 
   if (!product) return <BottomSheet visible={false} onClose={onClose}>{null}</BottomSheet>;
 
@@ -83,22 +99,79 @@ export function CollectDetailsSheet({
     : null;
 
   return (
-    <BottomSheet visible={!!product} onClose={onClose}>
-      <ScrollView bounces={false} contentContainerStyle={styles.content}>
+    <BottomSheet
+      visible={!!selectedProduct}
+      onClose={closeDetails}
+      sheetStyle={{ maxHeight: height - insets.top - Spacing.md }}
+    >
+      <View style={styles.fixedHeader}>
+        <View style={styles.headingRow}>
+          <Text style={styles.heading} accessibilityRole="header">Product details</Text>
+          <Pressable
+            onPress={closeDetails}
+            accessibilityRole="button"
+            accessibilityLabel="Close product details"
+            style={({ pressed }) => [styles.closeButton, pressed && { opacity: 0.7 }]}
+          >
+            <Ionicons name="close" size={22} color={Colors.light.text} />
+          </Pressable>
+        </View>
         <View style={styles.hero}>
-          <View style={styles.imageWrap}>
+          <Pressable
+            style={styles.imageWrap}
+            disabled={!imageUrl}
+            accessibilityRole="button"
+            accessibilityLabel={`Preview image of ${product.productName}`}
+            onPress={(event) => {
+              event.stopPropagation();
+              setPreviewUri(imageUrl);
+            }}
+          >
             {imageUrl ? (
               <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" />
             ) : (
               <Ionicons name="cube-outline" size={40} color={Colors.light.textLight} />
             )}
-          </View>
+          </Pressable>
           <View style={styles.heroInfo}>
-            <Text style={styles.name}>{product.productName}</Text>
-            {!!product.category && <Text style={styles.category}>{product.category}</Text>}
+            <Text style={styles.name} numberOfLines={3}>{product.productName}</Text>
+            {!!product.category && <Text style={styles.category} numberOfLines={1}>{product.category}</Text>}
           </View>
         </View>
 
+        {canMoveList && onMarkOutOfStock && !sourceIsOutOfStock && (
+          <Pressable
+            onPress={() => onMarkOutOfStock(product.id)}
+            disabled={movingList}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !!movingList, busy: !!movingList }}
+            style={({ pressed }) => [
+              styles.actionRow,
+              (pressed || movingList) && { opacity: 0.7 },
+            ]}
+          >
+            <View style={[styles.actionIcon, styles.actionIconDanger]}>
+              <Ionicons name="remove-circle-outline" size={18} color={Colors.light.error} />
+            </View>
+            <View style={styles.shopInfo}>
+              <Text style={[styles.shopName, { color: Colors.light.error }]}>
+                Mark as Out of Stock
+              </Text>
+              <Text style={styles.actionHint} numberOfLines={2}>
+                Moves to Out of Stock under {product.shopName || 'Unknown Shop'} to buy later
+              </Text>
+            </View>
+            {movingList && <ActivityIndicator size="small" color={Colors.light.error} />}
+          </Pressable>
+        )}
+      </View>
+
+      <ScrollView
+        key={product.id}
+        style={styles.scrollArea}
+        bounces={false}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.priceCard}>
           <View style={styles.priceMain}>
             <Text style={styles.priceLabel}>Price at {product.shopName || 'shop'}</Text>
@@ -225,55 +298,45 @@ export function CollectDetailsSheet({
           </View>
         )}
 
-        {canMoveList && (
+        {canMoveList && onMoveToList && (
           <View style={styles.shopsSection}>
-            <Text style={styles.shopsTitle}>Product unavailable?</Text>
+            <Text style={styles.shopsTitle}>{sourceIsOutOfStock ? 'Return to a shopping list' : 'Move item'}</Text>
+            {sourceIsOutOfStock && originalList && <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Return to ${originalList.name}`}
+              disabled={movingList}
+              onPress={() => onMoveToList(product.id, originalList.id)}
+              style={styles.actionRow}
+            >
+              <Ionicons name="arrow-undo-outline" size={18} color={Colors.light.primary} />
+              <View style={styles.shopInfo}>
+                <Text style={styles.shopName}>Return to {originalList.name}</Text>
+                <Text style={styles.actionHint}>Original shopping list</Text>
+              </View>
+            </Pressable>}
+            {sourceIsOutOfStock && !originalList && <Text style={styles.actionHint}>
+              {product.outOfStockSourceListId ? 'The original list is no longer available in your access. Choose another list.' : 'No original list was recorded for this item. Choose a destination below.'}
+            </Text>}
 
-            {onMarkOutOfStock && (
-              <Pressable
-                onPress={() => onMarkOutOfStock(product.id)}
-                disabled={movingList}
-                style={({ pressed }) => [
-                  styles.actionRow,
-                  (pressed || movingList) && { opacity: 0.7 },
-                ]}
-              >
-                <View style={[styles.actionIcon, styles.actionIconDanger]}>
-                  <Ionicons name="remove-circle-outline" size={18} color={Colors.light.error} />
-                </View>
-                <View style={styles.shopInfo}>
-                  <Text style={[styles.shopName, { color: Colors.light.error }]}>
-                    Mark as Out of Stock
-                  </Text>
-                  <Text style={styles.actionHint} numberOfLines={2}>
-                    Moves to “Out of Stock · {product.shopName || 'Unknown Shop'}” to buy later
-                  </Text>
-                </View>
-                {movingList && <ActivityIndicator size="small" color={Colors.light.error} />}
-              </Pressable>
-            )}
+            <Pressable
+              onPress={() => setListPickerFor(listPickerOpen ? null : product.id)}
+              style={({ pressed }) => [styles.actionRow, pressed && { opacity: 0.7 }]}
+            >
+              <View style={styles.actionIcon}>
+                <Ionicons name="list-outline" size={18} color={Colors.light.primary} />
+              </View>
+              <View style={styles.shopInfo}>
+                <Text style={styles.shopName}>Move to another list</Text>
+                <Text style={styles.actionHint}>Pick one of your existing lists</Text>
+              </View>
+              <Ionicons
+                name={listPickerOpen ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={Colors.light.textSecondary}
+              />
+            </Pressable>
 
-            {onMoveToList && (
-              <Pressable
-                onPress={() => setListPickerFor(listPickerOpen ? null : product.id)}
-                style={({ pressed }) => [styles.actionRow, pressed && { opacity: 0.7 }]}
-              >
-                <View style={styles.actionIcon}>
-                  <Ionicons name="list-outline" size={18} color={Colors.light.primary} />
-                </View>
-                <View style={styles.shopInfo}>
-                  <Text style={styles.shopName}>Move to another list</Text>
-                  <Text style={styles.actionHint}>Pick one of your existing lists</Text>
-                </View>
-                <Ionicons
-                  name={listPickerOpen ? 'chevron-up' : 'chevron-down'}
-                  size={18}
-                  color={Colors.light.textSecondary}
-                />
-              </Pressable>
-            )}
-
-            {onMoveToList && listPickerOpen &&
+            {listPickerOpen &&
               (listsLoading ? (
                 <ActivityIndicator size="small" color={Colors.light.primary} style={styles.shopsLoading} />
               ) : otherLists.length === 0 ? (
@@ -312,6 +375,12 @@ export function CollectDetailsSheet({
           </View>
         )}
       </ScrollView>
+      <ImageViewer
+        uri={previewUri}
+        visible={!!selectedProduct && !!previewUri}
+        onClose={() => setPreviewUri(null)}
+        presentation="preview"
+      />
     </BottomSheet>
   );
 }
@@ -339,9 +408,39 @@ function DetailRow({
 }
 
 const styles = StyleSheet.create({
+  fixedHeader: {
+    flexShrink: 0,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  heading: {
+    ...Typography.bodyBold,
+    color: Colors.light.text,
+    flex: 1,
+  },
+  closeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.light.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollArea: {
+    flexShrink: 1,
+    minHeight: 0,
+  },
   content: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     gap: Spacing.md,
   },
   hero: {

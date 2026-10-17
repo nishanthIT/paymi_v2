@@ -37,7 +37,7 @@ export function useUnreadCount() {
  */
 export function useChatRealtime() {
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -55,12 +55,13 @@ export function useChatRealtime() {
       const onMessage = (message: ChatMessage) => {
         const chatId = message.chatId;
         if (!chatId) return;
-        upsertThreadMessage(queryClient, chatId, message);
+        const own = message.senderId === Number(user?.id) && message.senderType === user?.userType;
+        upsertThreadMessage(queryClient, chatId, { ...message, isOwnMessage: own });
         const patched = patchChatSummary(queryClient, chatId, (chat) => ({
           ...chat,
           lastMessage: message.messageType === 'TEXT' ? message.content : '📎 Attachment',
           lastMessageTime: message.timestamp,
-          unreadCount: (chat.unreadCount ?? 0) + 1,
+          unreadCount: (chat.unreadCount ?? 0) + (own ? 0 : 1),
         }));
         if (!patched) {
           queryClient.invalidateQueries({ queryKey: chatKeys.all });
@@ -73,16 +74,22 @@ export function useChatRealtime() {
       };
       const onMessageDeleted = ({ messageId, chatId }: { messageId: string; chatId: string }) => {
         removeThreadMessage(queryClient, chatId, messageId);
+        queryClient.invalidateQueries({ queryKey: chatKeys.all });
       };
 
+      const onSuspended = () => queryClient.invalidateQueries({ queryKey: ['chat-safety'] });
+      socket.on('chat_suspended', onSuspended);
       socket.on('message_received', onMessage);
       socket.on('new_chat_created', onNewChat);
+      socket.on('chats_changed', onNewChat);
       socket.on('chat_deleted', onChatDeleted);
       socket.on('message_deleted', onMessageDeleted);
 
       cleanup = () => {
+        socket.off('chat_suspended', onSuspended);
         socket.off('message_received', onMessage);
         socket.off('new_chat_created', onNewChat);
+        socket.off('chats_changed', onNewChat);
         socket.off('chat_deleted', onChatDeleted);
         socket.off('message_deleted', onMessageDeleted);
       };
@@ -92,7 +99,7 @@ export function useChatRealtime() {
       cancelled = true;
       cleanup?.();
     };
-  }, [isAuthenticated, queryClient]);
+  }, [isAuthenticated, queryClient, user?.id, user?.userType]);
 }
 
 /** Debounced user directory search for starting new chats. */

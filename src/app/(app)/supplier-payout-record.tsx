@@ -1,3 +1,4 @@
+import { payoutDateBoundary } from '@/features/supplier-payouts/dates';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
@@ -34,7 +35,6 @@ import {
   formatMoney,
   formatMoneyTyping,
   parseMoneyInput,
-  toDateParam,
 } from '@/features/shop-tools/format';
 import { matchesSearch } from '@/utils/search';
 
@@ -64,21 +64,21 @@ export default function SupplierPayoutScreen() {
 
   const dates = useMemo(() => {
     const now = new Date();
-    if (range === 'today') return { startDate: toDateParam(now), endDate: toDateParam(now) };
+    if (range === 'today') return { startDate: payoutDateBoundary(now), endDate: payoutDateBoundary(now, true) };
     if (range === '7d') {
       const start = new Date();
       start.setDate(start.getDate() - 7);
-      return { startDate: toDateParam(start), endDate: undefined };
+      return { startDate: payoutDateBoundary(start), endDate: undefined };
     }
     if (range === '30d') {
       const start = new Date();
       start.setDate(start.getDate() - 30);
-      return { startDate: toDateParam(start), endDate: undefined };
+      return { startDate: payoutDateBoundary(start), endDate: undefined };
     }
     if (range === 'custom') {
       return {
-        startDate: customStart ? toDateParam(customStart) : undefined,
-        endDate: customEnd ? toDateParam(customEnd) : undefined,
+        startDate: customStart ? payoutDateBoundary(customStart) : undefined,
+        endDate: customEnd ? payoutDateBoundary(customEnd, true) : undefined,
       };
     }
     return { startDate: undefined, endDate: undefined };
@@ -193,6 +193,10 @@ export default function SupplierPayoutScreen() {
 
       {records.isLoading ? (
         <ListSkeleton rows={5} height={84} />
+      ) : records.isError ? (
+        <EmptyState icon="alert-circle-outline" title="Could not load payouts" subtitle={records.error?.message || 'Please try again.'}>
+          <PrimaryButton title="Try Again" variant="ghost" onPress={() => records.refetch()} />
+        </EmptyState>
       ) : (
         <FlatList
           data={visible}
@@ -373,6 +377,7 @@ function PayoutForm({
     <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.sheetContent}>
         <Text style={styles.sheetTitle}>{record ? 'Edit Payout' : 'New Supplier Payout'}</Text>
+        <DetailRow label="Recorded date & time" value={record ? formatDateTime(record.createdAt) : 'Captured automatically when saved'} />
         <TextField label="Supplier" value={supplier} onChangeText={setSupplier} placeholder="e.g. Bestway" />
         <TextField label="Amount (£)" value={amountText} onChangeText={(text) => setAmountText(formatMoneyTyping(text))} keyboardType="decimal-pad" placeholder="0.00" />
         <OptionPicker<PaymentStatus>

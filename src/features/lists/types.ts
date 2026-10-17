@@ -17,6 +17,7 @@ export interface ListProduct {
   id: string; // listProduct id
   productId: string;
   productAtShopId: string;
+  outOfStockSourceListId?: string | null;
   productName: string;
   barcode: string;
   caseBarcode?: string;
@@ -57,7 +58,19 @@ export interface ListDetails {
   copiedByMe?: boolean;
   /** False when the shop owner is only previewing an employee's list. */
   canEdit?: boolean;
+  isOutOfStockCollection?: boolean;
   products: ListProduct[];
+}
+
+export interface OutOfStockProduct extends ListProduct {
+  /** Real source list, retained for cache updates and original-list management. */
+  listId: string;
+  sourceListName: string;
+}
+
+export interface OutOfStockCollection {
+  name: string;
+  products: OutOfStockProduct[];
 }
 
 /** Product row returned by /products/search and /products/barcode/:barcode. */

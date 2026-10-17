@@ -1,0 +1,38 @@
+ M .env
+ M .gitignore
+ M package.json
+ M src/app/(app)/(tabs)/index.tsx
+ M src/app/(app)/(tabs)/profile.tsx
+ M src/app/(app)/_layout.tsx
+ M src/app/(app)/age-restriction-records.tsx
+ M src/app/(app)/certificate-management.tsx
+ M src/app/(app)/certificate/[id].tsx
+ M src/app/(app)/collect.tsx
+ M src/app/(app)/fridge-temperature.tsx
+ M src/app/(app)/incident-logs.tsx
+ M src/app/(app)/list/[id].tsx
+ M src/app/(app)/supplier-payout-record.tsx
+ M src/app/_layout.tsx
+ M src/components/ui/image-viewer.tsx
+ M src/contexts/AuthContext.tsx
+ M src/features/age-restriction/api.ts
+ M src/features/certificates/download.ts
+ M src/features/chat/api.ts
+ M src/features/chat/socket.ts
+ M src/features/collect/components/collect-details-sheet.tsx
+ M src/features/collect/components/collect-product-card.tsx
+ M src/features/employees/api.ts
+ M src/features/employees/components/employee-form-sheet.tsx
+ M src/features/fridges/hooks/use-temperature-alerts.ts
+ M src/features/lists/components/list-product-row.tsx
+ M src/features/supplier-payouts/api.ts
+ M src/features/tasks/hooks/use-task-notifications.ts
+ M src/lib/query-client.ts
+ M src/services/api.ts
+?? src/app/(app)/supermarkets.tsx
+?? src/components/ui/private-image.tsx
+?? src/features/fridges/temperature.ts
+?? src/features/supermarkets/
+?? src/features/supplier-payouts/dates.ts
+?? src/hooks/use-private-image.ts
+?? tests/

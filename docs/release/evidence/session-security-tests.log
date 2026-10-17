@@ -1,0 +1,11 @@
+✔ explicit credentials cannot authenticate as the previous cookie account (0.536743ms)
+✔ missing and known fallback signing secrets fail closed (0.816574ms)
+✔ production cookies require TLS and resist cross-site requests (0.500717ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.359323

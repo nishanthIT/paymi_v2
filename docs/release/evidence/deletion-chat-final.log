@@ -1,0 +1,25 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ public deletion resource needs no app and does not embed credentials or permit framing (451.704277ms)
+✔ request reauthenticates current account, is idempotent, and status requires a private receipt (91.336026ms)
+✔ owner deletion preserves staff, co-owner, workspace, tasks and shared lists; files and stale sessions are removed (67.812667ms)
+✔ employee deletion cannot remove another role with the same ID; file errors remain retryable (22.941787ms)
+✔ admin deletion removes the account without deleting its managed shop (16.961264ms)
+✔ former employees can request deletion with credentials without regaining workspace access (16.34626ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires explicit acceptance and rejects content larger than the server limit (565.591564ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (59.78045ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (301.043129ms)
+✔ moderation removes reported content from histories and summaries and records a decision (37.262918ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (77.913852ms)
+✔ socket clients cannot relay a forged message or sender identity (135.412054ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (59.049031ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3116.416939

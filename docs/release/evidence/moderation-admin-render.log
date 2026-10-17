@@ -1,0 +1,11 @@
+Re-optimizing dependencies because lockfile has changed
+✔ reported chats shows separate reporter and subject identities, evidence, explanation and status without executing message HTML (482.136601ms)
+✔ an empty queue is explicit and offers filtering, pagination and separate restriction and job sections (1.964549ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 660.261046

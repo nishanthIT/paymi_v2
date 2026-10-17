@@ -1,4 +1,5 @@
 import api from '@/services/api';
+import { API_CONFIG } from '@/config/api';
 
 import type { Advertisement, NewsItem, Promotion } from './types';
 
@@ -22,6 +23,11 @@ export async function fetchNewsItem(id: string): Promise<NewsItem> {
 
 /** GET /promotions?active=true — promotions with shop + priced products. */
 export async function fetchPromotions(): Promise<Promotion[]> {
-  const response = await api.get('/promotions', { params: { active: 'true' } });
-  return response.data?.promotions ?? [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/promotions/public`, { credentials: 'omit', signal: controller.signal });
+    if (!response.ok) throw new Error('Could not load promotions. Please try again.');
+    return (await response.json()).promotions ?? [];
+  } finally { clearTimeout(timer); }
 }

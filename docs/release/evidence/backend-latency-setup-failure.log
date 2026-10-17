@@ -1,0 +1,35 @@
+✖ create → deactivate → reactivate survives 100ms DB latency (0.618406ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1775.244432
+
+✖ failing tests:
+
+test at tests/latency.test.js:23:1
+✖ create → deactivate → reactivate survives 100ms DB latency (0.618406ms)
+  Error: Command failed: /home/n1sh/Start_up/Paymi/product-A-backend/node_modules/.bin/prisma db push --force-reset --skip-generate --accept-data-loss --schema=/tmp/paymi-schema-1oHaTz/schema.prisma
+  Error: Schema engine error:
+  
+  
+      at genericNodeError (node:internal/errors:985:15)
+      at wrappedFn (node:internal/errors:539:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at resetDatabase (file:///home/n1sh/Start_up/Paymi/product-A-backend/tests/helpers/harness.js:64:3)
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/product-A-backend/tests/latency.test.js:12:9)
+      at TestHook.runInAsyncScope (node:async_hooks:227:14)
+      at TestHook.run (node:internal/test_runner/test:1382:25)
+      at TestHook.run (node:internal/test_runner/test:1726:18)
+      at TestHook.run (node:internal/util:581:20) {
+    status: 1,
+    signal: null,
+    output: [ null, <Buffer 50 72 69 73 6d 61 20 73 63 68 65 6d 61 20 6c 6f 61 64 65 64 20 66 72 6f 6d 20 73 63 68 65 6d 61 2e 70 72 69 73 6d 61 0a 44 61 74 61 73 6f 75 72 63 65 ... 87 more bytes>, <Buffer 45 72 72 6f 72 3a 20 53 63 68 65 6d 61 20 65 6e 67 69 6e 65 20 65 72 72 6f 72 3a 0a 0a> ],
+    pid: 1506933,
+    stdout: <Buffer 50 72 69 73 6d 61 20 73 63 68 65 6d 61 20 6c 6f 61 64 65 64 20 66 72 6f 6d 20 73 63 68 65 6d 61 2e 70 72 69 73 6d 61 0a 44 61 74 61 73 6f 75 72 63 65 ... 87 more bytes>,
+    stderr: <Buffer 45 72 72 6f 72 3a 20 53 63 68 65 6d 61 20 65 6e 67 69 6e 65 20 65 72 72 6f 72 3a 0a 0a>
+  }

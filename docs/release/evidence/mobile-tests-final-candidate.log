@@ -1,0 +1,16 @@
+✔ label drafts, saved work and print history separate colliding roles and shops without importing ambiguous legacy data (0.655702ms)
+✔ offline identity cannot restore an expired, malformed or different-role session (0.231415ms)
+✔ temperature input preserves negatives and zero while rejecting unfinished or malformed values (0.166184ms)
+✔ payout date filters cover the full local day including midnight across UTC boundaries (0.28652ms)
+✔ restored active/default preference never grants access or guesses among multiple shops (0.111826ms)
+✔ persistent cache names separate identity type, user, and supermarket (0.067122ms)
+✔ pending offline mutations block switching and replay only in their restored shop cache (3.089658ms)
+✔ uploads block switching, and scope generations invalidate stale responses even after switching back (0.12659ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 262.095221

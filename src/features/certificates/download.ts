@@ -1,3 +1,4 @@
+import { getSupermarketScope } from '@/features/supermarkets/scope';
 import { Directory, File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
@@ -33,18 +34,21 @@ function downloadError(error: unknown): Error {
 
 /** Downloads the authenticated certificate image into the app cache. */
 async function downloadToCache(certificate: ShopCertificate): Promise<File> {
+  const scope = getSupermarketScope();
   const token = await secureStorage.getToken();
+  if (!scope.id || scope.generation !== getSupermarketScope().generation) throw new Error('Select the certificate’s shop and try again.');
   if (!token) throw new Error('Please sign in again to download this certificate.');
 
-  const directory = new Directory(Paths.cache, 'certificates');
+  const directory = new Directory(Paths.cache, 'certificates', scope.id);
   directory.create({ idempotent: true, intermediates: true });
-  const target = new File(directory, fileNameFor(certificate));
+  const target = new File(directory, `${certificate.id}-${fileNameFor(certificate)}`);
 
   try {
     const file = await File.downloadFileAsync(certificateImageUrl(certificate), target, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, 'X-Supermarket-Id': scope.id },
       idempotent: true,
     });
+    if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
     if (!file.exists || !file.size) throw new Error('404 empty file');
     return file;
   } catch (error) {

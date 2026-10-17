@@ -1,3 +1,4 @@
+import { labelIdentity } from '../model/storage-scope';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -27,7 +28,7 @@ import { isDraftEmpty } from '../render/draft-preview';
  */
 export function useLabelLibrary({ load = true }: { load?: boolean } = {}) {
   const { user } = useAuth();
-  const userId = user ? String(user.id) : '';
+  const userId = user ? labelIdentity(user.userType, user.id) : '';
   const shopId = user ? String(user.shopId ?? 'none') : '';
   const keys = user ? libraryKeys(userId, shopId) : null;
   const savedKey = keys?.saved;

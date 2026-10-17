@@ -1,0 +1,21 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📎 Saving file with extension: .txt from mimetype: text/plain
+✔ new and existing accounts send, receive and upload without any acceptance row (908.746513ms)
+✔ report identity, explanation and exact snapshot persist; own and inaccessible reports fail; races dedupe (96.559996ms)
+✔ all admin operations reject customer and delegated staff, and never expose reporter details publicly (154.845969ms)
+✔ admin can filter, investigate context, record internal notes and transition status without restricting account (172.587918ms)
+✔ account suspension denies existing sessions, login and socket reconnect; expiry and early reactivation preserve data (203.153162ms)
+✔ chat and account restrictions are independent, custom durations expire and chat blocks direct API writes (47.220595ms)
+✔ individual deletion preserves evidence, other authors and report status; concurrent requests are idempotent (44.88876ms)
+✔ bulk deletion requires both confirmations, survives retry/restart and preserves newer messages and other authors (749.983956ms)
+✔ a failed bulk batch rolls back fully and the startup worker resumes the durable job (120.131026ms)
+✔ release migrations upgrade the prior schema without replacing account IDs, passwords, ownership or tasks (98.26959ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3786.607631

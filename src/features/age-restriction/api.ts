@@ -6,6 +6,8 @@ export interface AgeRestrictionRecord {
   id: string;
   occurredAt: string;
   description: string;
+  productCategory?: string | null;
+  productName?: string | null;
   imageUrl: string | null;
   createdByName: string | null;
   updatedByName: string | null;
@@ -17,6 +19,8 @@ export interface AgeRestrictionRecord {
 export interface AgeRestrictionInput {
   occurredAt: Date;
   description: string;
+  productCategory?: string | null;
+  productName?: string | null;
   /** New local image to upload. */
   imageUri?: string | null;
   /** Clear the existing image (edit only). */
@@ -29,6 +33,31 @@ export const ageRestrictionKeys = {
   all: ['age-restriction-records'] as const,
   list: (filters: { from?: string }) => ['age-restriction-records', filters] as const,
 };
+
+export interface AgeRecordProduct {
+  id: string;
+  title: string;
+  category: string | null;
+  barcode: string | null;
+}
+
+export async function fetchAgeRecordCategories(): Promise<string[]> {
+  try {
+    const response = await api.get('/age-restriction-records/categories');
+    return response.data.categories;
+  } catch (error: any) {
+    throw apiError(error, 'Could not load categories');
+  }
+}
+
+export async function searchAgeRecordProducts(params: { q: string; category?: string }): Promise<{ products: AgeRecordProduct[]; hasMore: boolean }> {
+  try {
+    const response = await api.get('/age-restriction-records/products', { params });
+    return response.data;
+  } catch (error: any) {
+    throw apiError(error, 'Could not load products');
+  }
+}
 
 function apiError(error: any, fallback: string): Error {
   if (error?.silent) return error;
@@ -53,6 +82,8 @@ async function buildForm(input: AgeRestrictionInput): Promise<FormData> {
   const form = new FormData();
   form.append('occurredAt', input.occurredAt.toISOString());
   form.append('description', input.description);
+  if (input.productCategory !== undefined) form.append('productCategory', input.productCategory ?? '');
+  if (input.productName !== undefined) form.append('productName', input.productName ?? '');
   if (input.imageUri) {
     if (Platform.OS === 'web') {
       const blob = await (await fetch(input.imageUri)).blob();

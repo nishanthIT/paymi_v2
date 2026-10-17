@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-17T06:30:04.627Z",
+  "migration": "20261017160000_typed_price_reporters",
+  "applied": true,
+  "columnsPresent": true,
+  "before": {
+    "reports": {
+      "count": 4,
+      "digest": "812dd3c3df2eac87f81845a5ed098ba0"
+    },
+    "earnings": {
+      "count": 21,
+      "digest": "8d4e6e90f1b110cfbe550f18eb63fd50"
+    }
+  },
+  "existingReportsAndEarningsUnchanged": true,
+  "migrationLedger": "Record the verified migration with prisma migrate resolve --applied"
+}

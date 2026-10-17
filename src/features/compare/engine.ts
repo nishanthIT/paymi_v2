@@ -52,7 +52,7 @@ export function buildPurchaseOptions(data: CompareResponse): PurchaseOption[] {
   if (options.length > 0) {
     const best = options[0].effectiveUnitPrice;
     for (const option of options) {
-      option.isBestValue = Math.abs(option.effectiveUnitPrice - best) < 0.005;
+      option.isBestValue = Math.abs(option.effectiveUnitPrice - best) < 1e-9;
     }
   }
 
@@ -64,13 +64,15 @@ function optionsForShop(
   bundles: CompareBundle[],
   productId: string,
 ): PurchaseOption[] {
-  const baseline = shop.effectivePrice;
+  const baseUnits = shop.unitsPerPack ?? 1;
+  const baseline = shop.effectivePrice / baseUnits;
   const results: PurchaseOption[] = [];
 
-  const singleLabel = shop.hasActiveOffer ? 'Single (offer price)' : 'Single';
+  const packLabel = baseUnits > 1 ? `Case of ${baseUnits}` : 'Single';
+  const singleLabel = shop.hasActiveOffer ? `${packLabel} (offer price)` : packLabel;
   const singleDetail = shop.hasActiveOffer
     ? `Was ${money(shop.price)} · now ${money(shop.effectivePrice)}`
-    : `${money(shop.price)} each`;
+    : `${money(shop.effectivePrice)} ${baseUnits > 1 ? `per case · ${shop.pricedUnitSize ?? ''} each` : 'each'}`;
   results.push({
     key: `single:${shop.productAtShopId}`,
     kind: 'single',
@@ -80,9 +82,9 @@ function optionsForShop(
     productAtShopId: shop.productAtShopId,
     label: singleLabel,
     detail: singleDetail,
-    unitsIncluded: 1,
+    unitsIncluded: baseUnits,
     packagePrice: round(shop.effectivePrice),
-    effectiveUnitPrice: round(shop.effectivePrice),
+    effectiveUnitPrice: shop.effectivePrice / baseUnits,
     baselineSingleAtShop: baseline,
     savingsPerUnit: 0,
     hasActiveOffer: shop.hasActiveOffer,
@@ -92,7 +94,8 @@ function optionsForShop(
 
   for (const tier of shop.priceTiers) {
     if (!tier.quantity || tier.quantity < 2 || tier.price == null) continue;
-    const unit = round(tier.price / tier.quantity);
+    const units = tier.packagingId ? tier.quantity : tier.quantity * baseUnits;
+    const unit = tier.price / units;
     results.push({
       key: `tier:${shop.productAtShopId}:${tier.quantity}`,
       kind: 'tier',
@@ -100,15 +103,15 @@ function optionsForShop(
       shopName: shop.shopName,
       shopAddress: shop.shopAddress,
       productAtShopId: shop.productAtShopId,
-      label: `${tier.quantity} for ${money(tier.price)}`,
-      detail: `${money(unit)} per item · pack of ${tier.quantity}`,
-      unitsIncluded: tier.quantity,
+      label: tier.packagingId ? `Case of ${units} for ${money(tier.price)}` : `${tier.quantity} for ${money(tier.price)}`,
+      detail: `${money(unit)} per item · pack of ${units}`,
+      unitsIncluded: units,
       packagePrice: round(tier.price),
       effectiveUnitPrice: unit,
       baselineSingleAtShop: baseline,
       savingsPerUnit: round(baseline - unit),
-      hasActiveOffer: shop.hasActiveOffer,
-      offerExpiryDate: shop.offerExpiryDate,
+      hasActiveOffer: false,
+      offerExpiryDate: null,
       isBestValue: false,
     });
   }
@@ -128,7 +131,7 @@ function optionsForShop(
     if (totalUnits <= buyQty) continue;
 
     const packagePrice = round(buyQty * shop.effectivePrice);
-    const unit = round(packagePrice / totalUnits);
+    const unit = packagePrice / (totalUnits * baseUnits);
 
     results.push({
       key: `bundle:${bundle.id}:${shop.productAtShopId}`,
@@ -139,7 +142,7 @@ function optionsForShop(
       productAtShopId: shop.productAtShopId,
       label: bundleLabel(bundle, buyQty, freeQty),
       detail: `Pay for ${buyQty}, take ${totalUnits} · ${money(packagePrice)} total`,
-      unitsIncluded: totalUnits,
+      unitsIncluded: totalUnits * baseUnits,
       packagePrice,
       effectiveUnitPrice: unit,
       baselineSingleAtShop: baseline,

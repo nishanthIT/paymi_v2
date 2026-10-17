@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-14",
+  "backend": {
+    "fullSuite": {
+      "passed": 120,
+      "failed": 0,
+      "conditionalSkipped": 1
+    },
+    "separateSlowDatabaseTest": {
+      "passed": 1,
+      "delayMsPerPacket": 350
+    },
+    "focusedServices": {
+      "passed": 21
+    },
+    "focusedChat": {
+      "passed": 19
+    }
+  },
+  "mobile": {
+    "testsPassed": 11,
+    "typecheck": "PASS",
+    "lint": "PASS"
+  },
+  "gitDiffCheck": "PASS",
+  "liveHttp": {
+    "health": 200,
+    "session": 200,
+    "chat": 200
+  },
+  "dataPreservation": {
+    "chatRows": 33,
+    "messageRows": 64,
+    "participantRows": 77,
+    "fingerprintsUnchanged": true
+  },
+  "orphanDecision": "Three DMs (four messages) remain restricted pending verified ownership, as confirmed by the owner.",
+  "deviceTesting": "NOT TESTED; owner checklist in backend-services-fix.md",
+  "nativeBuilds": "Not performed; owner handles builds and submission."
+}

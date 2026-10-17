@@ -18,7 +18,7 @@ const NEWS_PREVIEW_COUNT = 6;
 
 /** Home: hero ad carousel, quick actions and the latest news. */
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, activeSupermarket, shopsError, refreshSupermarkets } = useAuth();
   const router = useRouter();
 
   const ads = useAdvertisements();
@@ -28,14 +28,15 @@ export default function HomeScreen() {
   const [viewerUri, setViewerUri] = useState<string | null>(null);
 
   const firstName = user?.name?.split(' ')[0] ?? 'there';
+  const shopName = activeSupermarket?.name ?? 'My Supermarkets';
   const newsItems = news.data?.slice(0, NEWS_PREVIEW_COUNT) ?? [];
 
   const { refetch: refetchAds } = ads;
   const { refetch: refetchNews } = news;
   const { refetch: refetchPromotions } = promotions;
   const refetchAll = useCallback(
-    () => Promise.all([refetchAds(), refetchNews(), refetchPromotions()]),
-    [refetchAds, refetchNews, refetchPromotions],
+    () => Promise.all([refetchAds(), refetchNews(), refetchPromotions(), refreshSupermarkets()]),
+    [refetchAds, refetchNews, refetchPromotions, refreshSupermarkets],
   );
   const anyPaused = [ads, news, promotions].some((q) => q.fetchStatus === 'paused');
   const { refreshing, onRefresh } = usePullToRefresh(refetchAll, anyPaused ? 'paused' : 'idle');
@@ -55,9 +56,35 @@ export default function HomeScreen() {
         }
       >
         <Animated.View entering={FadeInUp.duration(400)} style={styles.header}>
-          <Text style={styles.greeting}>Hi {firstName} </Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.greeting} numberOfLines={1}>Hi {firstName}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Current shop: ${shopName}. Switch supermarket`}
+              accessibilityHint="Opens your supermarkets so you can choose another shop"
+              onPress={() => router.push('/(app)/supermarkets')}
+              style={({ pressed }) => [styles.shopSwitcher, pressed && styles.shopSwitcherPressed]}
+            >
+              <Text style={styles.shopName} numberOfLines={1} ellipsizeMode="tail">
+                {shopName}
+              </Text>
+              <Ionicons name="storefront-outline" size={25} color={Colors.light.text} />
+            </Pressable>
+          </View>
           <Text style={styles.subtitle}>Here’s what’s new today</Text>
         </Animated.View>
+
+        {(shopsError || !activeSupermarket) && (
+          <Pressable accessibilityRole="button" onPress={() => router.push('/(app)/supermarkets')}
+            style={[styles.shopSwitcher, { marginBottom: Spacing.md, padding: Spacing.md }]}>
+            <Ionicons name="storefront-outline" size={22} color={Colors.light.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: Colors.light.text, fontWeight: '700' }}>Open your shop workspace</Text>
+              <Text style={{ color: Colors.light.textSecondary }}>{shopsError || 'Choose a shop to access its lists, people and daily records.'}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={Colors.light.primary} />
+          </Pressable>
+        )}
 
         {/* Hero advertisements */}
         <Animated.View entering={FadeInDown.duration(400).delay(80)}>
@@ -78,7 +105,7 @@ export default function HomeScreen() {
           <QuickAction
             icon="pricetags"
             label="Promotions"
-            onPress={() => router.push('/(app)/promotions')}
+            onPress={() => router.push('/promotions')}
           />
           <QuickAction
             icon="pricetag"
@@ -171,11 +198,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.xs,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
   greeting: {
+    flex: 1,
+    minWidth: 0,
     fontSize: 24,
     fontWeight: '800' as const,
     letterSpacing: -0.3,
     color: Colors.light.text,
+  },
+  shopSwitcher: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: Spacing.sm,
+    flexShrink: 1,
+    maxWidth: '48%',
+    minHeight: 44,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    backgroundColor: Colors.light.surfaceAlt,
+  },
+  shopSwitcherPressed: {
+    backgroundColor: Colors.light.primaryLight,
+    borderColor: Colors.light.borderStrong,
+  },
+  shopName: {
+    flexShrink: 1,
+    minWidth: 0,
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.light.text,
+    textAlign: 'right',
   },
   subtitle: {
     ...Typography.bodySmall,

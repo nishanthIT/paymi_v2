@@ -1,5 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
+import { fetchAssignableEmployees } from '../api';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, Pressable, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -23,6 +25,8 @@ interface EmployeeFormSheetProps {
 /** Add / edit a shop employee, including what they can do in each shop tool. */
 export function EmployeeFormSheet({ visible, employee, onClose, onSubmit, submitting }: EmployeeFormSheetProps) {
   const isEdit = !!employee;
+  const [existingId, setExistingId] = useState<number | null>(null);
+  const assignable = useQuery({ queryKey: ['employees', 'assignable'], queryFn: fetchAssignableEmployees, enabled: visible && !isEdit });
   const credentialsLocked = !!employee?.credentialsLocked;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -36,6 +40,7 @@ export function EmployeeFormSheet({ visible, employee, onClose, onSubmit, submit
   if (key !== lastKey) {
     setLastKey(key);
     if (key) {
+      setExistingId(null);
       setName(employee?.name ?? '');
       setEmail(employee?.email ?? '');
       setPassword('');
@@ -45,6 +50,7 @@ export function EmployeeFormSheet({ visible, employee, onClose, onSubmit, submit
   }
 
   const handleSubmit = async () => {
+    if (existingId) { await onSubmit({ name: '', existingEmployeeId: existingId, permissions }); return; }
     const next: typeof errors = {};
     if (!name.trim()) next.name = 'Name is required';
     const emailError = credentialsLocked ? null : validateEmail(email.trim());
@@ -72,7 +78,13 @@ export function EmployeeFormSheet({ visible, employee, onClose, onSubmit, submit
             : 'They will sign in with these credentials and can only use this shop.'}
         </Text>
 
-        <TextField
+        {!isEdit && !!assignable.data?.length && <View style={{ marginBottom: Spacing.md }}>
+          <Text style={styles.subtitle}>Or assign a team member from another of your shops:</Text>
+          {assignable.data.map((person) => <Pressable key={person.id} accessibilityRole="button" accessibilityState={{ selected: existingId === person.id }} onPress={() => setExistingId(existingId === person.id ? null : person.id)} style={{ padding: 12, minHeight: 48, borderWidth: 1, borderRadius: 12, marginBottom: 6, borderColor: Colors.light.border, backgroundColor: existingId === person.id ? Colors.light.primaryLight : Colors.light.backgroundCard }}>
+            <Text style={{ color: Colors.light.text, fontWeight: '600' }}>{person.name}{existingId === person.id ? ' ✓' : ''}</Text><Text style={{ color: Colors.light.textSecondary }}>{person.email}</Text>
+          </Pressable>)}
+        </View>}
+        {!existingId && <><TextField
           label="Name"
           icon="person-outline"
           value={name}
@@ -109,10 +121,12 @@ export function EmployeeFormSheet({ visible, employee, onClose, onSubmit, submit
           </>
         )}
 
+        </>}
+
         <EmployeeAccessEditor value={permissions} onChange={setPermissions} />
 
         <PrimaryButton
-          title={isEdit ? 'Save Changes' : 'Add Employee'}
+          title={isEdit ? 'Save Changes' : existingId ? 'Assign to This Shop' : 'Add Employee'}
           onPress={handleSubmit}
           loading={submitting}
           style={styles.submit}

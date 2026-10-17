@@ -9,6 +9,7 @@ import { getChatSocket } from '@/features/chat/socket';
 
 interface TaskAssignedPayload {
   taskId?: string;
+  supermarketId?: string;
   taskName?: string;
   assignedBy?: string;
   shopName?: string;
@@ -37,6 +38,7 @@ export function useTaskNotifications() {
       if (!socket || cancelled) return;
 
       const onAssigned = (payload?: TaskAssignedPayload) => {
+        if (payload?.supermarketId !== user?.shopId) return;
         // Socket reconnects can replay the event — notify once per task.
         if (payload?.taskId) {
           if (seenTaskIds.current.has(payload.taskId)) return;
@@ -65,5 +67,5 @@ export function useTaskNotifications() {
       cancelled = true;
       cleanup?.();
     };
-  }, [isAuthenticated, isEmployee, queryClient, router, showToast]);
+  }, [user?.shopId, isAuthenticated, isEmployee, queryClient, router, showToast]);
 }

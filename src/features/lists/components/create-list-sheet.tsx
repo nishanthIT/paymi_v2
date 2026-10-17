@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
@@ -18,12 +18,15 @@ export function CreateListSheet({ visible, onClose, onCreate }: CreateListSheetP
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const resetKey = visible;
+  const [previousResetKey, setPreviousResetKey] = useState(resetKey);
+  if (previousResetKey !== resetKey) {
+    setPreviousResetKey(resetKey);
     if (visible) {
       setName('');
       setError(null);
     }
-  }, [visible]);
+  }
 
   const handleCreate = () => {
     const clean = name.trim();

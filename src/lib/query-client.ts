@@ -23,7 +23,7 @@ AppState.addEventListener('change', (status) => {
   }
 });
 
-export const queryClient = new QueryClient({
+export const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       // Serve cached data instantly, refresh silently in the background.
@@ -39,11 +39,12 @@ export const queryClient = new QueryClient({
   },
 });
 
-/** Persists the query cache to disk for instant cold-start rendering. */
-export const queryPersister = createAsyncStoragePersister({
+// The exported binding always points at the mounted identity + supermarket cache.
+export let queryClient = createQueryClient();
+export const setActiveQueryClient = (client: QueryClient) => { queryClient = client; };
+export const createQueryPersister = (scopeKey: string) => createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: 'paymi.query-cache.v1',
-  throttleTime: 1000,
+  key: `paymi.query-cache.v2.${scopeKey}`,
+  throttleTime: 200,
 });
-
 export const QUERY_PERSIST_MAX_AGE = 7 * DAY_MS;

@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/toast';
 
 import * as listApi from '../api';
 import { listKeys } from '../keys';
-import type { BundleCheckResult, BundleOffer, ListDetails, Product } from '../types';
+import type { BundleCheckResult, BundleOffer, Product } from '../types';
 import { useAddProduct } from './use-list-details';
 
 /** Pack size options for a product (single / pack / case with unit prices). */
@@ -62,20 +62,19 @@ export function useSmartAdd(listId: string | undefined) {
     onSettled: (_data, _error, input) => {
       queryClient.invalidateQueries({ queryKey: listKeys.detail(input.listId) });
       queryClient.invalidateQueries({ queryKey: listKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['list'] });
     },
   });
 
   const addSingleNow = useCallback(
     (product: Product, quantity: number, addOptions?: AddOptions) => {
       if (!listId) return;
-      const cached = queryClient.getQueryData<ListDetails>(listKeys.detail(listId));
-      const wasInList = (cached?.products ?? []).some((p) => p.productId === product.id);
       addProduct.mutate(
         { listId, product, quantity, ...addOptions },
         {
           onSuccess: (result) => {
             showToast(
-              wasInList || result?.alreadyExists
+              result?.alreadyExists
                 ? `Quantity increased — ${product.title}`
                 : `Added ${product.title}`,
               'success',
@@ -85,7 +84,7 @@ export function useSmartAdd(listId: string | undefined) {
         },
       );
     },
-    [addProduct, listId, queryClient, showToast],
+    [addProduct, listId, showToast],
   );
 
   /**

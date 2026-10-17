@@ -23,6 +23,11 @@ const LEGACY_TOKEN_KEY = 'auth_token';
 const LEGACY_ALT_TOKEN_KEY = 'authToken';
 const USER_KEY = 'paymi.user';
 const LEGACY_USER_KEY = 'user';
+const SIGNED_OUT_KEY = 'paymi.session-signed-out';
+let signedOut = false;
+async function isSignedOut() {
+  return signedOut || await AsyncStorage.getItem(SIGNED_OUT_KEY) === '1';
+}
 
 const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
 
@@ -52,11 +57,19 @@ async function deleteItem(key: string) {
 }
 
 export const secureStorage = {
+  async setSession(token: string, userJson: string) {
+    signedOut = true;
+    await AsyncStorage.setItem(SIGNED_OUT_KEY, '1');
+    await setItem(USER_KEY, userJson);
+    await setItem(TOKEN_KEY, token);
+    await AsyncStorage.removeItem(SIGNED_OUT_KEY);
+    signedOut = false;
+  },
   async setToken(token: string) {
     await setItem(TOKEN_KEY, token);
   },
   async getToken(): Promise<string | null> {
-    return getItem(TOKEN_KEY);
+    return await isSignedOut() ? null : getItem(TOKEN_KEY);
   },
   async clearToken() {
     await deleteItem(TOKEN_KEY);
@@ -69,20 +82,28 @@ export const secureStorage = {
     await setItem(USER_KEY, userJson);
   },
   async getUser(): Promise<string | null> {
-    return getItem(USER_KEY);
+    return await isSignedOut() ? null : getItem(USER_KEY);
   },
   async clearUser() {
     await deleteItem(USER_KEY);
     await AsyncStorage.removeItem(LEGACY_USER_KEY);
   },
   async clearAll() {
-    await Promise.allSettled([
+    signedOut = true;
+    // The non-secret marker prevents failed Keychain removal or legacy migration restoring a session.
+    const marker = await Promise.allSettled([AsyncStorage.setItem(SIGNED_OUT_KEY, '1')]);
+    const results = await Promise.allSettled([
       deleteItem(TOKEN_KEY),
       deleteItem(USER_KEY),
       AsyncStorage.removeItem(LEGACY_TOKEN_KEY),
       AsyncStorage.removeItem(LEGACY_ALT_TOKEN_KEY),
       AsyncStorage.removeItem(LEGACY_USER_KEY),
     ]);
+    if (results.some(result => result.status === 'rejected')) {
+      throw new Error(marker[0].status === 'fulfilled'
+        ? 'Signed out, but some saved sign-in data could not be erased. Retry when device storage is available.'
+        : 'Saved sign-in data could not be erased. Keep this device secure and retry signing out.');
+    }
   },
   /**
    * Moves any token previously stored in AsyncStorage under the legacy key
@@ -90,6 +111,7 @@ export const secureStorage = {
    */
   async migrateLegacyToken() {
     try {
+      if (await isSignedOut()) return;
       const existing = await getItem(TOKEN_KEY);
       if (existing) return;
       let legacy = await AsyncStorage.getItem(LEGACY_TOKEN_KEY);

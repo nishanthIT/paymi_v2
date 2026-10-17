@@ -1,0 +1,99 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ second shop creation is transactional and concurrent/lost-response retries create exactly one shop (766.977977ms)
+✔ directory, default, and explicit selection require verified CUSTOMER ownership (60.063792ms)
+📡 Emitted list_created to shop_cmvafz7dk0002aqvp85k6vpf7_lists
+📡 Emitted list_created to shop_cmvafz7w1000gaqvpq4l5n4r5_lists
+Found 1 in-stock shops with product cmvafz7dy000daqvpujmblpv8
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvafz7dk0002aqvp85k6vpf7_lists
+📦 Fetching list from DATABASE (no cache): cmvafz7zp000maqvpee0k92by
+📦 Database isPurchased states: [
+  {
+    id: 'cmvafz80w000qaqvp61g3w1t5',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+Found 1 in-stock shops with product cmvafz7dy000daqvpujmblpv8
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvafz7w1000gaqvpq4l5n4r5_lists
+📦 Fetching list from DATABASE (no cache): cmvafz804000oaqvprwmjfbwd
+📦 Database isPurchased states: [
+  {
+    id: 'cmvafz81r000saqvp4my1vlcw',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✅ Toggle purchased request: {
+  listId: 'cmvafz7zp000maqvpee0k92by',
+  listProductId: 'cmvafz80w000qaqvp61g3w1t5',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvafz7dk0002aqvp85k6vpf7_lists
+✅ Purchased status toggled: { listProductId: 'cmvafz80w000qaqvp61g3w1t5', isPurchased: true }
+✔ lists, Collect Mode and retail stock are isolated; supplier prices and stock remain unchanged (189.210732ms)
+✔ employee access is explicit per shop, feature-specific, and never grants creation or company access (550.893496ms)
+✔ operational records and history IDs never cross supermarkets (177.017745ms)
+✔ company supplier endpoints cannot mutate or transfer into customer shops (52.779222ms)
+✔ list backfill preserves data, reports ambiguity, and supports repeatable apply and recovery (65.011135ms)
+✔ company supermarket directory is separate, searchable, permission-controlled and auditable (118.481408ms)
+✔ waste, age records, payouts, shifts, certificates and private photos remain shop-scoped (218.596078ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ concurrent unavailable items from different suppliers use one list and preserve row IDs and quantities (588.762175ms)
+📦 Fetching list from DATABASE (no cache): cmvafz9xw000qaq0igz248jpb
+📦 Database isPurchased states: [
+  {
+    id: 'cmvafz9xx000saq0ib6byuzs2',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+✔ consolidated read includes legacy and new supplier groups without rewriting history (49.984002ms)
+✔ collection preserves existing account, tracking, shop and read/edit permissions (501.33695ms)
+📦 Update quantity request: {
+  listId: 'cmvafz9z0000uaq0ip4u13cz3',
+  productAtShopId: undefined,
+  listProductId: 'cmvafz9xu000maq0itr03fupn',
+  quantity: 4,
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+📡 Emitted list_product_updated to shop_cmvafz9k30002aq0ipa02uwms_lists
+✅ Quantity updated: { listProductId: 'cmvafz9xu000maq0itr03fupn', quantity: 4 }
+✅ Toggle purchased request: {
+  listId: 'cmvafz9z0000uaq0ip4u13cz3',
+  listProductId: 'cmvafz9xu000maq0itr03fupn',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvafz9k30002aq0ipa02uwms_lists
+✅ Purchased status toggled: { listProductId: 'cmvafz9xu000maq0itr03fupn', isPurchased: true }
+✔ original item IDs support editing, collecting and moving back to an ordinary list (48.427442ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ chiller, freezer and legacy freezer limits survive create, edit and reload; alerts use saved range (835.510717ms)
+✔ both age record APIs accept either, both or neither product details; current records can clear fields (269.687731ms)
+✔ payouts persist, list, filter and keep their automatic creation timestamp on edits (101.406335ms)
+✔ additive age migration preserves existing rows and allows independent null fields (16.639456ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ employee saves -23 freezer and positive fridge readings; warm freezer alarms are saved, not rejected (1550.98962ms)
+✔ category suggestions combine existing catalog with shop-local saved names and never overwrite global taxonomy (51.919304ms)
+✔ product selector searches catalogue names/barcodes, filters categories, and excludes another shop private products (29.148462ms)
+✔ age-record lookups require current membership and feature permission; read-only users cannot save new categories (24.679653ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8761.298993

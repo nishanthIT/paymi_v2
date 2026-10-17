@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-17T06:34:09.768403+00:00",
+  "backend": {
+    "pass": 163,
+    "fail": 0,
+    "skip": 1,
+    "skipped": "Conditional TEST_DB_LATENCY_MS employee lifecycle test; no injected latency in this run",
+    "log": "out-of-stock-normal-list-backend-tests.log"
+  },
+  "mobile": {
+    "pass": 38,
+    "fail": 0,
+    "typecheck": "PASS",
+    "eslint": "PASS"
+  },
+  "liveReadOnlyApi": "PASS",
+  "mainSchemaMigrations": "APPLIED, preservation verified",
+  "nativeDevice": "NOT TESTED \u2014 no connected app/browser",
+  "nativeBuilds": "NOT RUN \u2014 owner-managed",
+  "hostedDeployment": "NOT RUN",
+  "adminFullTypecheck": "Pre-existing AddProduct/Chat/Shops errors; targeted price report checks passed",
+  "sourceManifest": "out-of-stock-source-sha256.json"
+}

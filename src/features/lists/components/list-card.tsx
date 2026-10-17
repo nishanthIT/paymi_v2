@@ -9,7 +9,7 @@ import type { ShoppingList } from '../types';
 interface ListCardProps {
   list: ShoppingList;
   onPress: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 function formatUpdated(iso: string): string {
@@ -59,14 +59,16 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
           <Text style={styles.updated}>{formatUpdated(list.updatedAt)}</Text>
         </View>
       </View>
-      <Pressable
-        onPress={onDelete}
+      {onDelete && <Pressable
+        onPress={event => { event.stopPropagation(); onDelete(); }}
+        accessibilityRole="button"
+        accessibilityLabel={`Remove ${list.name}`}
         disabled={isPending}
         hitSlop={10}
         style={({ pressed }) => [styles.deleteButton, pressed && styles.deletePressed]}
       >
         <Ionicons name="trash-outline" size={18} color={Colors.light.textLight} />
-      </Pressable>
+      </Pressable>}
     </Pressable>
   );
 }

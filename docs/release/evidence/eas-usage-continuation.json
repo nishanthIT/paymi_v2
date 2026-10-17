@@ -1,0 +1,87 @@
+{
+  "account": {
+    "name": "n1sh",
+    "plan": "Free",
+    "concurrencies": {
+      "total": 1,
+      "android": 1,
+      "ios": 1
+    },
+    "billingPeriod": {
+      "start": "2026-10-01T00:00:00.000Z",
+      "end": "2026-11-01T00:00:00.000Z",
+      "daysElapsed": 12,
+      "daysRemaining": 20,
+      "totalDays": 31
+    }
+  },
+  "builds": {
+    "plan": {
+      "used": 3,
+      "limit": 30,
+      "percentUsed": 10
+    },
+    "overage": {
+      "count": 0,
+      "costCents": 0,
+      "byWorkerSize": []
+    },
+    "byPlatformAndSize": [
+      {
+        "platform": "ios",
+        "resourceClass": "medium",
+        "count": 3
+      }
+    ],
+    "ios": {
+      "plan": {
+        "used": 3,
+        "limit": 15,
+        "percentUsed": 20
+      }
+    },
+    "android": {
+      "plan": {
+        "used": 0,
+        "limit": 15,
+        "percentUsed": 0
+      }
+    }
+  },
+  "updates": {
+    "uniqueUpdaters": {
+      "plan": {
+        "used": 0,
+        "limit": 1000,
+        "percentUsed": 0
+      },
+      "overage": {
+        "count": 0,
+        "costCents": 0
+      }
+    },
+    "bandwidth": {
+      "plan": {
+        "usedBytes": 0,
+        "usedFormatted": "0.00 MiB",
+        "limitBytes": 107374182400,
+        "limitFormatted": "100 GiB",
+        "percentUsed": 0
+      },
+      "overage": {
+        "usedBytes": 0,
+        "usedFormatted": "0.00 MiB",
+        "costCents": 0
+      }
+    },
+    "overageCostCents": 0
+  },
+  "billing": {
+    "addons": [],
+    "estimated": {
+      "overageCents": 0,
+      "totalCents": 0
+    }
+  },
+  "billingUrl": "https://expo.dev/accounts/n1sh/settings/billing"
+}

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -53,7 +53,10 @@ export function AddNewProductSheet({
 
   const { data: categories = [], isLoading: loadingCategories } = useCategories(visible);
 
-  useEffect(() => {
+  const resetKey = `${visible}:${barcode}`;
+  const [previousResetKey, setPreviousResetKey] = useState(resetKey);
+  if (previousResetKey !== resetKey) {
+    setPreviousResetKey(resetKey);
     if (visible) {
       setTitle('');
       setRetailSize('');
@@ -63,7 +66,7 @@ export function AddNewProductSheet({
       setTrackStock(false);
       setStockText('');
     }
-  }, [visible, barcode]);
+  }
 
   // Show the full list again when the query is just the selected value.
   const filteredCategories = useMemo(() => {

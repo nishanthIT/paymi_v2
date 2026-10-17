@@ -1,0 +1,52 @@
+ M package.json
+ M prisma/schema.prisma
+ M server.js
+ M src/controller/addProduct.js
+ M src/controller/auth.js
+ M src/controller/chat.js
+ M src/controller/dashbord/customerEmployees.js
+ M src/controller/makeList.js
+ M src/middleware/authware.js
+ M src/realtime/socketServer.js
+ M src/routes/adminRoutes.js
+ M src/routes/ageRestrictedRecordRoutes.js
+ M src/routes/ageRestrictionRecordRoutes.js
+ M src/routes/authRoutes.js
+ M src/routes/certificateRoutes.js
+ M src/routes/cleaningRoutes.js
+ M src/routes/compareRoutes.js
+ M src/routes/employeeRoutes.js
+ M src/routes/expiryRoutes.js
+ M src/routes/fridgeRoutes.js
+ M src/routes/incidentRoutes.js
+ M src/routes/listRoutes.js
+ M src/routes/shiftSheetRoutes.js
+ M src/routes/shopRoutes.js
+ M src/routes/supplierPayoutRoutes.js
+ M src/routes/taskRoutes.js
+ M src/routes/wasteRoutes.js
+ M src/services/accessControl.js
+ M src/services/chatAccess.js
+ M src/services/expiryNotificationService.js
+ M src/services/membershipService.js
+ M tests/helpers/harness.js
+ M tests/migration.test.js
+?? docs/
+?? prisma/migrations/20261011120000_default_supermarket_ownership/
+?? prisma/migrations/20261011160000_multisupermarket_operations/
+?? prisma/migrations/20261012100000_optional_age_record_products/
+?? scripts/lib/defaultSupermarketMigration.js
+?? scripts/lib/listScopeMigration.js
+?? scripts/migrateDefaultSupermarkets.js
+?? scripts/migrateListScopes.js
+?? src/middleware/listScope.js
+?? src/middleware/privateUploads.js
+?? src/middleware/supplierScope.js
+?? src/routes/adminSupermarketRoutes.js
+?? src/routes/supermarketRoutes.js
+?? src/services/ageRecordValidation.js
+?? src/services/supermarketProvisioning.js
+?? src/services/temperatureValidation.js
+?? tests/defaultSupermarkets.test.js
+?? tests/multiSupermarkets.test.js
+?? tests/shopTools.test.js

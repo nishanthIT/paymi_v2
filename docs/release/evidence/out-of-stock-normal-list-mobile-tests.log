@@ -1,0 +1,46 @@
+✔ label drafts, saved work and print history separate colliding roles and shops without importing ambiguous legacy data (0.867257ms)
+✔ offline identity cannot restore an expired, malformed or different-role session (0.2543ms)
+✔ conversation dates use local time, Yesterday and older dates across year boundaries (16.345099ms)
+✔ activity sorting survives stale timestamps and out-of-order socket messages (1.230147ms)
+✔ simultaneous global and open-thread delivery does not duplicate messages; moderation removes every cached page copy (0.978921ms)
+✔ thread dates use the viewer calendar day, including midnight and historical years (0.396733ms)
+✔ Yesterday follows local calendar dates across both UK daylight-saving boundaries (0.362109ms)
+✔ day separators stay above the oldest message in each day across loaded pages (0.21508ms)
+✔ floating date follows the top visible inverted row regardless of event order or offscreen messages (0.160796ms)
+✔ shop recovery restores employee list access after an initial directory outage without switching a revoked workspace (0.223397ms)
+✔ shop read/write/edit controls fail closed for missing, mismatched and read-only memberships (0.091858ms)
+✔ persisted list edits resume after restart with original IDs, quantity, urgency and stock, including moves and shared lists (4.248821ms)
+✔ legacy offline edits without list identity are rejected without contacting an arbitrary list (0.489791ms)
+✔ one overview card combines only already accessible legacy/canonical lists without mutating raw IDs or tracked access (0.321527ms)
+✔ shared Collect Mode keeps supplier identity and every real row through collecting, filters and undo (1.405406ms)
+✔ quantity, urgency and collection updates affect the real row/source only and never merge duplicate products (0.167347ms)
+✔ failed move restores its removed source while retaining concurrent changes to another accessible list (0.150473ms)
+✔ ordinary destination pickers retain only original accessible lists, never a virtual or legacy out-of-stock target (0.084137ms)
+✔ original-list management includes empty and tracked sources with real identities (0.081731ms)
+✔ delete resolves only current accessible source lists and shared sources are untracked, never deleted (0.118182ms)
+✔ adding a product to Out of Stock never changes matching items in legacy/tracked supplier rows (0.163417ms)
+✔ list and Collect Mode use the same aggregate cache and never collapse a pending list into a usable server target (0.05704ms)
+✔ manual sale separates VAT, net revenue, margin and markup (0.165931ms)
+✔ target margin and target markup use distinct inverse formulas (0.092362ms)
+✔ VAT and profit adjustments recalculate rounded target selling prices (0.081021ms)
+✔ case and bulk totals retain fractional unit costs without cumulative rounding (0.068666ms)
+✔ rounded target prices achieve the percentage even with fractional unit costs (0.072392ms)
+✔ manual losses and zero values produce finite results and honest undefined ratios (0.074422ms)
+✔ invalid quantities, percentages and excessive values cannot produce misleading results (0.122922ms)
+✔ decimal input supports pounds and fractional percentages without interpreting garbage as zero (0.138183ms)
+✔ temperature input preserves negatives and zero while rejecting unfinished or malformed values (0.146027ms)
+✔ payout date filters cover the full local day including midnight across UTC boundaries (0.09057ms)
+✔ restored active/default preference never grants access or guesses among multiple shops (0.050613ms)
+✔ persistent cache names separate identity type, user, and supermarket (0.03987ms)
+✔ pending offline mutations block switching and replay only in their restored shop cache (1.305103ms)
+✔ uploads block switching, and scope generations invalidate stale responses even after switching back (0.101372ms)
+✔ freezer keypad defaults below zero, explicit plus preserves abnormal positive readings, and fridges remain positive (0.15659ms)
+✔ category search preserves legacy selections, deduplicates names, and only offers a distinct new category (0.131562ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 395.80489

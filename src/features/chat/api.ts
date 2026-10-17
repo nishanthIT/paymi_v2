@@ -1,3 +1,4 @@
+import { getSupermarketScope, beginScopedWrite, endScopedWrite } from '@/features/supermarkets/scope';
 import { API_CONFIG } from '@/config/api';
 import api from '@/services/api';
 import { secureStorage } from '@/utils/secureStorage';
@@ -109,7 +110,11 @@ export async function uploadChatFile(
   fileName: string,
   mimeType: string,
 ): Promise<UploadedFile> {
+  const scope = getSupermarketScope();
+  beginScopedWrite();
+  try {
   const token = await secureStorage.getToken();
+  if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
   const fileUri =
     uri.startsWith('file://') || uri.startsWith('content://') || uri.startsWith('http')
       ? uri
@@ -127,6 +132,7 @@ export async function uploadChatFile(
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
+      ...(scope.id ? { 'X-Supermarket-Id': scope.id } : {}),
     },
     body: formData,
   });
@@ -138,7 +144,9 @@ export async function uploadChatFile(
   if (!data?.success) {
     throw new Error(data?.message ?? 'Upload failed');
   }
+  if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
   return data.file as UploadedFile;
+  } finally { endScopedWrite(); }
 }
 
 /** Resolve a stored attachment path (e.g. /uploads/...) to a full URL. */

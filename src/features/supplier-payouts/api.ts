@@ -46,7 +46,8 @@ export async function fetchPayouts(params: {
 }): Promise<SupplierPayoutRecord[]> {
   try {
     const response = await api.get('/supplier-payouts', { params });
-    return response.data?.records ?? [];
+    if (!Array.isArray(response.data?.records)) throw new Error('Invalid payout response');
+    return response.data.records;
   } catch (error: any) {
     throw apiError(error, 'Could not load payout records');
   }

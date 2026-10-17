@@ -13,9 +13,11 @@ import { QuantityStepper } from './quantity-stepper';
 
 interface ListProductRowProps {
   item: ListProduct;
-  onQuantityChange: (quantity: number) => void;
-  onRemove: () => void;
+  onQuantityChange?: (quantity: number) => void;
+  onRemove?: () => void;
   onToggleUrgent?: () => void;
+  onOpenDetails: () => void;
+  onPreviewImage: (uri: string) => void;
 }
 
 /** Product row inside a list: image, price, quantity, remove — collected status is only tracked in Collect Mode. */
@@ -24,6 +26,8 @@ export const ListProductRow = React.memo(function ListProductRow({
   onQuantityChange,
   onRemove,
   onToggleUrgent,
+  onOpenDetails,
+  onPreviewImage,
 }: ListProductRowProps) {
   const imageUrl = getProductImageUrl(item.img, item.barcode);
   const price = item.hasActiveOffer && item.offerPrice != null ? item.offerPrice : item.lowestPrice;
@@ -31,67 +35,84 @@ export const ListProductRow = React.memo(function ListProductRow({
 
   return (
     <View style={[styles.card, isPending && styles.cardPending]}>
-      <View style={styles.imageWrapper}>
+      <Pressable
+        style={styles.imageWrapper}
+        disabled={!imageUrl}
+        accessibilityRole="button"
+        accessibilityLabel={`Preview image of ${item.productName}`}
+        onPress={(event) => {
+          event.stopPropagation();
+          if (imageUrl) onPreviewImage(imageUrl);
+        }}
+      >
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
         ) : (
           <Ionicons name="cube-outline" size={22} color={Colors.light.textLight} />
         )}
-      </View>
+      </Pressable>
 
       <View style={styles.body}>
-        <View style={styles.nameRow}>
-          <Text style={styles.name} numberOfLines={2}>
-            {item.productName}
-          </Text>
-          <SizeBadge
-            label={formatSizeLabel({
-              title: item.productName,
-              packetSize: item.packetSize,
-              retailSize: item.retailSize,
-            })}
-          />
-        </View>
-        {(item.isFreeItem || item.bundlePromotionId || item.isUrgent) && (
-          <View style={styles.badgeRow}>
-            {item.isUrgent && (
-              <View style={styles.urgentPill}>
-                <Ionicons name="alert-circle" size={10} color="#FFFFFF" />
-                <Text style={styles.urgentPillText}>URGENT</Text>
-              </View>
-            )}
-            {item.isFreeItem ? (
-              <View style={[styles.bundlePill, styles.freePill]}>
-                <Ionicons name="gift" size={10} color="#FFFFFF" />
-                <Text style={styles.bundlePillText}>FREE · Bundle</Text>
-              </View>
-            ) : item.bundlePromotionId ? (
-              <View style={styles.bundlePill}>
-                <Ionicons name="gift-outline" size={10} color={Colors.light.primary} />
-                <Text style={[styles.bundlePillText, styles.bundlePillTextPrimary]}>
-                  Bundle Offer{item.freeQuantity ? ` · +${item.freeQuantity} FREE` : ''}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        )}
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>£{price.toFixed(2)}</Text>
-          {item.hasActiveOffer && item.offerPrice != null && (
-            <Text style={styles.originalPrice}>£{item.originalPrice.toFixed(2)}</Text>
-          )}
-          {!!item.shopName && item.shopName !== 'Unknown Shop' && (
-            <Text style={styles.shop} numberOfLines={1}>
-              · {item.shopName}
+        <Pressable
+          onPress={onOpenDetails}
+          disabled={isPending}
+          accessibilityRole="button"
+          accessibilityLabel={`View details for ${item.productName}`}
+          style={({ pressed }) => [styles.productInfo, pressed && { opacity: 0.7 }]}
+        >
+          <View style={styles.nameRow}>
+            <Text style={styles.name} numberOfLines={2}>
+              {item.productName}
             </Text>
+            <SizeBadge
+              label={formatSizeLabel({
+                title: item.productName,
+                packetSize: item.packetSize,
+                retailSize: item.retailSize,
+              })}
+            />
+          </View>
+          {(item.isFreeItem || item.bundlePromotionId || item.isUrgent) && (
+            <View style={styles.badgeRow}>
+              {item.isUrgent && (
+                <View style={styles.urgentPill}>
+                  <Ionicons name="alert-circle" size={10} color="#FFFFFF" />
+                  <Text style={styles.urgentPillText}>URGENT</Text>
+                </View>
+              )}
+              {item.isFreeItem ? (
+                <View style={[styles.bundlePill, styles.freePill]}>
+                  <Ionicons name="gift" size={10} color="#FFFFFF" />
+                  <Text style={styles.bundlePillText}>FREE · Bundle</Text>
+                </View>
+              ) : item.bundlePromotionId ? (
+                <View style={styles.bundlePill}>
+                  <Ionicons name="gift-outline" size={10} color={Colors.light.primary} />
+                  <Text style={[styles.bundlePillText, styles.bundlePillTextPrimary]}>
+                    Bundle Offer{item.freeQuantity ? ` · +${item.freeQuantity} FREE` : ''}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           )}
-        </View>
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>£{price.toFixed(2)}</Text>
+            {item.hasActiveOffer && item.offerPrice != null && (
+              <Text style={styles.originalPrice}>£{item.originalPrice.toFixed(2)}</Text>
+            )}
+            {!!item.shopName && item.shopName !== 'Unknown Shop' && (
+              <Text style={styles.shop} numberOfLines={1}>
+                · {item.shopName}
+              </Text>
+            )}
+          </View>
+        </Pressable>
         <View style={styles.controls}>
-          <QuantityStepper
+          {onQuantityChange && !isPending ? <QuantityStepper
             value={item.quantity}
             onChange={onQuantityChange}
             compact
-          />
+          /> : <Text style={styles.shop}>Qty {item.quantity}</Text>}
           {onToggleUrgent && (
             <Pressable
               onPress={onToggleUrgent}
@@ -106,14 +127,14 @@ export const ListProductRow = React.memo(function ListProductRow({
               />
             </Pressable>
           )}
-          <Pressable
+          {onRemove && <Pressable
             onPress={onRemove}
             disabled={isPending}
             hitSlop={10}
             style={({ pressed }) => [styles.removeButton, pressed && styles.removePressed]}
           >
             <Ionicons name="trash-outline" size={16} color={Colors.light.textLight} />
-          </Pressable>
+          </Pressable>}
         </View>
       </View>
     </View>
@@ -152,6 +173,9 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    gap: 4,
+  },
+  productInfo: {
     gap: 4,
   },
   name: {

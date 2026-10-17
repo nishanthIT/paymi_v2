@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-13",
+  "timezone": "Asia/Kolkata",
+  "scope": "Chat moderation and account menu refinement; uncommitted working tree",
+  "database": "disposable local PostgreSQL only",
+  "production_migration_applied": false,
+  "app_store_verdict": "BLOCKED",
+  "google_play_verdict": "BLOCKED",
+  "checks": [
+    {
+      "name": "backend regression",
+      "status": "PASS",
+      "executed": true,
+      "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test node --test --test-concurrency=1 tests/*.test.js",
+      "cwd": "product-A-backend",
+      "exit_code": 0,
+      "passed": 113,
+      "failed": 0,
+      "skipped": 1,
+      "log": "moderation-backend-final.log",
+      "note": "Conditional latency case run separately; additive release migrations, account deletion, report/suspension/removal and worker rollback/recovery included."
+    },
+    {
+      "name": "injected database latency",
+      "status": "PASS",
+      "executed": true,
+      "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test TEST_DB_LATENCY_MS=100 node --test tests/latency.test.js",
+      "cwd": "product-A-backend",
+      "exit_code": 0,
+      "passed": 1,
+      "log": "moderation-latency.log"
+    },
+    {
+      "name": "mobile tests",
+      "status": "PASS",
+      "executed": true,
+      "command": "node --import ./scripts/register-ts-hook.mjs --test --test-isolation=none tests/*.test.mjs",
+      "cwd": "paymi_v2",
+      "exit_code": 0,
+      "passed": 9,
+      "log": "moderation-mobile-tests-final.log"
+    },
+    {
+      "name": "mobile TypeScript",
+      "status": "PASS",
+      "executed": true,
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "cwd": "paymi_v2",
+      "exit_code": 0,
+      "log": "moderation-mobile-typecheck-final.log"
+    },
+    {
+      "name": "changed mobile files ESLint",
+      "status": "PASS",
+      "executed": true,
+      "command": "node node_modules/eslint/bin/eslint.js src/app/chat-safety.tsx 'src/app/(app)/chat/[id].tsx' 'src/app/(app)/(tabs)/profile.tsx' src/app/about.tsx src/features/chat/components/message-bubble.tsx src/features/chat/socket.ts src/features/chat/hooks/use-chat-thread.ts src/features/chat/hooks/use-chats.ts src/services/api.ts tests/chat-moderation-cache.test.mjs",
+      "cwd": "paymi_v2",
+      "exit_code": 0,
+      "log": "moderation-mobile-lint-final.log"
+    },
+    {
+      "name": "admin server rendering",
+      "status": "PASS",
+      "executed": true,
+      "command": "node --test tests/moderation-render.test.mjs",
+      "cwd": "fornt-end-save",
+      "exit_code": 0,
+      "passed": 2,
+      "log": "moderation-admin-render-final.log",
+      "note": "Identity mapping, HTML escaping and queue empty state; not browser interaction tests."
+    },
+    {
+      "name": "full admin TypeScript",
+      "status": "FAIL",
+      "executed": true,
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json",
+      "cwd": "fornt-end-save",
+      "exit_code": 2,
+      "log": "moderation-admin-typecheck-final.log",
+      "note": "Existing errors in AddProduct.tsx, Chat.tsx and Shops.tsx. No errors in the new Moderation.tsx."
+    },
+    {
+      "name": "native builds and store submission",
+      "status": "NOT TESTED",
+      "executed": false,
+      "note": "Owner handles these. No new native builds or store actions in this refinement batch."
+    },
+    {
+      "name": "real-device and browser interaction tests",
+      "status": "BLOCKED",
+      "executed": false,
+      "note": "No enabled browser/app surfaces or connected test devices used. Acceptance checklist in moderation-refinement.md."
+    },
+    {
+      "name": "paymi_v2 tracked diff whitespace",
+      "status": "PASS",
+      "executed": true,
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "name": "product-A-backend tracked diff whitespace",
+      "status": "PASS",
+      "executed": true,
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "name": "fornt-end-save tracked diff whitespace",
+      "status": "PASS",
+      "executed": true,
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ]
+}

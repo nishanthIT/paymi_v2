@@ -1,0 +1,25 @@
+{
+  "id": "57eeca9a-6fdd-4f6c-ac29-f537581ef014",
+  "status": "FINISHED",
+  "platform": "IOS",
+  "appIdentifier": "com.n1sh.paymi",
+  "appVersion": "1.1.0",
+  "appBuildVersion": "30",
+  "gitCommitHash": "abd957166519f26f8ff0a0132bec32adc2078be4",
+  "createdAt": "2026-10-12T23:47:57.996Z",
+  "completedAt": "2026-10-12T23:53:17.725Z",
+  "fingerprint": {
+    "id": "01a13284-0fc7-7148-a507-e1656d76bcad",
+    "hash": "d38ccaea2b48473ab31f20013b0e9327aafa2a3f"
+  },
+  "artifactPath": "release-artifacts/ios-30/paymi-1.1.0-30.ipa",
+  "sha256": "924ea9cd499ee1b10079827893aeb845f1f454498d41e3cadaa31df750030a9e",
+  "bytes": 25592122,
+  "logs": [
+    "release-artifacts/ios-30/build-0.log",
+    "release-artifacts/ios-30/build-1.log"
+  ],
+  "buildUrl": "https://expo.dev/accounts/n1sh/projects/my-app/builds/57eeca9a-6fdd-4f6c-ac29-f537581ef014",
+  "storeUpload": "NOT PERFORMED",
+  "deviceValidation": "NOT TESTED"
+}

@@ -71,7 +71,8 @@ export default function LoginScreen() {
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.title}>Welcome back</Text>
+            <Text style={styles.title}>Welcome to Paymi</Text>
+            <Link href="/promotions" style={{ color: Colors.light.primary, padding: Spacing.md }}>Browse promotions without signing in</Link>
             <Text style={styles.subtitle}>
               Sign in to manage your shop with Paymi
             </Text>
@@ -139,6 +140,7 @@ export default function LoginScreen() {
               Create an account
             </Link>
           </Animated.View>
+          <Link href="/about" style={{ textAlign: 'center', padding: 16, color: Colors.light.primary }}>About Paymi · Support & privacy</Link>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

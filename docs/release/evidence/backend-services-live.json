@@ -1,0 +1,101 @@
+{
+  "checkedAt": "2026-10-14T04:12:33.800Z",
+  "services": {
+    "sessions": "ready",
+    "moderation": "ready",
+    "cache": "ready"
+  },
+  "fingerprints": {
+    "Chat": {
+      "count": 33,
+      "digest": "ecaf58a465aac8bf1f06cd10905b4be9"
+    },
+    "Message": {
+      "count": 64,
+      "digest": "457f7e0939279748873932133f7b0f1f"
+    },
+    "ChatParticipant": {
+      "count": 77,
+      "digest": "182d81de90af07abbb64f7696d995630"
+    }
+  },
+  "accountsChecked": 11,
+  "totalAccounts": 48,
+  "coverage": [
+    {
+      "role": "ADMIN",
+      "groups": 15,
+      "direct": 0
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 5,
+      "direct": 4
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 3,
+      "direct": 2
+    },
+    {
+      "role": "EMPLOYEE",
+      "groups": 3,
+      "direct": 1
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 2,
+      "direct": 1
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 1,
+      "direct": 2
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 1,
+      "direct": 2
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 1,
+      "direct": 2
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 2,
+      "direct": 1
+    },
+    {
+      "role": "CUSTOMER",
+      "groups": 1,
+      "direct": 2
+    },
+    {
+      "role": "EMPLOYEE",
+      "groups": 1,
+      "direct": 1
+    }
+  ],
+  "conversationsVisibleToAuthorizedAccounts": 30,
+  "pendingModerationJobs": 0,
+  "unlinkedCustomerShops": 0,
+  "chatDataUnchanged": true,
+  "orphanedDirectConversations": [
+    {
+      "id": "cmke8jfk2000edg627x9zn5hg",
+      "messages": 1
+    },
+    {
+      "id": "cmm61a1650000caagk2ubue5d",
+      "messages": 2
+    },
+    {
+      "id": "cmm8syujv0002cavsb86v3o6n",
+      "messages": 1
+    }
+  ],
+  "orphanReason": "Each has one stored participant referring to a missing account. Data retained; no participant reassignment or account recreation.",
+  "orphanDecision": "Owner confirmed on 2026-10-14: Keep restricted pending verified ownership."
+}

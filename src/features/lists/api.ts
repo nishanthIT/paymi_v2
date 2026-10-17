@@ -93,8 +93,8 @@ export async function untrackList(listId: string): Promise<void> {
 
 /**
  * Adds a product (by logical productId) to a list. The backend picks the
- * cheapest in-stock shop and increments quantity when the product already
- * exists. When `quantity` > 1 we follow up with an absolute quantity update.
+ * cheapest in-stock shop and atomically adds the requested quantity. A single
+ * write avoids partial additions and does not require the separate edit permission.
  */
 export async function addProductToList(input: {
   listId: string;
@@ -108,20 +108,11 @@ export async function addProductToList(input: {
     const response = await api.post('/lists/addProduct', {
       listId,
       productId,
+      quantity,
       ...(isUrgent ? { isUrgent: true } : {}),
       ...(inHandStock != null ? { inHandStock } : {}),
     });
     const result: AddProductResult = response.data;
-
-    if (quantity > 1 && result?.data?.listProductId) {
-      const finalQuantity = (result.data.quantity || 1) + (quantity - 1);
-      await updateProductQuantity({
-        listId,
-        listProductId: result.data.listProductId,
-        quantity: finalQuantity,
-      });
-      result.data.quantity = finalQuantity;
-    }
 
     return result;
   } catch (error: any) {
@@ -132,6 +123,7 @@ export async function addProductToList(input: {
 export async function removeProductFromList(input: {
   listId: string;
   productId: string;
+  listProductId?: string;
 }): Promise<void> {
   try {
     await api.delete('/lists/removeProduct', { data: input });
@@ -215,7 +207,7 @@ export async function moveProductToList(input: {
   }
 }
 
-/** Moves a list item into the "Out of Stock · <shop>" list, creating it if needed. */
+/** Moves a list item into the shared Out of Stock collection, grouped by supplier. */
 export async function markProductOutOfStock(input: {
   listId: string;
   listProductId: string;

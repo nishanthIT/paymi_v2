@@ -1,0 +1,35 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ all authorized existing groups, teams and direct histories are visible; listing is strictly read-only (826.88343ms)
+✔ team rosters derive from active memberships without recreating participant records (120.344421ms)
+✔ missing shop links do not trigger replacement chat creation (33.552792ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires no rules acceptance and rejects content larger than the server limit (874.170107ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (116.595156ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (411.594418ms)
+✔ moderation removes reported content from histories and summaries and records a decision (61.659061ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (122.64068ms)
+✔ socket clients cannot relay a forged message or sender identity (145.670893ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (62.327704ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📎 Saving file with extension: .txt from mimetype: text/plain
+✔ new and existing accounts send, receive and upload without any acceptance row (1168.510547ms)
+✔ report identity, explanation and exact snapshot persist; own and inaccessible reports fail; races dedupe (180.425843ms)
+✔ all admin operations reject customer and delegated staff, and never expose reporter details publicly (216.216023ms)
+✔ admin can filter, investigate context, record internal notes and transition status without restricting account (208.138124ms)
+✔ account suspension denies existing sessions, login and socket reconnect; expiry and early reactivation preserve data (296.483726ms)
+✔ chat and account restrictions are independent, custom durations expire and chat blocks direct API writes (109.64019ms)
+✔ individual deletion preserves evidence, other authors and report status; concurrent requests are idempotent (88.648998ms)
+✔ bulk deletion requires both confirmations, survives retry/restart and preserves newer messages and other authors (1027.957012ms)
+Moderation queue ready (PostgreSQL)
+✔ a failed bulk batch rolls back fully and the startup worker resumes the durable job (149.045988ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9079.749132

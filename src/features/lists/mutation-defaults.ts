@@ -1,29 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
-
 import * as listApi from './api';
+import { installListReplay } from './replay';
 
-/**
- * Registers default mutationFns so mutations paused while offline can be
- * rehydrated from disk and resumed after an app restart + reconnect.
- */
+/** Restore paused list changes with their original list and exact API payload. */
 export function registerListMutationDefaults(queryClient: QueryClient) {
-  queryClient.setMutationDefaults(['lists', 'create'], {
-    mutationFn: listApi.createList,
-  });
-  queryClient.setMutationDefaults(['lists', 'delete'], {
-    mutationFn: listApi.deleteList,
-  });
-  queryClient.setMutationDefaults(['lists', 'add-product'], {
-    mutationFn: (input: { listId: string; productId: string; quantity?: number }) =>
-      listApi.addProductToList(input),
-  });
-  queryClient.setMutationDefaults(['lists', 'remove-product'], {
-    mutationFn: listApi.removeProductFromList,
-  });
-  queryClient.setMutationDefaults(['lists', 'update-quantity'], {
-    mutationFn: listApi.updateProductQuantity,
-  });
-  queryClient.setMutationDefaults(['lists', 'toggle-purchased'], {
-    mutationFn: listApi.togglePurchased,
-  });
+  installListReplay(queryClient, listApi);
 }

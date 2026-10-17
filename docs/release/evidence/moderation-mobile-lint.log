@@ -1,0 +1,21 @@
+
+/home/n1sh/Start_up/Paymi/paymi_v2/src/app/(app)/chat/[id].tsx
+   2:27  warning  '/home/n1sh/Start_up/Paymi/paymi_v2/node_modules/react/index.js' imported multiple times                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               import/no-duplicates
+   9:46  warning  '/home/n1sh/Start_up/Paymi/paymi_v2/node_modules/react/index.js' imported multiple times                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               import/no-duplicates
+  57:69  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/n1sh/Start_up/Paymi/paymi_v2/src/app/(app)/chat/[id].tsx:57:69
+  55 |   const safety = useQuery({ queryKey: ['chat-safety'], queryFn: async () => (await api.get('/chat-safety')).data, refetchInterval: 15000 });
+  56 |   const suspension = safety.data?.suspension;
+> 57 |   const restricted = !!suspension && Date.parse(suspension.until) > Date.now();
+     |                                                                     ^^^^^^^^^^ Cannot call impure function
+  58 |   useEffect(() => {
+  59 |     let disposed = false; let cleanup = () => {};
+  60 |     getChatSocket().then(socket => {  react-hooks/purity
+  66:6   warning  React Hook useEffect has a missing dependency: 'safety'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+
+✖ 4 problems (1 error, 3 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

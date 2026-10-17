@@ -24,6 +24,7 @@ import {
   useRecentSearches,
 } from '@/features/lists/hooks/use-product-search';
 import { useSmartAdd } from '@/features/lists/hooks/use-smart-add';
+import { productSearchQuantityRows } from '@/features/lists/list-management';
 import type { Product } from '@/features/lists/types';
 
 /**
@@ -39,7 +40,7 @@ export default function AddProductScreen() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [addingIds, setAddingIds] = useState<Set<string>>(new Set());
 
-  const { data: results, isFetching, isSearchActive, isDebouncing, searchTerm } =
+  const { data: results, isFetching, isSearchActive, isDebouncing, searchTerm, isError, error, refetch, fetchStatus } =
     useProductSearch(query);
   const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
   const { data: list } = useListDetails(listId ?? '');
@@ -51,14 +52,10 @@ export default function AddProductScreen() {
     [list?.products],
   );
 
-  // listProduct row per productId so the card stepper can adjust quantity in place.
-  const listProductByProductId = useMemo(() => {
-    const map = new Map<string, { id: string; quantity: number }>();
-    for (const p of list?.products ?? []) {
-      if (!p.id.startsWith('optimistic-')) map.set(p.productId, { id: p.id, quantity: p.quantity });
-    }
-    return map;
-  }, [list?.products]);
+  const listProductByProductId = useMemo(
+    () => productSearchQuantityRows(listId ?? '', list?.products ?? []),
+    [listId, list?.products],
+  );
 
   const handleAdd = async (
     product: Product,
@@ -87,8 +84,9 @@ export default function AddProductScreen() {
 
   const showRecent = !isSearchActive && recentSearches.length > 0;
   const showResultsLoading = isSearchActive && (isFetching || isDebouncing) && !results?.length;
+  const searchFailed = isSearchActive && !isDebouncing && (isError || fetchStatus === 'paused');
   const showNoResults =
-    isSearchActive && !isFetching && !isDebouncing && (results?.length ?? 0) === 0;
+    isSearchActive && !searchFailed && !isFetching && !isDebouncing && (results?.length ?? 0) === 0;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -165,7 +163,13 @@ export default function AddProductScreen() {
         </View>
       )}
 
-      {showResultsLoading ? (
+      {searchFailed ? (
+        <View style={styles.centerState} accessibilityRole="alert">
+          <Ionicons name="alert-circle-outline" size={36} color={Colors.light.textLight} />
+          <Text style={styles.centerText}>{error?.message || 'You’re offline. Reconnect to search products.'}</Text>
+          <Pressable accessibilityRole="button" onPress={() => refetch()}><Text style={styles.recentClear}>Try again</Text></Pressable>
+        </View>
+      ) : showResultsLoading ? (
         <View style={styles.centerState}>
           <ActivityIndicator color={Colors.light.primary} />
           <Text style={styles.centerText}>Searching…</Text>

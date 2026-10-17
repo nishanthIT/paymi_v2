@@ -1,0 +1,149 @@
+env: load .env
+env: export EXPO_PUBLIC_API_TIMEOUT EXPO_PUBLIC_LOCAL_IP EXPO_PUBLIC_LOCAL_PORT EXPO_PUBLIC_PRIVACY_POLICY_URL EXPO_PUBLIC_PRODUCTION_URL
+Using src/app as the root directory for Expo Router.
+React Compiler enabled
+Starting Metro Bundler
+
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:1521402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+iOS Bundled 17868ms node_modules/expo-router/entry.js (2037 modules)
+Android Bundled 26041ms node_modules/expo-router/entry.js (2170 modules)
+Static rendering is enabled. Learn more: https://docs.expo.dev/router/web/static-rendering/
+λ Bundled 10365ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (2000 modules)
+Web Bundled 10607ms node_modules/expo-router/entry.js (1861 modules)
+
+› ios bundles (1):
+_expo/static/js/ios/entry-890d2117051aed3369f66806e7ba6b4f.hbc (6.1MB)
+
+› android bundles (1):
+_expo/static/js/android/entry-28cebda6a4b50325e434a95d5513775f.hbc (6.3MB)
+
+› web bundles (2):
+_expo/static/js/web/entry-23e126c775ecbf885c14dfdfb88b9355.js (4.2MB)
+_expo/static/js/web/index-501356f4427cd7a7b3d8b1ee447798f2.js (45KB)
+
+› Static routes (99):
+/chat (35KB)
+/about (32KB)
+/ (index) (35KB)
+/lists (35KB)
+/login (36KB)
+/collect (35KB)
+/scanner (35KB)
+/profile (35KB)
+/_sitemap (29KB)
+/register (38KB)
+/employees (35KB)
+/chat/[id] (35KB)
+/list/[id] (35KB)
+/news/[id] (35KB)
+/+not-found (29KB)
+/promotions (35KB)
+/(app)/chat (35KB)
+/chat-safety (32KB)
+/add-product (35KB)
+/shift-sheet (35KB)
+/(tabs)/chat (35KB)
+/(app) (35KB)
+/(app)/lists (35KB)
+/report-price (35KB)
+/supermarkets (35KB)
+/(tabs) (35KB)
+/(tabs)/lists (35KB)
+/labels (35KB)
+/labels/mixed (35KB)
+/labels/shelf (35KB)
+/(auth)/login (36KB)
+/verify-email (31KB)
+/(app)/collect (35KB)
+/incident-logs (35KB)
+/manage-expiry (35KB)
+/(app)/scanner (35KB)
+/(app)/profile (35KB)
+/employee/[id] (35KB)
+/labels/runner (35KB)
+/vat-calculator (35KB)
+/(tabs)/profile (35KB)
+/labels/reduced (35KB)
+/promotion/[id] (35KB)
+/cleaning-status (35KB)
+/(app)/employees (35KB)
+/task-management (35KB)
+/(app)/chat/[id] (35KB)
+/(app)/list/[id] (35KB)
+/(app)/news/[id] (35KB)
+/forgot-password (34KB)
+/(auth)/register (38KB)
+/account-deletion (37KB)
+/compare-products (35KB)
+/(app)/promotions (35KB)
+/certificate/[id] (35KB)
+/labels/templates (35KB)
+/(app)/add-product (35KB)
+/profit-calculator (35KB)
+/(app)/shift-sheet (35KB)
+/(app)/(tabs)/chat (35KB)
+/fridge-temperature (35KB)
+/(app)/report-price (35KB)
+/(app)/supermarkets (35KB)
+/(app)/(tabs) (35KB)
+/(app)/(tabs)/lists (35KB)
+/(app)/labels (35KB)
+/(app)/labels/mixed (35KB)
+/(app)/labels/shelf (35KB)
+/(app)/incident-logs (35KB)
+/(app)/manage-expiry (35KB)
+/compare/[productId] (35KB)
+/(app)/employee/[id] (35KB)
+/(app)/labels/runner (35KB)
+/(auth)/verify-email (31KB)
+/(app)/vat-calculator (35KB)
+/(app)/(tabs)/profile (35KB)
+/(app)/labels/reduced (35KB)
+/labels/template/[id] (35KB)
+/(app)/promotion/[id] (35KB)
+/(app)/cleaning-status (35KB)
+/(app)/task-management (35KB)
+/certificate-management (35KB)
+/(app)/compare-products (35KB)
+/supplier-payout-record (35KB)
+/(app)/certificate/[id] (35KB)
+/employee/list/[listId] (35KB)
+/(app)/labels/templates (35KB)
+/(auth)/forgot-password (34KB)
+/age-restriction-records (35KB)
+/(app)/profit-calculator (35KB)
+/waste-management-record (35KB)
+/(app)/fridge-temperature (35KB)
+/(app)/compare/[productId] (35KB)
+/(app)/labels/template/[id] (35KB)
+/(app)/certificate-management (35KB)
+/(app)/supplier-payout-record (35KB)
+/(app)/employee/list/[listId] (35KB)
+/(app)/age-restriction-records (35KB)
+/(app)/waste-management-record (35KB)
+
+Exported: /tmp/paymi-release-export
+Something prevented Expo from exiting, forcefully exiting now.

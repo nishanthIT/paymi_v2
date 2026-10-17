@@ -14,6 +14,7 @@ export default function AppLayout() {
     >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="list/[id]" />
+      <Stack.Screen name="out-of-stock" />
       <Stack.Screen name="add-product" />
       <Stack.Screen
         name="scanner"
@@ -21,13 +22,12 @@ export default function AppLayout() {
       />
       <Stack.Screen name="collect" />
       <Stack.Screen name="report-price" />
+      <Stack.Screen name="supermarkets" options={{ title: 'My Supermarkets' }} />
       <Stack.Screen name="employees" />
       <Stack.Screen name="employee/[id]" />
       <Stack.Screen name="employee/list/[listId]" />
       <Stack.Screen name="chat/[id]" />
       <Stack.Screen name="news/[id]" />
-      <Stack.Screen name="promotions" />
-      <Stack.Screen name="promotion/[id]" />
       <Stack.Screen name="manage-expiry" />
       <Stack.Screen name="task-management" />
       <Stack.Screen name="fridge-temperature" />

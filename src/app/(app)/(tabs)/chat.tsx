@@ -1,3 +1,4 @@
+import { formatConversationDate, conversationActivity } from '@/features/chat/dates';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -34,25 +35,12 @@ function monogram(name: string) {
     .toUpperCase();
 }
 
-function formatWhen(timestamp?: string | null) {
-  if (!timestamp) return '';
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) return '';
-  const now = new Date();
-  const sameDay = date.toDateString() === now.toDateString();
-  if (sameDay) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-  return date.toLocaleDateString([], { day: 'numeric', month: 'short' });
-}
-
 function isCommonChat(chat: ChatSummary) {
   return chat.type === 'GROUP' && chat.name === 'ALL Chat';
 }
 
 /**
- * Chat tab: pinned community + team group chats, direct conversations,
+ * Chat tab: community + team group chats ordered by activity, direct conversations,
  * live previews and unread counts.
  */
 export default function ChatScreen() {
@@ -75,8 +63,8 @@ export default function ChatScreen() {
     return {
       groups: filtered
         .filter((c) => c.type === 'GROUP')
-        .sort((a, b) => Number(isCommonChat(b)) - Number(isCommonChat(a))),
-      personal: filtered.filter((c) => c.type === 'PERSONAL'),
+        .sort((a, b) => conversationActivity(b) - conversationActivity(a)),
+      personal: filtered.filter((c) => c.type === 'PERSONAL').sort((a, b) => conversationActivity(b) - conversationActivity(a)),
     };
   }, [chats, search]);
 
@@ -266,7 +254,7 @@ function ChatRow({
           <Text style={styles.chatName} numberOfLines={1}>
             {chat.name || 'Chat'}
           </Text>
-          <Text style={styles.chatWhen}>{formatWhen(chat.lastMessageTime)}</Text>
+          <Text style={styles.chatWhen}>{formatConversationDate(chat.lastMessageTime)}</Text>
         </View>
         <View style={styles.chatBottomRow}>
           <Text

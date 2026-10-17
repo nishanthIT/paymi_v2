@@ -1,3 +1,4 @@
+import { PrivateImage } from '@/components/ui/private-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -195,7 +196,7 @@ export default function IncidentLogsScreen() {
                 </View>
                 {!!item.imageUrl && (
                   <Pressable onPress={() => setViewerUri(item.imageUrl!)}>
-                    <Image source={{ uri: item.imageUrl }} style={styles.thumb} contentFit="cover" />
+                    <PrivateImage uri={item.imageUrl} style={styles.thumb} contentFit="cover" />
                   </Pressable>
                 )}
               </View>

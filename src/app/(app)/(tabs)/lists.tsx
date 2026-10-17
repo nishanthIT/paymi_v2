@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -17,9 +16,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { CreateListSheet } from '@/features/lists/components/create-list-sheet';
+import { OriginalListsSheet } from '@/features/lists/components/original-lists-sheet';
+import { useListRemoval } from '@/features/lists/hooks/use-list-removal';
+import { listRemovalChoices } from '@/features/lists/list-management';
 import { ListCard } from '@/features/lists/components/list-card';
 import { ListCardsSkeleton } from '@/features/lists/components/list-skeletons';
-import { useCreateList, useDeleteList, useLists, useUntrackList } from '@/features/lists/hooks/use-lists';
+import { useCreateList, useLists } from '@/features/lists/hooks/use-lists';
+import { useShopFeature } from '@/features/employees/permissions';
+import { collapseOutOfStockLists } from '@/features/lists/out-of-stock';
 import type { ShoppingList } from '@/features/lists/types';
 import { usePullToRefresh, useRefetchOnFocus } from '@/hooks/use-query-refresh';
 import { matchesSearch } from '@/utils/search';
@@ -34,19 +38,21 @@ export default function ListsScreen() {
   const { data: lists, isError, fetchStatus, refetch } = useLists();
   const { refreshing, onRefresh } = usePullToRefresh(refetch, fetchStatus);
   useRefetchOnFocus(refetch);
+  const canCreate = useShopFeature('feature.lists', 'write');
+  const canEdit = useShopFeature('feature.lists', 'edit');
   const createList = useCreateList();
-  const deleteList = useDeleteList();
-  const untrackList = useUntrackList();
+  const removal = useListRemoval();
 
   const [filter, setFilter] = useState('');
   const [showCreate, setShowCreate] = useState(false);
+  const [showRemoveSources, setShowRemoveSources] = useState(false);
 
+  const overviewLists = useMemo(() => collapseOutOfStockLists(lists ?? []), [lists]);
   const filteredLists = useMemo(() => {
-    if (!lists) return [];
     const term = filter.trim();
-    if (!term) return lists;
-    return lists.filter((list) => matchesSearch(term, list.name));
-  }, [lists, filter]);
+    if (!term) return overviewLists;
+    return overviewLists.filter((list) => matchesSearch(term, list.name));
+  }, [overviewLists, filter]);
 
   const handleCreate = (name: string) => {
     createList.mutate(
@@ -56,38 +62,9 @@ export default function ListsScreen() {
   };
 
   const handleDelete = (list: ShoppingList) => {
-    // Shared lists (tracked from another user) are removed from *my* lists
-    // without deleting the underlying collaborative list for everyone else.
-    if (list.copiedFromName) {
-      Alert.alert(
-        'Remove shared list',
-        `Remove "${list.name}" from your lists? It stays with ${list.copiedFromName}.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Remove',
-            style: 'destructive',
-            onPress: () =>
-              untrackList.mutate(list.id, {
-                onError: (error) => showToast(error.message, 'error'),
-              }),
-          },
-        ],
-      );
-      return;
-    }
-
-    Alert.alert('Delete list', `Delete "${list.name}" and all its items?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          deleteList.mutate(list.id, {
-            onError: (error) => showToast(error.message, 'error'),
-          }),
-      },
-    ]);
+    const choices = listRemovalChoices(list, lists ?? []);
+    if (choices.length === 1) removal.confirm(choices[0]);
+    else setShowRemoveSources(true);
   };
 
   // No cached lists yet: skeleton while loading/restoring, retry state once it gives up.
@@ -102,16 +79,16 @@ export default function ListsScreen() {
           <View>
             <Text style={styles.title}>Shopping Lists</Text>
             <Text style={styles.subtitle}>
-              {lists?.length ?? 0} {(lists?.length ?? 0) === 1 ? 'list' : 'lists'}
+              {overviewLists.length} {overviewLists.length === 1 ? 'list' : 'lists'}
             </Text>
           </View>
-          <Pressable
+          {canCreate && <Pressable
             onPress={() => setShowCreate(true)}
             style={({ pressed }) => [styles.newButton, pressed && styles.newButtonPressed]}
           >
             <Ionicons name="add" size={20} color="#FFFFFF" />
             <Text style={styles.newButtonText}>New</Text>
-          </Pressable>
+          </Pressable>}
         </View>
 
         <View style={styles.searchBar}>
@@ -152,7 +129,7 @@ export default function ListsScreen() {
             <ListCard
               list={item}
               onPress={() => router.push({ pathname: '/(app)/list/[id]', params: { id: item.id } })}
-              onDelete={() => handleDelete(item)}
+              onDelete={canEdit && !removal.isPending ? () => handleDelete(item) : undefined}
             />
           </Animated.View>
         )}
@@ -204,12 +181,14 @@ export default function ListsScreen() {
               <Text style={styles.emptyBody}>
                 {filter
                   ? 'Try a different name.'
-                  : 'Create your first shopping list to start adding products.'}
+                  : canCreate ? 'Create your first shopping list to start adding products.' : 'Your shop owner can enable Write access to let you create lists.'}
               </Text>
             </View>
           )
         }
       />
+
+      <OriginalListsSheet visible={showRemoveSources} onClose={() => setShowRemoveSources(false)} mode="remove" />
 
       <CreateListSheet
         visible={showCreate}

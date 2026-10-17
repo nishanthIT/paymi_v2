@@ -1,12 +1,14 @@
+import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/services/api';
+import { getChatSocket } from '@/features/chat/socket';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -21,7 +23,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { uploadChatFile } from '@/features/chat/api';
-import { MessageBubble } from '@/features/chat/components/message-bubble';
+import { MessageTimeline } from '@/features/chat/components/message-timeline';
 import {
   useChatThread,
   useDeleteMessage,
@@ -35,6 +37,8 @@ import type { ChatMessage } from '@/features/chat/types';
  * Message thread: realtime, optimistic sends, typing indicator, read
  * receipts, image attachments and infinite history.
  */
+type MessageAction = { text: string; style?: 'destructive' | 'cancel'; onPress?: () => void };
+
 export default function ChatThreadScreen() {
   const { id, name, type } = useLocalSearchParams<{ id: string; name?: string; type?: string }>();
   const chatId = id ?? '';
@@ -48,6 +52,26 @@ export default function ChatThreadScreen() {
   const { typingUsers } = useThreadRealtime(chatId, thread.messages);
   const { onInputChange } = useTypingEmitter(chatId);
 
+  const safety = useQuery({ queryKey: ['chat-safety'], queryFn: async () => (await api.get('/chat-safety')).data, refetchInterval: 15000 });
+  const suspension = safety.data?.suspension;
+  const restricted = !!suspension;
+  const { refetch: refetchSafety } = safety;
+  useEffect(() => {
+    if (!suspension?.until) return;
+    const timer = setTimeout(() => { void refetchSafety(); }, Math.min(2147483647, Math.max(0, Date.parse(suspension.until) - Date.now()) + 50));
+    return () => clearTimeout(timer);
+  }, [suspension?.until, refetchSafety]);
+  useEffect(() => {
+    let disposed = false; let cleanup = () => {};
+    getChatSocket().then(socket => {
+      if (!socket || disposed) return;
+      const refresh = () => { void refetchSafety(); };
+      socket.on('chat_suspended', refresh); cleanup = () => { socket.off('chat_suspended', refresh); };
+    });
+    return () => { disposed = true; cleanup(); };
+  }, [refetchSafety]);
+
+  const [menuActions, setMenuActions] = useState<MessageAction[]>([]);
   const [draft, setDraft] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -63,14 +87,14 @@ export default function ChatThreadScreen() {
   const handleChangeText = useCallback(
     (text: string) => {
       setDraft(text);
-      onInputChange(text);
+      if (!restricted) onInputChange(text);
     },
-    [onInputChange],
+    [onInputChange, restricted],
   );
 
   const handleSend = useCallback(() => {
     const content = draft.trim();
-    if (!content) return;
+    if (!content || restricted) return;
     setDraft('');
     send.mutate(
       { content },
@@ -80,9 +104,10 @@ export default function ChatThreadScreen() {
         },
       },
     );
-  }, [draft, send, showToast]);
+  }, [draft, send, showToast, restricted]);
 
   const handleAttachImage = useCallback(async () => {
+    if (restricted) return;
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.7,
@@ -116,11 +141,14 @@ export default function ChatThreadScreen() {
     } finally {
       setUploading(false);
     }
-  }, [send, showToast]);
+  }, [send, showToast, restricted]);
 
   const handleLongPress = useCallback(
     (message: ChatMessage) => {
-      const actions: { text: string; style?: 'destructive' | 'cancel'; onPress?: () => void }[] = [];
+      const actions: MessageAction[] = [];
+      if (!message.isOwnMessage && !message.pending) {
+        actions.push({ text: 'Report Message', onPress: () => router.push({ pathname: '/chat-safety', params: { messageId: message.id } }) });
+      }
       if (message.content && message.messageType === 'TEXT') {
         actions.push({
           text: 'Copy',
@@ -131,7 +159,7 @@ export default function ChatThreadScreen() {
           },
         });
       }
-      if (message.failed) {
+      if (message.failed && !restricted) {
         actions.push({
           text: 'Retry send',
           onPress: () => {
@@ -160,9 +188,9 @@ export default function ChatThreadScreen() {
       }
       if (actions.length === 0) return;
       actions.push({ text: 'Cancel', style: 'cancel' });
-      Alert.alert('Message', undefined, actions);
+      setMenuActions(actions);
     },
-    [deleteMessage, send, showToast],
+    [deleteMessage, send, showToast, router, restricted],
   );
 
   return (
@@ -199,6 +227,8 @@ export default function ChatThreadScreen() {
         </View>
       </View>
 
+      <Link href="/chat-safety" style={{ padding: Spacing.md, color: Colors.light.primary }}>Chat safety and community rules</Link>
+      {restricted && <Text accessibilityRole="alert" style={{ padding: Spacing.md, color: Colors.light.error }}>Messaging is restricted until {new Date(suspension.until).toLocaleString()}. {suspension.reason} Your other shop tools remain available. Contact support@paymi.co.uk to appeal.</Text>}
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -209,32 +239,14 @@ export default function ChatThreadScreen() {
             <ActivityIndicator color={Colors.light.primary} />
           </View>
         ) : (
-          <FlatList
-            data={thread.messages}
-            keyExtractor={(item) => item.id}
-            inverted
-            renderItem={({ item }) => (
-              <MessageBubble message={item} isGroup={isGroup} onLongPress={handleLongPress} />
-            )}
-            contentContainerStyle={styles.messagesContent}
-            onEndReached={() => {
-              if (thread.hasNextPage && !thread.isFetchingNextPage) thread.fetchNextPage();
-            }}
-            onEndReachedThreshold={0.4}
-            ListFooterComponent={
-              thread.isFetchingNextPage ? (
-                <ActivityIndicator
-                  color={Colors.light.primary}
-                  style={{ marginVertical: Spacing.md }}
-                />
-              ) : null
-            }
-            ListEmptyComponent={
-              <View style={styles.emptyThread}>
-                <Text style={styles.emptyThreadText}>No messages yet — say hello </Text>
-              </View>
-            }
-            keyboardShouldPersistTaps="handled"
+          <MessageTimeline
+            key={chatId}
+            messages={thread.messages}
+            isGroup={isGroup}
+            hasOlder={thread.hasNextPage}
+            loadingOlder={thread.isFetchingNextPage}
+            onLoadOlder={() => { void thread.fetchNextPage(); }}
+            onLongPress={handleLongPress}
           />
         )}
 
@@ -249,13 +261,14 @@ export default function ChatThreadScreen() {
           <Pressable
             onPress={handleAttachImage}
             hitSlop={8}
-            disabled={uploading}
+            disabled={uploading || restricted}
             style={({ pressed }) => [styles.attachButton, pressed && { opacity: 0.7 }]}
           >
             <Ionicons name="image-outline" size={22} color={Colors.light.primary} />
           </Pressable>
           <TextInput
             style={styles.input}
+            editable={!restricted}
             value={draft}
             onChangeText={handleChangeText}
             placeholder="Message"
@@ -265,7 +278,7 @@ export default function ChatThreadScreen() {
           />
           <Pressable
             onPress={handleSend}
-            disabled={!draft.trim()}
+            disabled={!draft.trim() || restricted}
             style={({ pressed }) => [
               styles.sendButton,
               !draft.trim() && styles.sendButtonDisabled,
@@ -276,6 +289,12 @@ export default function ChatThreadScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+      <BottomSheet visible={menuActions.length > 0} onClose={() => setMenuActions([])} scrollable>
+        <Text accessibilityRole="header" style={[styles.headerTitle, { padding: Spacing.md }]}>Message actions</Text>
+        {menuActions.map(action => <Pressable key={action.text} accessibilityRole="button" style={{ padding: Spacing.md, minHeight: 48 }} onPress={() => { setMenuActions([]); action.onPress?.(); }}>
+          <Text style={{ ...Typography.body, color: action.style === 'destructive' ? Colors.light.error : Colors.light.primary }}>{action.text}</Text>
+        </Pressable>)}
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -341,19 +360,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  messagesContent: {
-    paddingVertical: Spacing.sm,
-  },
-  emptyThread: {
-    padding: Spacing.xl,
-    alignItems: 'center',
-    // Counteract the inverted list so the empty state reads upright.
-    transform: [{ scaleY: -1 }],
-  },
-  emptyThreadText: {
-    ...Typography.body,
-    color: Colors.light.textSecondary,
   },
   uploadBar: {
     flexDirection: 'row',

@@ -16,18 +16,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/ui/toast';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { ImageViewer } from '@/components/ui/image-viewer';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { CollectDetailsSheet } from '@/features/collect/components/collect-details-sheet';
 import { ExportPdfSheet } from '@/features/lists/components/export-pdf-sheet';
 import { ListProductRow } from '@/features/lists/components/list-product-row';
 import { ListQuickActions } from '@/features/lists/components/list-quick-actions';
+import { OriginalListsSheet } from '@/features/lists/components/original-lists-sheet';
+import { OUT_OF_STOCK_ID } from '@/features/lists/out-of-stock';
 import { ListProductRowsSkeleton } from '@/features/lists/components/list-skeletons';
 import { exportListPdf } from '@/features/lists/pdf/export-list-pdf';
 import {
   useListDetails,
+  useMoveToList,
+  useMarkOutOfStock,
   useRemoveProduct,
   useToggleUrgent,
   useUpdateQuantity,
 } from '@/features/lists/hooks/use-list-details';
+import { useShopFeature } from '@/features/employees/permissions';
 import { useRenameList } from '@/features/lists/hooks/use-lists';
 import type { ListProduct } from '@/features/lists/types';
 import { usePullToRefresh, useRefetchOnFocus } from '@/hooks/use-query-refresh';
@@ -50,14 +57,25 @@ export default function ListDetailsScreen() {
   const updateQuantity = useUpdateQuantity(listId);
   const toggleUrgent = useToggleUrgent(listId);
   const renameList = useRenameList();
+  const moveToList = useMoveToList(listId);
+  const markOutOfStock = useMarkOutOfStock(listId);
+  const canAdd = useShopFeature('feature.lists', 'write');
+  const hasEdit = useShopFeature('feature.lists', 'edit');
+  const canEdit = hasEdit && list?.canEdit !== false;
+  const isOutOfStock = listId === OUT_OF_STOCK_ID;
 
   const [filter, setFilter] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
   const [renameValue, setRenameValue] = useState('');
+  const [detailsId, setDetailsId] = useState<string | null>(null);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const details = list?.products?.find((product) => product.id === detailsId) ?? null;
 
   const openRename = () => {
+    if (isOutOfStock) { setSourcesOpen(true); return; }
     setRenameValue(list?.name ?? '');
     setRenameOpen(true);
   };
@@ -121,7 +139,7 @@ export default function ListDetailsScreen() {
       {
         text: 'Remove',
         style: 'destructive',
-        onPress: () => removeProduct.mutate(item.productId, { onError }),
+        onPress: () => removeProduct.mutate({ productId: item.productId, listProductId: item.id }, { onError }),
       },
     ]);
 
@@ -134,11 +152,13 @@ export default function ListDetailsScreen() {
     <Animated.View layout={LinearTransition.springify().damping(20)}>
       <ListProductRow
         item={item}
-        onQuantityChange={(quantity) =>
-          updateQuantity.mutate({ listProductId: item.id, quantity }, { onError })
+        onOpenDetails={() => setDetailsId(item.id)}
+        onPreviewImage={setPreviewUri}
+        onQuantityChange={canEdit ? (quantity) =>
+          updateQuantity.mutate({ listProductId: item.id, quantity }, { onError }) : undefined
         }
-        onRemove={() => confirmRemove(item)}
-        onToggleUrgent={() => toggleUrgent.mutate(item.id, { onError })}
+        onRemove={canEdit ? () => confirmRemove(item) : undefined}
+        onToggleUrgent={canEdit ? () => toggleUrgent.mutate(item.id, { onError }) : undefined}
       />
     </Animated.View>
   );
@@ -156,6 +176,7 @@ export default function ListDetailsScreen() {
           </Pressable>
           <Pressable
             onPress={openRename}
+            disabled={!canEdit}
             hitSlop={6}
             style={({ pressed }) => [styles.headerTitleWrap, pressed && { opacity: 0.6 }]}
           >
@@ -163,7 +184,7 @@ export default function ListDetailsScreen() {
               <Text style={styles.title} numberOfLines={1}>
                 {list?.name ?? 'List'}
               </Text>
-              <Ionicons name="pencil" size={13} color={Colors.light.textLight} />
+              {canEdit && <Ionicons name="pencil" size={13} color={Colors.light.textLight} />}
             </View>
             <Text style={styles.subtitle}>
               {collected} of {total} collected
@@ -181,7 +202,7 @@ export default function ListDetailsScreen() {
           >
             <Ionicons name="print-outline" size={19} color={Colors.light.text} />
           </Pressable>
-          <Pressable
+          {canEdit && <Pressable
             onPress={() =>
               router.push({ pathname: '/(app)/collect', params: { listId } })
             }
@@ -189,7 +210,7 @@ export default function ListDetailsScreen() {
           >
             <Ionicons name="navigate" size={14} color="#FFFFFF" />
             <Text style={styles.collectText}>Collect Now</Text>
-          </Pressable>
+          </Pressable>}
         </View>
 
         {total > 0 && (
@@ -288,12 +309,36 @@ export default function ListDetailsScreen() {
         }
       />
 
-      <Animated.View entering={FadeInDown.duration(300)} style={styles.quickActionsWrap}>
+      {canAdd && <Animated.View entering={FadeInDown.duration(300)} style={styles.quickActionsWrap}>
         <ListQuickActions
           onScan={() => router.push({ pathname: '/(app)/scanner', params: { listId } })}
           onAddProduct={() => router.push({ pathname: '/(app)/add-product', params: { listId } })}
         />
-      </Animated.View>
+      </Animated.View>}
+
+      <ImageViewer
+        uri={previewUri}
+        visible={!!previewUri}
+        onClose={() => setPreviewUri(null)}
+        presentation="preview"
+      />
+      <CollectDetailsSheet
+        product={details}
+        isLoading={fetchStatus === 'fetching'}
+        onClose={() => setDetailsId(null)}
+        listId={listId}
+        movingList={moveToList.isPending || markOutOfStock.isPending}
+        onMoveToList={canEdit ? (listProductId, targetListId) => {
+          setDetailsId(null);
+          moveToList.mutate({ listProductId, targetListId }, { onError });
+        } : undefined}
+        onMarkOutOfStock={canEdit && !isOutOfStock ? listProductId => {
+          setDetailsId(null);
+          markOutOfStock.mutate({ listProductId }, { onError });
+        } : undefined}
+      />
+
+      {isOutOfStock && <OriginalListsSheet visible={sourcesOpen} onClose={() => setSourcesOpen(false)} />}
 
       <ExportPdfSheet
         visible={exportOpen}

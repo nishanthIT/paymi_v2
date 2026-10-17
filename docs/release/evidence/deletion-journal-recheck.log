@@ -1,0 +1,14 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ a failed provider purge leaves deletion retryable and revokes all old sessions before erasure (518.511865ms)
+✔ verified ledger replay erases a restored account, preserves shared shops, rejects old tokens and advances ID sequences (34.303743ms)
+✔ Redis deletion failures propagate instead of silently falling back to local memory (0.61522ms)
+✔ journal storage failure prevents erasure; durable journal is integrity-protected and excludes account content (46.30106ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1245.795965

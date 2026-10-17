@@ -1,0 +1,236 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ shop owner creates employees
+  ✔ creates only a shop membership in the owner's own shop, never company membership (255.663069ms)
+  ✔ a client-submitted shopId for another shop is rejected (5.391756ms)
+  ✔ a shop owner cannot assign company roles or permissions (245.148546ms)
+✔ shop owner creates employees (968.229035ms)
+▶ shop employees and owners cannot reach company administration
+  ✔ shop employee gets 403 on every company endpoint (40.873225ms)
+  ✔ shop owner gets 403 on every company endpoint (30.858583ms)
+  ✔ previously unauthenticated company endpoints now require a token (2.439271ms)
+  ✖ a forged EMPLOYEE token for a shop employee still has no company access (2.292275ms)
+✖ shop employees and owners cannot reach company administration (507.075092ms)
+📡 Emitted list_created to shop_cmv4s4h1r0002aq3cqdt4tvo3_lists
+▶ cross-shop isolation
+  ✔ owner B only sees Bravo employees (6.107519ms)
+  ✔ owner B cannot read or change an Alpha employee by id (10.443584ms)
+  ✔ owner B cannot track, read or claim Alpha lists or shop (36.536502ms)
+  ✔ Bravo employee cannot read Alpha lists (217.597852ms)
+  ✔ admin customer view cannot be pointed at another customer's shop (14.398068ms)
+✔ cross-shop isolation (932.793201ms)
+📡 Emitted list_created to shop_cmv4s4h1r0002aq3cqdt4tvo3_lists
+▶ deactivation and stale sessions
+  ✔ inactive employee loses access on an existing token; lists are kept (910.348888ms)
+📡 Emitted list_created to shop_cmv4s4h1r0002aq3cqdt4tvo3_lists
+  ✔ removing an employee keeps the account and lists but revokes access (445.835097ms)
+  ✔ bumping the session version invalidates old tokens (429.158532ms)
+✔ deactivation and stale sessions (1785.55882ms)
+▶ single shop role
+  ✔ the shop manager role no longer exists and only the owner manages employees (427.002296ms)
+  ✔ a regular shop employee cannot manage employees (424.559306ms)
+✔ single shop role (851.710055ms)
+▶ company staff
+  ✔ staff keep exactly their granted company permissions (29.28464ms)
+  ✔ deactivated company membership revokes existing sessions (24.9716ms)
+  ✔ company staff list contains only company staff (7.127782ms)
+  ✔ staff managers cannot grant permissions they do not hold (83.250717ms)
+✔ company staff (144.905784ms)
+▶ dual membership
+  ✔ company and shop permissions are checked independently (683.108859ms)
+  ✔ a shop owner cannot attach an existing company staff account to their shop (5.6063ms)
+✔ dual membership (688.886536ms)
+▶ Customers → Customer details → Employees
+  ✔ shows the customer's shop employees, status counts and their lists (22.204896ms)
+  ✔ viewing customer employees grants them no company access (225.964006ms)
+✔ Customers → Customer details → Employees (248.400956ms)
+▶ realtime shop rooms
+  ✔ only members/owner of a shop may join its list room (5.26167ms)
+✔ realtime shop rooms (5.360372ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ additive SQL and pre-schema inspection preserve every existing table row (561.088279ms)
+✔ single verified supermarket becomes default without changing IDs, names, employees or business data (19.487662ms)
+✔ rerunning is idempotent and stale reports are rejected (24.447615ms)
+✔ default FK rejects another owner and supplier ownership fails even through direct database writes (6.51635ms)
+✔ multiple verified shops retain legacy/default state; explicit selection does not mutate any pointer (11.0409ms)
+✔ ambiguous and incomplete ownership is reviewed without guessing, copying or creating shops (44.804701ms)
+✔ recovery restores defaults only, retaining ownerships and all existing records; it is repeatable (33.952181ms)
+✔ existing owner and employee login still work; employee default never grants owner rights or disabled features (92.779263ms)
+✔ registration commits one named first shop and default; lost response retry works after OTP consumption (460.454619ms)
+✔ concurrent registration commits one account, shop, chat and receipt (27.767978ms)
+✔ concurrent HTTP onboarding retries all return the same committed shop (1445.811319ms)
+✔ registration cannot recreate an existing employee as a customer, even with a verified code (210.986096ms)
+✔ provisioning failure after account creation rolls every write back and permits retry (18.716179ms)
+✔ supplier prices and original employees/operational data remain byte-equivalent throughout (18.291515ms)
+✔ pure classification never infers a second owner from operational records or missing defaults (0.233701ms)
+✔ CLI requires a target, binds reports to it, supports reviewed local apply/recovery and refuses unapproved remote writes (575.880239ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ chats
+  ✔ shop employees use their own shop group chat but not another shop's (99.448837ms)
+  ✔ existing conversations still load and accept messages (25.560881ms)
+  ✔ chat user selectors are scoped: owner sees own shop employees, company staff can reach customers for support (25.227618ms)
+  ✖ sockets: rooms are authorized and per-user events do not leak across account types (1580.184332ms)
+✖ chats (3507.514813ms)
+▶ tasks
+  ✔ owner assigns only own active shop employees; employee works the task (99.491391ms)
+  ✔ editing a task keeps existing assignments and their progress, including deactivated employees (43.492161ms)
+✔ tasks (143.277335ms)
+▶ deactivation side effects
+  ✔ deactivated employee leaves the shop chat, notifications and selectors; history is kept; reactivation restores (460.5851ms)
+  ✔ status survives a refresh and failed actions report errors (13.296339ms)
+📡 Emitted list_created to shop_cmv4s4pgf0002aqhu573tbnd1_lists
+  ✔ lists stay with their shop and creator (74.331748ms)
+✔ deactivation side effects (548.642363ms)
+📡 Emitted list_created to shop_cmv4s4pgf0002aqhu573tbnd1_lists
+📡 Emitted list_updated to shop_cmv4s4pgf0002aqhu573tbnd1_lists
+▶ per-tool shop access (read / write / edit)
+  ✔ owner switches tools and access levels for one employee; API and notifications follow (93.008942ms)
+  ✔ task progress needs write access, not edit (35.937196ms)
+✔ per-tool shop access (read / write / edit) (129.259712ms)
+📡 Emitted list_created to shop_cmv4s4pgf0002aqhu573tbnd1_lists
+📦 Fetching list from DATABASE (no cache): cmv4s4srx001raqhue53gjdwd
+📦 Database isPurchased states: []
+Found 1 in-stock shops with product cmv4s4pgu000daqhupm5uufu3
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv4s4pgf0002aqhu573tbnd1_lists
+📦 Fetching list from DATABASE (no cache): cmv4s4srx001raqhue53gjdwd
+📦 Database isPurchased states: [
+  {
+    id: 'cmv4s4t3m001vaqhu4d22gpb8',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+▶ employee lists: owner views, copies and stays in sync
+  ✔ owner opens an employee list, copies it, and sees new items live (467.381113ms)
+✔ employee lists: owner views, copies and stays in sync (467.723432ms)
+▶ company views
+  ✔ company staff page never lists shop employees; customer details lists them per shop (139.333655ms)
+✔ company views (139.570228ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ employee membership migration
+  ✔ dry run classifies by provenance and writes nothing (14.869519ms)
+  ✔ apply maps employees to the right shop, removes unverified company access and keeps history (81.694165ms)
+  ✖ migrated accounts get the right access and stale tokens stop working (36.719391ms)
+  ✔ rerunning is a no-op and does not duplicate memberships or re-invalidate sessions (12.482101ms)
+  ✔ resolving a review explicitly assigns a shop without touching lists (77.443592ms)
+  ✔ rollback removes only rows the run created (28.188708ms)
+✖ employee membership migration (653.699683ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ second shop creation is transactional and concurrent/lost-response retries create exactly one shop (536.669978ms)
+✔ directory, default, and explicit selection require verified CUSTOMER ownership (56.339173ms)
+📡 Emitted list_created to shop_cmv4s4uq60002aqr9apfnzzvw_lists
+📡 Emitted list_created to shop_cmv4s4v30000gaqr9aif8lsyn_lists
+Found 1 in-stock shops with product cmv4s4uqg000daqr98ecse8mk
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv4s4uq60002aqr9apfnzzvw_lists
+📦 Fetching list from DATABASE (no cache): cmv4s4v6u000maqr9645xq5mj
+📦 Database isPurchased states: [
+  {
+    id: 'cmv4s4v86000qaqr9yasgrlk4',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+Found 1 in-stock shops with product cmv4s4uqg000daqr98ecse8mk
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv4s4v30000gaqr9aif8lsyn_lists
+📦 Fetching list from DATABASE (no cache): cmv4s4v79000oaqr9zqhurqui
+📦 Database isPurchased states: [
+  {
+    id: 'cmv4s4v9m000saqr9du4x7g3n',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✅ Toggle purchased request: {
+  listId: 'cmv4s4v6u000maqr9645xq5mj',
+  listProductId: 'cmv4s4v86000qaqr9yasgrlk4',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+🗑️ Cache invalidated for list: cmv4s4v6u000maqr9645xq5mj
+📡 Emitted list_product_updated to shop_cmv4s4uq60002aqr9apfnzzvw_lists
+✅ Purchased status toggled: { listProductId: 'cmv4s4v86000qaqr9yasgrlk4', isPurchased: true }
+✔ lists, Collect Mode and retail stock are isolated; supplier prices and stock remain unchanged (259.158623ms)
+✔ employee access is explicit per shop, feature-specific, and never grants creation or company access (555.915408ms)
+✔ operational records and history IDs never cross supermarkets (170.718812ms)
+✔ company supplier endpoints cannot mutate or transfer into customer shops (56.940783ms)
+✔ list backfill preserves data, reports ambiguity, and supports repeatable apply and recovery (37.876922ms)
+✔ company supermarket directory is separate, searchable, permission-controlled and auditable (69.791724ms)
+✔ waste, age records, payouts, shifts, certificates and private photos remain shop-scoped (219.843062ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ chiller, freezer and legacy freezer limits survive create, edit and reload; alerts use saved range (717.874797ms)
+✔ both age record APIs accept either, both or neither product details; current records can clear fields (248.648067ms)
+✔ payouts persist, list, filter and keep their automatic creation timestamp on edits (66.741648ms)
+✔ additive age migration preserves existing rows and allows independent null fields (9.698382ms)
+ℹ tests 74
+ℹ suites 16
+ℹ pass 71
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22036.86279
+
+✖ failing tests:
+
+test at tests/authorization.test.js:158:3
+✖ a forged EMPLOYEE token for a shop employee still has no company access (2.292275ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  401 !== 403
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/product-A-backend/tests/authorization.test.js:162:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/features.test.js:114:3
+✖ sockets: rooms are authorized and per-user events do not leak across account types (1580.184332ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(await waitFor(() => got(anon, 'chat_join_denied').length === 1))
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/product-A-backend/tests/features.test.js:126:12)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/migration.test.js:169:3
+✖ migrated accounts get the right access and stale tokens stop working (36.719391ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  401 !== 200
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/product-A-backend/tests/migration.test.js:173:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

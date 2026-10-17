@@ -14,7 +14,7 @@ import { usePromotions } from '@/features/home/hooks/use-home';
 /** All active promotions with image zoom and per-promotion product lists. */
 export default function PromotionsScreen() {
   const router = useRouter();
-  const { data: promotions, isLoading, refetch, isRefetching } = usePromotions();
+  const { data: promotions, isLoading, error, refetch, isRefetching } = usePromotions();
   const [viewerUri, setViewerUri] = useState<string | null>(null);
 
   return (
@@ -25,7 +25,7 @@ export default function PromotionsScreen() {
         </Pressable>
         <View style={styles.headerText}>
           <Text style={styles.headerTitle}>Promotions</Text>
-          <Text style={styles.headerMeta}>Current offers from your wholesalers</Text>
+          <Text style={styles.headerMeta}>Current public wholesaler offers</Text>
         </View>
       </View>
 
@@ -49,7 +49,7 @@ export default function PromotionsScreen() {
               promotion={item}
               onPressImage={setViewerUri}
               onViewProducts={(promotion) =>
-                router.push({ pathname: '/(app)/promotion/[id]', params: { id: promotion.id } })
+                router.push({ pathname: '/promotion/[id]', params: { id: promotion.id } })
               }
             />
           </Animated.View>
@@ -63,8 +63,8 @@ export default function PromotionsScreen() {
           ) : (
             <View style={styles.empty}>
               <Ionicons name="pricetags-outline" size={40} color={Colors.light.textLight} />
-              <Text style={styles.emptyTitle}>No promotions right now</Text>
-              <Text style={styles.emptyText}>Check back soon — new offers land regularly.</Text>
+              <Text style={styles.emptyTitle}>{error ? "Could not load promotions" : "No promotions right now"}</Text>
+              <Text style={styles.emptyText}>{error ? "Check your connection and pull down to retry." : "Check back for new offers."}</Text>
             </View>
           )
         }

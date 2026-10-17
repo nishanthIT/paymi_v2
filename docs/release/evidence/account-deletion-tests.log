@@ -1,0 +1,15 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ public deletion resource needs no app and does not embed credentials or permit framing (441.812848ms)
+✔ request reauthenticates current account, is idempotent, and status requires a private receipt (92.70392ms)
+✔ owner deletion preserves staff, co-owner, workspace, tasks and shared lists; files and stale sessions are removed (64.253619ms)
+✔ employee deletion cannot remove another role with the same ID; file errors remain retryable (19.598517ms)
+✔ admin deletion removes the account without deleting its managed shop (11.205307ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1241.403469

@@ -1,6 +1,7 @@
+import { PrivateImage } from '@/components/ui/private-image';
+import { ProductCategoryFields } from '@/features/age-restriction/product-category-fields';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Linking, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
@@ -11,6 +12,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { useShopFeature } from '@/features/employees/permissions';
 import {
   AGE_RESTRICTION_DESCRIPTION_MAX,
   ageRestrictionKeys,
@@ -55,6 +57,8 @@ function auditText(record: AgeRestrictionRecord): string {
 export default function AgeRestrictionRecordsScreen() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const canCreate = useShopFeature('feature.age_records', 'write');
+  const canEdit = useShopFeature('feature.age_records', 'edit');
 
   const [range, setRange] = useState<Range>('all');
   const [sheet, setSheet] = useState<SheetState>(null);
@@ -160,7 +164,7 @@ export default function AgeRestrictionRecordsScreen() {
           renderItem={({ item }) => (
             <RecordCard
               onPress={() => setSheet({ mode: 'view', record: item })}
-              onLongPress={item.canManage ? () => handleDelete(item) : undefined}
+              onLongPress={item.canManage && canEdit ? () => handleDelete(item) : undefined}
             >
               <View style={styles.row}>
                 <View style={styles.body}>
@@ -176,7 +180,7 @@ export default function AgeRestrictionRecordsScreen() {
                   <AuditLine text={auditText(item)} />
                 </View>
                 {!!item.imageUrl && (
-                  <Image source={{ uri: item.imageUrl }} style={styles.thumb} contentFit="cover" />
+                  <PrivateImage uri={item.imageUrl} style={styles.thumb} contentFit="cover" />
                 )}
                 <Ionicons name="chevron-forward" size={18} color={Colors.light.textLight} />
               </View>
@@ -192,12 +196,13 @@ export default function AgeRestrictionRecordsScreen() {
         />
       )}
 
-      <Fab label="Add Record" onPress={() => openForm(null)} />
+      {canCreate && <Fab label="Add Record" onPress={() => openForm(null)} />}
 
       <BottomSheet visible={sheet != null} onClose={() => setSheet(null)} keyboardAware scrollable>
         {shown?.mode === 'view' && (
           <RecordDetail
             record={shown.record}
+            canEdit={canEdit}
             onViewImage={setViewerUri}
             onEdit={() => openForm(shown.record)}
             onDelete={() => handleDelete(shown.record)}
@@ -222,12 +227,14 @@ export default function AgeRestrictionRecordsScreen() {
 
 function RecordDetail({
   record,
+  canEdit,
   onViewImage,
   onEdit,
   onDelete,
   deleting,
 }: {
   record: AgeRestrictionRecord;
+  canEdit: boolean;
   onViewImage: (uri: string) => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -254,6 +261,12 @@ function RecordDetail({
       </View>
 
       <View style={styles.section}>
+        <Text style={styles.infoLabel}>Category</Text>
+        <Text style={styles.detailDescription}>{record.productCategory || 'Not specified'}</Text>
+        <Text style={styles.infoLabel}>Product</Text>
+        <Text style={styles.detailDescription}>{record.productName || 'Not specified'}</Text>
+      </View>
+      <View style={styles.section}>
         <Text style={styles.infoLabel}>Description</Text>
         <Text style={styles.detailDescription} selectable>
           {record.description}
@@ -268,7 +281,7 @@ function RecordDetail({
             accessibilityRole="imagebutton"
             accessibilityLabel="Open photo full screen"
           >
-            <Image source={{ uri: record.imageUrl }} style={styles.detailImage} contentFit="cover" />
+            <PrivateImage uri={record.imageUrl} style={styles.detailImage} contentFit="cover" />
             <View style={styles.expandBadge}>
               <Ionicons name="expand-outline" size={14} color="#FFFFFF" />
               <Text style={styles.expandText}>Tap to enlarge</Text>
@@ -281,7 +294,7 @@ function RecordDetail({
 
       <AuditLine text={auditText(record)} />
 
-      {record.canManage && (
+      {record.canManage && canEdit && (
         <View style={styles.actionRow}>
           <PrimaryButton title="Delete" variant="ghost" onPress={onDelete} loading={deleting} style={styles.flex1} />
           <PrimaryButton title="Edit" onPress={onEdit} style={styles.flex1} />
@@ -304,6 +317,8 @@ function RecordForm({
 }) {
   const [when, setWhen] = useState<Date>(() => (record ? new Date(record.occurredAt) : new Date()));
   const [description, setDescription] = useState(record?.description ?? '');
+  const [productCategory, setProductCategory] = useState(record?.productCategory ?? '');
+  const [productName, setProductName] = useState(record?.productName ?? '');
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [inFuture, setInFuture] = useState(false);
@@ -385,6 +400,7 @@ function RecordForm({
       <DateTimeField label="Time" mode="time" value={when} onChange={setTime} />
       {inFuture && <Text style={styles.errorText}>Date and time can&apos;t be in the future.</Text>}
 
+      <ProductCategoryFields category={productCategory} product={productName} onCategory={setProductCategory} onProduct={setProductName} />
       <View>
         <TextField
           label="Short description"
@@ -403,7 +419,7 @@ function RecordForm({
         <Text style={styles.infoLabel}>Photo (optional)</Text>
         {previewUri ? (
           <View>
-            <Image source={{ uri: previewUri }} style={styles.detailImage} contentFit="cover" />
+            <PrivateImage uri={previewUri} style={styles.detailImage} contentFit="cover" />
             <Pressable
               onPress={clearPhoto}
               hitSlop={8}
@@ -429,7 +445,7 @@ function RecordForm({
 
       <PrimaryButton
         title={record ? 'Save Changes' : 'Save Record'}
-        onPress={() => valid && onSave({ occurredAt: when, description: trimmed, imageUri, removeImage })}
+        onPress={() => valid && onSave({ occurredAt: when, description: trimmed, productCategory: productCategory.trim() || null, productName: productName.trim() || null, imageUri, removeImage })}
         disabled={!valid}
         loading={saving}
       />

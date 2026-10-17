@@ -16,11 +16,17 @@ export interface CompareProduct {
 
 /** Quantity-based tier pricing set by a shop (e.g. "5 for £10"). */
 export interface CompareShopPriceTier {
+  packagingId?: string | null;
   quantity: number;
   price: number;
 }
 
 export interface CompareShop {
+  unitsPerPack?: number;
+  packagingId?: string | null;
+  pricedUnitSize?: string | null;
+  priceObservedAt?: string | null;
+  isSupplierCurrentPrice?: boolean;
   productAtShopId: string;
   shopId: string;
   shopName: string;
@@ -30,7 +36,7 @@ export interface CompareShop {
   offerPrice: number | null;
   offerExpiryDate: string | null;
   hasActiveOffer: boolean;
-  /** `offerPrice` when the offer is live, otherwise `price`. */
+  /** Selected by the backend, including imported supplier current prices. */
   effectivePrice: number;
   priceTiers: CompareShopPriceTier[];
 }

@@ -1,3 +1,5 @@
+import { parseTemperature } from '@/features/fridges/temperature';
+import { TemperatureField } from '@/features/fridges/components/temperature-field';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import React, { useMemo, useState } from 'react';
@@ -17,6 +19,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { useShopFeature } from '@/features/employees/permissions';
 import {
   useAddTemperatureLog,
   useAllLogs,
@@ -45,6 +48,7 @@ interface LogTarget {
 /** Chiller/freezer temperature logging with per-day morning/evening checklist. */
 export default function FridgeTemperatureScreen() {
   const isOwner = useIsOwner();
+  const canLog = useShopFeature('feature.fridges', 'write');
   const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('today');
   const [range, setRange] = useState<Range>('7d');
@@ -93,6 +97,8 @@ export default function FridgeTemperatureScreen() {
       {tab === 'today' &&
         (todayStatus.isLoading ? (
           <ListSkeleton rows={3} height={150} />
+        ) : todayStatus.isError ? (
+          <LoadError subject="today's readings" error={todayStatus.error} onRetry={() => { void todayStatus.refetch(); }} />
         ) : (
           <FlatList
             data={todayStatus.data ?? []}
@@ -106,7 +112,7 @@ export default function FridgeTemperatureScreen() {
               />
             }
             renderItem={({ item }) => (
-              <TodayFridgeCard fridge={item} onLog={(slot, compartment) => setLogTarget({ fridge: item, slot, compartment })} />
+              <TodayFridgeCard fridge={item} canLog={canLog} onLog={(slot, compartment) => setLogTarget({ fridge: item, slot, compartment })} />
             )}
             ListEmptyComponent={
               <EmptyState
@@ -153,6 +159,8 @@ export default function FridgeTemperatureScreen() {
           </View>
           {logs.isLoading ? (
             <ListSkeleton rows={6} height={60} />
+          ) : logs.isError ? (
+            <LoadError subject="temperature history" error={logs.error} onRetry={() => { void logs.refetch(); }} />
           ) : (
             <FlatList
               data={logs.data ?? []}
@@ -197,10 +205,15 @@ export default function FridgeTemperatureScreen() {
 
       {tab === 'equipment' && isOwner && (
         <>
-          <FlatList
+          {fridges.isLoading ? (
+            <ListSkeleton rows={3} height={88} />
+          ) : fridges.isError ? (
+            <LoadError subject="equipment" error={fridges.error} onRetry={() => { void fridges.refetch(); }} />
+          ) : <FlatList
             data={fridges.data ?? []}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
+            refreshControl={<RefreshControl refreshing={fridges.isRefetching} onRefresh={fridges.refetch} tintColor={Colors.light.primary} />}
             renderItem={({ item }) => (
               <RecordCard
                 onPress={() => {
@@ -230,7 +243,7 @@ export default function FridgeTemperatureScreen() {
             ListEmptyComponent={
               <EmptyState icon="snow-outline" title="No equipment" subtitle="Add your first fridge or freezer." />
             }
-          />
+          />}
           <Fab
             label="Add Equipment"
             onPress={() => {
@@ -293,6 +306,14 @@ export default function FridgeTemperatureScreen() {
   );
 }
 
+function LoadError({ subject, error, onRetry }: { subject: string; error: Error | null; onRetry: () => void }) {
+  return (
+    <EmptyState icon="cloud-offline-outline" title={`Couldn't load ${subject}`} subtitle={error?.message ?? 'Check your connection and try again.'}>
+      <PrimaryButton title="Try Again" variant="ghost" onPress={onRetry} />
+    </EmptyState>
+  );
+}
+
 /** Legacy freezer detection for units saved before the explicit freezer flag. */
 function isFreezerUnit(minSafeTemp: number, maxSafeTemp: number): boolean {
   return minSafeTemp <= -11 && maxSafeTemp <= -11;
@@ -313,9 +334,11 @@ function FreezerTag() {
 /** Today card: morning/evening slots, red when out of range. */
 function TodayFridgeCard({
   fridge,
+  canLog,
   onLog,
 }: {
   fridge: FridgeTodayStatus;
+  canLog: boolean;
   onLog: (slot: EntrySlot, compartment: Compartment) => void;
 }) {
   const freezer = fridge.hasFreezer || isFreezerUnit(fridge.minSafeTemp, fridge.maxSafeTemp);
@@ -347,6 +370,10 @@ function TodayFridgeCard({
     return (
       <Pressable
         key={`${compartment}-${slotType}`}
+        accessibilityRole="button"
+        accessibilityLabel={`${fridge.name}, ${label}: ${logged ? `${temp} degrees Celsius` : 'Not recorded'}`}
+        accessibilityState={{ disabled: logged || !canLog }}
+        disabled={logged || !canLog}
         onPress={() => !logged && onLog(slotType, compartment)}
         style={[styles.slot, logged && styles.slotDone, isAlert && styles.slotAlert]}
       >
@@ -357,8 +384,8 @@ function TodayFridgeCard({
           </Text>
         ) : (
           <View style={styles.slotAdd}>
-            <Ionicons name="add" size={14} color={Colors.light.primary} />
-            <Text style={styles.slotAddText}>Log</Text>
+            {canLog && <Ionicons name="add" size={14} color={Colors.light.primary} />}
+            <Text style={styles.slotAddText}>{canLog ? 'Log' : 'Not recorded'}</Text>
           </View>
         )}
       </Pressable>
@@ -454,7 +481,7 @@ function LogTemperatureSheet({
     setNotes('');
   }
 
-  const temp = tempText.trim() === '' || tempText.trim() === '-' ? null : Number(tempText);
+  const temp = parseTemperature(tempText);
   const valid = temp != null && Number.isFinite(temp);
 
   return (
@@ -468,14 +495,18 @@ function LogTemperatureSheet({
           </Text>
           {target?.compartment === 'FREEZER' && <FreezerTag />}
         </View>
-        <TextField
+        <TemperatureField
+          key={key}
           label="Temperature (°C)"
           value={tempText}
-          onChangeText={setTempText}
-          placeholder="e.g. 3.5"
-          keyboardType="numbers-and-punctuation"
+          onChange={setTempText}
+          defaultNegative={target?.compartment === 'FREEZER'}
           autoFocus
         />
+        <Text style={styles.freezerHint}>
+          {valid ? `Reading to save: ${temp! > 0 ? '+' : ''}${temp}°C.` : 'Choose the sign and enter the temperature.'}
+          {target?.compartment === 'FREEZER' ? ' Freezer readings start below zero; use + for a positive reading.' : ''}
+        </Text>
         <TextField label="Notes (optional)" value={notes} onChangeText={setNotes} placeholder="Anything unusual?" />
         <PrimaryButton
           title="Save Reading"
@@ -527,8 +558,8 @@ function FridgeFormSheet({
         (fridge.hasFreezer || (fridge.minSafeTemp <= -11 && fridge.maxSafeTemp <= -11));
       setName(fridge?.name ?? '');
       setLocation(fridge?.location ?? '');
-      setMinTemp(String(fridge?.minSafeTemp ?? -5));
-      setMaxTemp(String(fridge?.maxSafeTemp ?? 8));
+      setMinTemp(String((freezer ? fridge?.freezerMinSafeTemp : null) ?? fridge?.minSafeTemp ?? -5));
+      setMaxTemp(String((freezer ? fridge?.freezerMaxSafeTemp : null) ?? fridge?.maxSafeTemp ?? 8));
       setIsFreezer(freezer);
       setIsActive(fridge?.isActive ?? true);
     }
@@ -548,9 +579,9 @@ function FridgeFormSheet({
     }
   };
 
-  const min = Number(minTemp);
-  const max = Number(maxTemp);
-  const valid = name.trim().length > 0 && Number.isFinite(min) && Number.isFinite(max) && min < max;
+  const min = parseTemperature(minTemp);
+  const max = parseTemperature(maxTemp);
+  const valid = name.trim().length > 0 && min !== null && max !== null && min < max;
 
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
@@ -560,10 +591,10 @@ function FridgeFormSheet({
         <TextField label="Location (optional)" value={location} onChangeText={setLocation} placeholder="e.g. Back room" />
         <View style={styles.tempRow}>
           <View style={styles.tempField}>
-            <TextField label="Min temp °C" value={minTemp} onChangeText={setMinTemp} keyboardType="numbers-and-punctuation" />
+            <TemperatureField label="Min temp °C" value={minTemp} onChange={setMinTemp} />
           </View>
           <View style={styles.tempField}>
-            <TextField label="Max temp °C" value={maxTemp} onChangeText={setMaxTemp} keyboardType="numbers-and-punctuation" />
+            <TemperatureField label="Max temp °C" value={maxTemp} onChange={setMaxTemp} />
           </View>
         </View>
         <View style={styles.switchRow}>
@@ -577,6 +608,9 @@ function FridgeFormSheet({
             trackColor={{ true: FREEZER_BLUE }}
           />
         </View>
+        {min !== null && max !== null && min >= max && (
+          <Text style={styles.freezerHint}>Minimum temperature must be less than maximum.</Text>
+        )}
         {isFreezer && (
           <Text style={styles.freezerHint}>
             Tagged with a blue freezer badge. Readings are checked against the range above.
@@ -595,12 +629,12 @@ function FridgeFormSheet({
             onSave({
               name: name.trim(),
               location: location.trim() || undefined,
-              minSafeTemp: min,
-              maxSafeTemp: max,
+              minSafeTemp: min!,
+              maxSafeTemp: max!,
               hasFreezer: isFreezer,
               // Freezer units keep one range — mirror it into the freezer fields
               // so backend alert checks use the same numbers.
-              ...(isFreezer ? { freezerMinSafeTemp: min, freezerMaxSafeTemp: max } : {}),
+              ...(isFreezer ? { freezerMinSafeTemp: min!, freezerMaxSafeTemp: max! } : {}),
               ...(fridge ? { isActive } : {}),
             })
           }

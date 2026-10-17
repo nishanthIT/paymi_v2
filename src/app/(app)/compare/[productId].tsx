@@ -50,7 +50,8 @@ export default function CompareProductResultsScreen() {
     // shoppers get by picking the best-value option instead of the worst one.
     let maxSingle = 0;
     for (const shop of compare.data?.shops ?? []) {
-      if (shop.effectivePrice > maxSingle) maxSingle = shop.effectivePrice;
+      const unitPrice = shop.effectivePrice / (shop.unitsPerPack ?? 1);
+      if (unitPrice > maxSingle) maxSingle = unitPrice;
     }
     const diff = maxSingle - bestOption.effectiveUnitPrice;
     return diff > 0.005 ? diff : null;
@@ -175,7 +176,6 @@ export default function CompareProductResultsScreen() {
             <Animated.View entering={FadeInDown.duration(220).delay(Math.min(index, 6) * 40)}>
               <OptionCard
                 option={item}
-                onAdd={item.isBestValue ? () => setPickerOpen(true) : undefined}
               />
             </Animated.View>
           )}
@@ -187,7 +187,7 @@ export default function CompareProductResultsScreen() {
                 style={({ pressed }) => [styles.footerCta, pressed && styles.footerCtaPressed]}
               >
                 <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.footerCtaText}>Add best value to a list</Text>
+                <Text style={styles.footerCtaText}>Add product to a list</Text>
               </Pressable>
             ) : null
           }

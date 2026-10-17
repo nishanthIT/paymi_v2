@@ -1,0 +1,11 @@
+{
+  "checkedDate": "2026-10-13",
+  "applicationIdentifier": "com.n1sh.paymi",
+  "androidRemoteVersionCode": 10,
+  "iosRemoteBuildNumber": 29,
+  "androidKeystoreType": "JKS",
+  "androidSHA256": "B2:D5:CD:2A:6C:63:38:37:BC:27:15:EB:1F:11:7D:FF:13:F5:4F:C6:0F:9E:20:7D:9D:85:6E:2D:48:86:AE:87",
+  "source": "eas credentials --platform android, production profile; metadata only; no keys generated/replaced",
+  "playConsoleCertificateMatch": "NOT VERIFIED",
+  "localBuild": "BUILD SUCCESSFUL in 37s; /tmp artifact lost on environment restart; debug signing, not submission candidate"
+}

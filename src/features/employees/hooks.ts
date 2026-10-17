@@ -20,8 +20,8 @@ export const employeeListsKey = (id: number) => ['lists', 'employee', id] as con
 
 /** Only the shop owner manages shop employees. The API enforces the same rule. */
 export function useCanManageShopEmployees(): boolean {
-  const { user } = useAuth();
-  return user?.userType === 'CUSTOMER';
+  const { user, activeSupermarket } = useAuth();
+  return user?.userType === 'CUSTOMER' && activeSupermarket?.role === 'OWNER';
 }
 
 export function useEmployeeLists(id: number) {

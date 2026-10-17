@@ -42,6 +42,7 @@ export interface Employee {
 }
 
 export interface EmployeeInput {
+  existingEmployeeId?: number;
   name: string;
   email?: string;
   password?: string;
@@ -76,7 +77,8 @@ export async function fetchEmployeeLists(id: number): Promise<EmployeeListSummar
 
 export async function createEmployee(input: EmployeeInput): Promise<void> {
   try {
-    await api.post('/employees', input);
+    if (input.existingEmployeeId) await api.post('/employees/assign', { employeeId: input.existingEmployeeId, permissions: input.permissions });
+    else await api.post('/employees', input);
   } catch (error: any) {
     throw apiError(error, 'Could not create the employee');
   }
@@ -105,4 +107,8 @@ export async function deleteEmployee(id: number): Promise<void> {
   } catch (error: any) {
     throw apiError(error, 'Could not remove the employee');
   }
+}
+
+export async function fetchAssignableEmployees(): Promise<{ id: number; name: string; email: string }[]> {
+  return (await api.get('/employees/assignable')).data.employees;
 }

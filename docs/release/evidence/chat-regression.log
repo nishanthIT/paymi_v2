@@ -1,0 +1,60 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires explicit acceptance and rejects content larger than the server limit (581.173141ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (37.509468ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (288.081869ms)
+✔ moderation removes reported content from histories and summaries and records a decision (14.823992ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (33.348427ms)
+✔ socket clients cannot relay a forged message or sender identity (129.196358ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ chats
+  ✔ shop employees use their own shop group chat but not another shop's (155.657435ms)
+  ✔ existing conversations still load and accept messages (61.547777ms)
+  ✔ chat user selectors are scoped: owner sees own shop employees, company staff can reach customers for support (69.19092ms)
+  ✔ sockets: rooms are authorized and per-user events do not leak across account types (552.501132ms)
+✔ chats (2678.603486ms)
+▶ tasks
+  ✔ owner assigns only own active shop employees; employee works the task (82.99379ms)
+  ✔ editing a task keeps existing assignments and their progress, including deactivated employees (74.723426ms)
+✔ tasks (158.204773ms)
+▶ deactivation side effects
+  ✔ deactivated employee leaves the shop chat, notifications and selectors; history is kept; reactivation restores (489.583725ms)
+  ✔ status survives a refresh and failed actions report errors (16.148207ms)
+📡 Emitted list_created to shop_cmv57rb3w0002aqbhd8q9kt03_lists
+  ✔ lists stay with their shop and creator (84.305978ms)
+✔ deactivation side effects (590.596774ms)
+📡 Emitted list_created to shop_cmv57rb3w0002aqbhd8q9kt03_lists
+📡 Emitted list_updated to shop_cmv57rb3w0002aqbhd8q9kt03_lists
+▶ per-tool shop access (read / write / edit)
+  ✔ owner switches tools and access levels for one employee; API and notifications follow (145.593746ms)
+  ✔ task progress needs write access, not edit (41.515435ms)
+✔ per-tool shop access (read / write / edit) (187.442026ms)
+📡 Emitted list_created to shop_cmv57rb3w0002aqbhd8q9kt03_lists
+📦 Fetching list from DATABASE (no cache): cmv57rdvh001xaqbh2w8l932s
+📦 Database isPurchased states: []
+Found 1 in-stock shops with product cmv57rb4a000daqbh2ulqixqu
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmv57rb3w0002aqbhd8q9kt03_lists
+📦 Fetching list from DATABASE (no cache): cmv57rdvh001xaqbh2w8l932s
+📦 Database isPurchased states: [
+  {
+    id: 'cmv57re840021aqbhneb2kf0e',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+▶ employee lists: owner views, copies and stays in sync
+  ✔ owner opens an employee list, copies it, and sees new items live (492.462932ms)
+✔ employee lists: owner views, copies and stays in sync (492.606714ms)
+▶ company views
+  ✔ company staff page never lists shop employees; customer details lists them per shop (122.361554ms)
+✔ company views (122.480718ms)
+ℹ tests 19
+ℹ suites 6
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6596.683913

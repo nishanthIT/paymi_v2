@@ -1,0 +1,32 @@
+{
+  "checkedDate": "2026-10-15",
+  "timezone": "Asia/Kolkata",
+  "backend": {
+    "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test node --test --test-concurrency=1 tests/*.test.js",
+    "executed": true,
+    "exitCode": 0,
+    "tests": 136,
+    "passed": 135,
+    "failed": 0,
+    "skipped": 1,
+    "log": "shop-workflows-backend-tests.log"
+  },
+  "latency": {
+    "command": "TEST_DATABASE_URL=postgresql://paymi_release@127.0.0.1:55441/paymi_moderation_test TEST_DB_LATENCY_MS=350 node --test --test-concurrency=1 tests/latency.test.js",
+    "executed": true,
+    "exitCode": 0,
+    "passed": 1,
+    "failed": 0,
+    "log": "shop-workflows-latency.log"
+  },
+  "mobileEvidence": "shop-workflows-mobile-validation.json",
+  "liveEvidence": "shop-workflows-http-final.json",
+  "deviceWorkflowStatus": "NOT TESTED by automation; user reports screens working",
+  "nativeBuilds": "Not requested; owner handles builds",
+  "hostedDeployment": "Not performed",
+  "limitations": [
+    "Remote database latency remains significant.",
+    "Legacy offline edits missing list identity require re-entry.",
+    "Strict concurrent inventory cache misses and mutations across multiple backend processes need distributed coordination."
+  ]
+}

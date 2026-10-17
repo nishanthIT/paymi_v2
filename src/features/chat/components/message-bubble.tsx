@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
+import { PrivateImage } from '@/components/ui/private-image';
 import React, { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -40,6 +40,10 @@ export const MessageBubble = memo(function MessageBubble({
   return (
     <View style={[styles.row, own ? styles.rowOwn : styles.rowOther]}>
       <Pressable
+        accessibilityLabel={`${message.senderName || 'Message'}: ${message.content}`}
+        accessibilityHint="Long press for message actions"
+        accessibilityActions={[{ name: 'longpress', label: 'Message actions' }]}
+        onAccessibilityAction={event => { if (event.nativeEvent.actionName === 'longpress') onLongPress(message); }}
         onLongPress={() => onLongPress(message)}
         delayLongPress={280}
         style={({ pressed }) => [
@@ -54,7 +58,7 @@ export const MessageBubble = memo(function MessageBubble({
         )}
 
         {message.messageType === 'IMAGE' && attachment && (
-          <Image source={{ uri: attachment }} style={styles.image} contentFit="cover" transition={150} />
+          <PrivateImage uri={attachment} style={styles.image} contentFit="cover" transition={150} />
         )}
 
         {message.messageType === 'DOCUMENT' && (

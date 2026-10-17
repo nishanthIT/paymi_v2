@@ -1,0 +1,39 @@
+✔ startup checks actual schema and supplies safe actionable diagnostics (55.908379ms)
+✔ database fallback survives new instances and expires strings, hashes, lists and sets (110.891234ms)
+✔ concurrent rate limits have atomic increments and TTL, database failure stays fail closed (33.772903ms)
+Redis ready; durable PostgreSQL fallback ready
+Redis ready; durable PostgreSQL fallback ready
+✔ real Redis outage and reconnection cannot resurrect consumed or stale values (138.382107ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ a failed provider purge leaves deletion retryable and revokes all old sessions before erasure (756.309291ms)
+✔ verified ledger replay erases a restored account, preserves shared shops, rejects old tokens and advances ID sequences (83.24805ms)
+✔ Redis deletion failures propagate instead of silently falling back to local memory (0.706902ms)
+✔ journal storage failure prevents erasure; durable journal is integrity-protected and excludes account content (66.156603ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📎 Saving file with extension: .txt from mimetype: text/plain
+✔ new and existing accounts send, receive and upload without any acceptance row (1206.288535ms)
+✔ report identity, explanation and exact snapshot persist; own and inaccessible reports fail; races dedupe (127.915016ms)
+✔ all admin operations reject customer and delegated staff, and never expose reporter details publicly (158.417538ms)
+✔ admin can filter, investigate context, record internal notes and transition status without restricting account (182.071235ms)
+✔ account suspension denies existing sessions, login and socket reconnect; expiry and early reactivation preserve data (261.794781ms)
+✔ chat and account restrictions are independent, custom durations expire and chat blocks direct API writes (106.579135ms)
+✔ individual deletion preserves evidence, other authors and report status; concurrent requests are idempotent (73.187556ms)
+✔ bulk deletion requires both confirmations, survives retry/restart and preserves newer messages and other authors (1070.120282ms)
+Moderation queue ready (PostgreSQL)
+✔ a failed bulk batch rolls back fully and the startup worker resumes the durable job (142.370509ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ logout durably revokes only that session and disconnects its socket; retries succeed (639.140916ms)
+✔ password recovery invalidates customer and admin tokens and prevents OTP reuse (963.516141ms)
+✔ legacy version-zero tokens remain valid until revocation, and bearer wins over cookie (4.552772ms)
+✔ an expired legacy trial does not limit the free release or spend saved points (37.722546ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11744.860604

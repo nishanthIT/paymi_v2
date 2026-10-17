@@ -8,6 +8,7 @@ import { getChatSocket } from '@/features/chat/socket';
 
 interface TemperatureAlertPayload {
   message?: string;
+  supermarketId?: string;
   fridgeName?: string;
   temperature?: number;
 }
@@ -18,7 +19,7 @@ interface TemperatureAlertPayload {
  * moment any reading falls outside its safe range.
  */
 export function useTemperatureAlerts() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
@@ -33,6 +34,7 @@ export function useTemperatureAlerts() {
       if (!socket || cancelled) return;
 
       const onAlert = (payload?: TemperatureAlertPayload) => {
+        if (payload?.supermarketId !== user?.shopId) return;
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
         showToast(payload?.message ?? 'Temperature alert at your shop', 'error');
         queryClient.invalidateQueries({ queryKey: ['fridges'] });
@@ -46,5 +48,5 @@ export function useTemperatureAlerts() {
       cancelled = true;
       cleanup?.();
     };
-  }, [isAuthenticated, queryClient, showToast]);
+  }, [user?.shopId, isAuthenticated, queryClient, showToast]);
 }

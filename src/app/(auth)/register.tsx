@@ -109,7 +109,7 @@ export default function RegisterScreen() {
 
             <Text style={styles.title}>Create your account</Text>
             <Text style={styles.subtitle}>
-              Start your 90-day free trial — no card required
+              Create your free shop workspace — no card required
             </Text>
           </Animated.View>
 
@@ -217,6 +217,7 @@ export default function RegisterScreen() {
               Sign in
             </Link>
           </Animated.View>
+          <Link href="/about" style={{ textAlign: 'center', padding: 16, color: Colors.light.primary }}>About Paymi · Support & privacy</Link>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

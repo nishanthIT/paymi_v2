@@ -1,3 +1,4 @@
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -399,8 +400,6 @@ function AddExpirySheet({
 }) {
   const { showToast } = useToast();
   const [query, setQuery] = useState('');
-  const [hits, setHits] = useState<ExpirySearchProduct[]>([]);
-  const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ExpirySearchProduct | null>(null);
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [quantityText, setQuantityText] = useState('1');
@@ -416,7 +415,6 @@ function AddExpirySheet({
     setWasVisible(visible);
     if (visible) {
       setQuery('');
-      setHits([]);
       setSelected(initialProduct ?? null);
       setAskDate(!!initialProduct);
       setExpiryDate(null);
@@ -427,20 +425,15 @@ function AddExpirySheet({
     }
   }
 
-  useEffect(() => {
-    if (!visible || selected || query.trim().length < 2) {
-      setHits([]);
-      return;
-    }
-    setSearching(true);
-    const timer = setTimeout(() => {
-      searchExpiryProducts({ query: query.trim() })
-        .then(setHits)
-        .catch(() => setHits([]))
-        .finally(() => setSearching(false));
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [query, selected, visible]);
+  const searchTerm = useDebouncedValue(query.trim(), 350);
+  const searchEnabled = visible && !selected && searchTerm.length >= 2 && searchTerm === query.trim();
+  const search = useQuery({
+    queryKey: ['expiry-product-lookup', searchTerm],
+    queryFn: () => searchExpiryProducts({ query: searchTerm }),
+    enabled: searchEnabled,
+  });
+  const hits = searchEnabled ? search.data ?? [] : [];
+  const searching = searchEnabled && search.isFetching;
 
   const quantity = Number(quantityText);
   const valid = selected != null && expiryDate != null && Number.isFinite(quantity) && quantity > 0;
