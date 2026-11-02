@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -13,6 +12,7 @@ import {
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useCompareProduct } from '@/features/compare/hooks/use-compare-product';
@@ -20,7 +20,6 @@ import type { PurchaseOption } from '@/features/compare/types';
 import { ListPickerSheet } from '@/features/home/components/list-picker-sheet';
 import { useAddProduct } from '@/features/lists/hooks/use-list-details';
 import type { Product, ShoppingList } from '@/features/lists/types';
-import { getProductImageUrl } from '@/utils/product-image';
 
 /**
  * Ranked comparison of every shop that stocks a product. The comparison
@@ -97,21 +96,7 @@ export default function CompareProductResultsScreen() {
           <Ionicons name="chevron-back" size={22} color={Colors.light.text} />
         </Pressable>
         <View style={styles.headerImageWrap}>
-          {(() => {
-            const imageUrl = product
-              ? getProductImageUrl(product.img as any, product.barcode)
-              : null;
-            return imageUrl ? (
-              <Image
-                source={{ uri: imageUrl }}
-                style={styles.headerImage}
-                contentFit="contain"
-                transition={150}
-              />
-            ) : (
-              <Ionicons name="cube-outline" size={22} color={Colors.light.textLight} />
-            );
-          })()}
+          <ProductImage img={product?.img} barcode={product?.barcode} style={styles.headerImage} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.title} numberOfLines={2}>
@@ -189,7 +174,7 @@ export default function CompareProductResultsScreen() {
                 <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
                 <Text style={styles.footerCtaText}>Add product to a list</Text>
               </Pressable>
-            ) : null
+            ) : undefined
           }
         />
       )}

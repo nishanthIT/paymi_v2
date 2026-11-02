@@ -88,7 +88,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Paymi to scan product barcodes and take photos for certificates and age-restriction records.",
+          "cameraPermission": "Allow Paymi to scan product barcodes and take photos for chat, certificates and age-restriction records.",
           "recordAudioAndroid": false,
           "microphonePermission": false
         }
@@ -97,7 +97,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Allow Paymi to select photos for chat, incident records, certificates, age-restriction records and labels.",
-          "cameraPermission": "Allow Paymi to scan product barcodes and take photos for certificates and age-restriction records.",
+          "cameraPermission": "Allow Paymi to scan product barcodes and take photos for chat, certificates and age-restriction records.",
           "microphonePermission": false
         }
       ],

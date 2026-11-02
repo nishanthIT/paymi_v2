@@ -1,17 +1,21 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Pressable,
   StyleSheet,
+  Text,
   useWindowDimensions,
   View,
+  type FlatListInstance,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { BorderRadius, Colors, Shadows, Spacing } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 import type { Advertisement } from '../types';
 
@@ -26,17 +30,25 @@ const AUTO_SCROLL_MS = 2800;
 const ASPECT_RATIO = 1.91;
 // Data is tripled so the list can loop seamlessly in both directions.
 const LOOP_COPIES = 3;
+const PAGE_GUTTER = 20;
 
 /**
- * Full-width hero carousel: auto-scrolls every ~3s, loops infinitely,
- * pauses while the user is touching, and caches images on disk.
+ * Hero carousel: auto-scrolls every ~3s, loops infinitely,
+ * pauses during dragging, and caches images on disk.
  */
 export function AdCarousel({ ads, loading, onPressAd }: AdCarouselProps) {
-  const { width } = useWindowDimensions();
-  const cardWidth = width - Spacing.lg * 2;
+  const { width: windowWidth } = useWindowDimensions();
+  const [containerWidth, setContainerWidth] = useState(0);
+  // Paging follows the actual safe-area/content width, including on tablets.
+  const width = containerWidth || windowWidth;
+  const cardWidth = Math.max(1, width - PAGE_GUTTER * 2);
   const cardHeight = Math.round(cardWidth / ASPECT_RATIO);
+  const measureContainer = useCallback((event: LayoutChangeEvent) => {
+    const nextWidth = event.nativeEvent.layout.width;
+    if (nextWidth > 0) setContainerWidth(nextWidth);
+  }, []);
 
-  const listRef = useRef<FlatList>(null);
+  const listRef = useRef<FlatListInstance>(null);
   const indexRef = useRef(0);
   const interactingRef = useRef(false);
   const [activeDot, setActiveDot] = useState(0);
@@ -85,8 +97,8 @@ export function AdCarousel({ ads, loading, onPressAd }: AdCarouselProps) {
 
   if (loading && ads.length === 0) {
     return (
-      <View style={{ paddingHorizontal: Spacing.lg }}>
-        <Skeleton width="100%" height={cardHeight} radius={BorderRadius.xl} />
+      <View onLayout={measureContainer} style={styles.loading}>
+        <Skeleton width="100%" height={cardHeight + 58} radius={24} />
       </View>
     );
   }
@@ -94,7 +106,7 @@ export function AdCarousel({ ads, loading, onPressAd }: AdCarouselProps) {
   if (ads.length === 0) return null;
 
   return (
-    <View>
+    <View onLayout={measureContainer} style={styles.container}>
       <FlatList
         ref={listRef}
         data={data}
@@ -109,37 +121,48 @@ export function AdCarousel({ ads, loading, onPressAd }: AdCarouselProps) {
         onMomentumScrollEnd={handleMomentumEnd}
         scrollEnabled={looping}
         renderItem={({ item }) => (
-          <View style={{ width, paddingHorizontal: Spacing.lg }}>
+          <View style={[styles.page, { width }]}>
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={item.title ? `View image: ${item.title}` : 'View advertisement image'}
+              accessibilityHint="Opens the full-screen image viewer"
               onPress={() => onPressAd(item)}
-              style={({ pressed }) => [
-                styles.card,
-                { height: cardHeight },
-                pressed && { opacity: 0.92 },
-              ]}
+              style={({ pressed }) => [styles.card, pressed && styles.pressed]}
             >
               <Image
                 source={{ uri: item.imageUrl }}
-                style={styles.image}
+                style={[styles.image, { height: cardHeight }]}
                 contentFit="cover"
                 cachePolicy="memory-disk"
                 recyclingKey={item.id}
                 transition={220}
                 placeholderContentFit="cover"
+                accessible={false}
               />
+              <View style={styles.caption}>
+                <Text style={styles.captionTitle} numberOfLines={2}>{item.title || 'View image'}</Text>
+                <View style={styles.expandIcon}>
+                  <Ionicons name="expand-outline" size={17} color="#79551F" />
+                </View>
+              </View>
             </Pressable>
           </View>
         )}
       />
 
       {ads.length > 1 && (
-        <View style={styles.dots}>
-          {ads.map((ad, index) => (
-            <View
-              key={ad.id}
-              style={[styles.dot, index === activeDot && styles.dotActive]}
-            />
-          ))}
+        <View style={styles.pagination}>
+          <View style={styles.dots} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+            {ads.map((ad, index) => (
+              <View
+                key={ad.id}
+                style={[styles.dot, index === activeDot && styles.dotActive]}
+              />
+            ))}
+          </View>
+          <Text style={styles.pageCount} accessibilityLabel={`Advertisement ${activeDot + 1} of ${ads.length}`}>
+            {activeDot + 1} / {ads.length}
+          </Text>
         </View>
       )}
     </View>
@@ -147,32 +170,25 @@ export function AdCarousel({ ads, loading, onPressAd }: AdCarouselProps) {
 }
 
 const styles = StyleSheet.create({
+  container: { width: '100%' },
+  loading: { width: '100%', paddingHorizontal: PAGE_GUTTER },
+  page: { paddingHorizontal: PAGE_GUTTER, paddingBottom: 3 },
   card: {
-    borderRadius: BorderRadius.xl,
+    borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: Colors.light.backgroundSecondary,
-    ...Shadows.md,
+    borderWidth: 1,
+    borderColor: '#EAE3D7',
+    backgroundColor: Colors.light.backgroundCard,
+    ...Shadows.sm,
   },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: Spacing.sm,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.light.border,
-  },
-  dotActive: {
-    width: 18,
-    borderRadius: 3,
-    backgroundColor: Colors.light.primary,
-  },
+  pressed: { opacity: 0.92 },
+  image: { width: '100%' },
+  caption: { minHeight: 58, paddingHorizontal: 16, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  captionTitle: { flex: 1, minWidth: 0, fontSize: 13, lineHeight: 19, fontWeight: '600', color: Colors.light.text },
+  expandIcon: { width: 30, height: 30, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.light.backgroundSecondary },
+  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, paddingHorizontal: PAGE_GUTTER + 4, marginTop: 10 },
+  dots: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 5 },
+  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.light.border },
+  dotActive: { width: 22, backgroundColor: Colors.light.primary },
+  pageCount: { fontSize: 11, lineHeight: 16, fontWeight: '600', color: Colors.light.textSecondary, fontVariant: ['tabular-nums'] },
 });

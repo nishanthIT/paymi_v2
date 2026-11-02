@@ -107,7 +107,7 @@ export default function FridgeTemperatureScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={todayStatus.isRefetching}
-                onRefresh={todayStatus.refetch}
+                onRefresh={async () => { await todayStatus.refetch(); }}
                 tintColor={Colors.light.primary}
               />
             }
@@ -170,7 +170,7 @@ export default function FridgeTemperatureScreen() {
               refreshControl={
                 <RefreshControl
                   refreshing={logs.isRefetching}
-                  onRefresh={logs.refetch}
+                  onRefresh={async () => { await logs.refetch(); }}
                   tintColor={Colors.light.primary}
                 />
               }
@@ -213,7 +213,7 @@ export default function FridgeTemperatureScreen() {
             data={fridges.data ?? []}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
-            refreshControl={<RefreshControl refreshing={fridges.isRefetching} onRefresh={fridges.refetch} tintColor={Colors.light.primary} />}
+            refreshControl={<RefreshControl refreshing={fridges.isRefetching} onRefresh={async () => { await fridges.refetch(); }} tintColor={Colors.light.primary} />}
             renderItem={({ item }) => (
               <RecordCard
                 onPress={() => {

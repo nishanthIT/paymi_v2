@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { ImageViewer } from '@/components/ui/image-viewer';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
@@ -22,7 +22,6 @@ import { OUT_OF_STOCK_ID, isOutOfStockList, ordinaryListTargets } from '@/featur
 import type { ListProduct } from '@/features/lists/types';
 import { useShopPrice } from '@/features/price-reports/hooks';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 interface CollectDetailsSheetProps {
   product: ListProduct | null;
@@ -92,7 +91,6 @@ export function CollectDetailsSheet({
 
   if (!product) return <BottomSheet visible={false} onClose={onClose}>{null}</BottomSheet>;
 
-  const imageUrl = getProductImageUrl(product.img as any, product.barcode);
   const aisle = product.aielNumber || product.locationCode;
   const lastUpdated = livePrice?.lastUpdated
     ? new Date(livePrice.lastUpdated).toLocaleDateString()
@@ -117,22 +115,15 @@ export function CollectDetailsSheet({
           </Pressable>
         </View>
         <View style={styles.hero}>
-          <Pressable
-            style={styles.imageWrap}
-            disabled={!imageUrl}
-            accessibilityRole="button"
-            accessibilityLabel={`Preview image of ${product.productName}`}
-            onPress={(event) => {
-              event.stopPropagation();
-              setPreviewUri(imageUrl);
-            }}
-          >
-            {imageUrl ? (
-              <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" />
-            ) : (
-              <Ionicons name="cube-outline" size={40} color={Colors.light.textLight} />
-            )}
-          </Pressable>
+          <View style={styles.imageWrap}>
+            <ProductImage
+              img={product.img}
+              barcode={product.barcode}
+              style={styles.image}
+              onPreview={setPreviewUri}
+              accessibilityLabel={`Preview image of ${product.productName}`}
+            />
+          </View>
           <View style={styles.heroInfo}>
             <Text style={styles.name} numberOfLines={3}>{product.productName}</Text>
             {!!product.category && <Text style={styles.category} numberOfLines={1}>{product.category}</Text>}

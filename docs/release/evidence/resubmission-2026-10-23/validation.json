@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Kolkata",
+  "frontend": {
+    "passed": 65,
+    "failed": 0,
+    "exitCode": 0
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "eslint": {
+    "exitCode": 0
+  },
+  "backendBroadBeforeRetryProtection": {
+    "passed": 217,
+    "failed": 0,
+    "skipped": 1,
+    "exitCode": 0
+  },
+  "backendFinalChatModerationDeletion": {
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "export": {
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
+    "exitCode": 0,
+    "nativeBinary": false,
+    "notice": "Expo forceful CLI shutdown after successful export"
+  },
+  "nativeConfigIntrospection": {
+    "exitCode": 0
+  },
+  "configuredDatabaseDiagnostic": {
+    "readOnly": true,
+    "exitCode": 1,
+    "error": "ETIMEDOUT",
+    "findingsObtained": false
+  },
+  "devices": {
+    "adbConnectedDevices": 0,
+    "installedAndroidTested": false,
+    "installedIOSTested": false
+  },
+  "deployment": false,
+  "googlePlaySubmission": false,
+  "notes": [
+    "All integration tests used guarded disposable localhost database paymi_chat_test:55443.",
+    "Earlier interrupted commands, stopped database setup and router compatibility failure are not counted as passes; final reruns succeeded.",
+    "Preexisting .env and supplier/Prisma changes are excluded from this source snapshot."
+  ]
+}

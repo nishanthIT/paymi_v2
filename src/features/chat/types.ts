@@ -11,6 +11,12 @@ export interface ChatParticipant {
 }
 
 export interface ChatSummary {
+  /** A newly created room can open without a second history request. */
+  initialPage?: ChatThreadPage;
+  shopId: string | null;
+  isTeamChat: boolean;
+  isGlobalChat?: boolean;
+  isCommunityChat?: boolean;
   id: string;
   name: string;
   type: ChatType;
@@ -30,8 +36,24 @@ export interface ReadReceipt {
   readAt: string;
 }
 
+export interface DeliveryReceipt {
+  userId: number;
+  userType: ChatUserType;
+  deliveredAt: string;
+}
+
+export interface MessageReceiptEvent {
+  chatId: string;
+  messageIds: string[];
+  userId: number;
+  userType: ChatUserType;
+  readAt?: string;
+  deliveredAt?: string;
+}
+
 export interface ChatMessage {
   id: string;
+  clientMessageId?: string | null;
   chatId?: string;
   content: string;
   senderId: number;
@@ -46,24 +68,26 @@ export interface ChatMessage {
   timestamp: string;
   isOwnMessage: boolean;
   readBy?: ReadReceipt[];
+  deliveredTo?: DeliveryReceipt[];
   /** Client-only optimistic states. */
   pending?: boolean;
   failed?: boolean;
 }
 
 export interface ChatThreadPage {
+  isGlobalChat?: boolean;
   id: string;
   name: string;
   type: ChatType;
   participants: ChatParticipant[];
   participantCount: number;
   messages: ChatMessage[];
+  pagination?: { hasMore: boolean; nextCursor: string | null; limit: number };
 }
 
 export interface DirectoryUser {
   id: string;
   name: string;
-  /** Backend maps the user's email into this field. */
   phone: string;
   userType: ChatUserType;
 }
@@ -78,6 +102,7 @@ export interface UploadedFile {
 
 export interface SendMessageInput {
   chatId: string;
+  clientMessageId?: string;
   content: string;
   messageType?: MessageType;
   attachmentUrl?: string;

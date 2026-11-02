@@ -101,7 +101,7 @@ export default function CleaningStatusScreen() {
               refreshControl={
                 <RefreshControl
                   refreshing={today.isRefetching}
-                  onRefresh={today.refetch}
+                  onRefresh={async () => { await today.refetch(); }}
                   tintColor={Colors.light.primary}
                 />
               }
@@ -156,7 +156,7 @@ export default function CleaningStatusScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={history.isRefetching}
-                onRefresh={history.refetch}
+                onRefresh={async () => { await history.refetch(); }}
                 tintColor={Colors.light.primary}
               />
             }

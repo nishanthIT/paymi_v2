@@ -1,20 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
-
+import { useAuth } from '@/contexts/AuthContext';
+import { getChatErrorState } from '../errors';
 import { useChatUserSearch } from '../hooks/use-chats';
+import { ChatColors as C, chatInitials } from '../theme';
 import type { DirectoryUser } from '../types';
+import { ChatListSkeleton, ChatNotice } from './chat-feedback';
 
 interface NewChatSheetProps {
   visible: boolean;
@@ -23,155 +17,87 @@ interface NewChatSheetProps {
   creating: boolean;
 }
 
-function monogram(name: string) {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
+const ROLE_LABEL: Record<string, string> = { CUSTOMER: 'Owner', EMPLOYEE: 'Employee' };
 
-const ROLE_LABEL: Record<string, string> = {
-  CUSTOMER: 'Owner',
-  EMPLOYEE: 'Employee',
-  ADMIN: 'Admin',
-};
-
-/** Start-a-new-chat sheet with live user directory search. */
+/** A live, authorized shop directory. No placeholder people or inferred access. */
 export function NewChatSheet({ visible, onClose, onSelectUser, creating }: NewChatSheetProps) {
+  const { activeSupermarket } = useAuth();
   const [search, setSearch] = useState('');
   const users = useChatUserSearch(search, visible);
+  const error = users.isError ? getChatErrorState(users.error) : null;
+  const waiting = !users.isPaused && !!activeSupermarket &&
+    (users.isPending || users.isDebouncing || users.isPlaceholderData);
+  const staleResults = users.isDebouncing || users.isPlaceholderData;
+  const people = !activeSupermarket || error?.accessDenied || waiting || staleResults ? [] : users.data ?? [];
+  const close = () => { setSearch(''); onClose(); };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} keyboardAware>
+    <BottomSheet visible={visible} onClose={close} keyboardAware scrollable
+      sheetStyle={styles.sheet}>
       <View style={styles.content}>
-        <Text style={styles.title}>Start a new chat</Text>
-        <View style={styles.searchWrap}>
-          <Ionicons name="search" size={17} color={Colors.light.textLight} />
-          <TextInput
-            style={styles.searchInput}
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search by name or email"
-            placeholderTextColor={Colors.light.textLight}
-            autoCorrect={false}
-          />
-          {(users.isFetching || users.isDebouncing) && (
-            <ActivityIndicator size="small" color={Colors.light.primary} />
-          )}
+        <View style={styles.header}>
+          <View style={styles.heading}>
+            <Text accessibilityRole="header" style={styles.title}>New chat</Text>
+            <Text numberOfLines={1} style={styles.subtitle}>Retail shop owners and employees</Text>
+          </View>
+          <Pressable accessibilityRole="button" accessibilityLabel="Close new chat" style={styles.iconButton} onPress={close}>
+            <Ionicons name="close" size={22} color={C.textSecondary} />
+          </Pressable>
         </View>
-
-        <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
-          {users.isPending ? (
-            <ActivityIndicator color={Colors.light.primary} style={{ marginTop: Spacing.lg }} />
-          ) : (users.data?.length ?? 0) === 0 ? (
-            <Text style={styles.empty}>No people found.</Text>
-          ) : (
-            (users.data ?? []).map((user) => (
-              <Pressable
-                key={`${user.userType}-${user.id}`}
-                style={({ pressed }) => [styles.userRow, pressed && styles.userRowPressed]}
-                disabled={creating}
-                onPress={() => onSelectUser(user)}
-              >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{monogram(user.name || '?')}</Text>
-                </View>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={styles.userName}>{user.name}</Text>
-                  <Text style={styles.userMeta} numberOfLines={1}>
-                    {user.phone}
-                  </Text>
-                </View>
-                <View style={styles.rolePill}>
-                  <Text style={styles.roleText}>{ROLE_LABEL[user.userType] ?? user.userType}</Text>
-                </View>
-              </Pressable>
-            ))
-          )}
-        </ScrollView>
+        <View style={styles.searchWrap}>
+          <Ionicons name="search-outline" size={18} color={C.muted} />
+          <TextInput accessibilityLabel="Search shop users" style={styles.searchInput} value={search} onChangeText={setSearch}
+            placeholder="Search by name" placeholderTextColor={C.muted} autoCorrect={false} autoCapitalize="none" maxLength={200} />
+          {(users.isFetching || users.isDebouncing) && <ActivityIndicator size="small" color={C.gold} />}
+          {!!search && <Pressable accessibilityRole="button" accessibilityLabel="Clear teammate search" onPress={() => setSearch('')} style={styles.iconButton}>
+            <Ionicons name="close" size={17} color={C.textSecondary} />
+          </Pressable>}
+        </View>
+        {creating && <View accessibilityLiveRegion="polite" style={styles.creating}>
+          <ActivityIndicator size="small" color={C.gold} /><Text style={styles.subtitle}>Opening conversation…</Text>
+        </View>}
+        {users.isPaused ? <ChatNotice title="Waiting for a connection" message="Contacts will refresh when you’re back online." />
+          : error ? <ChatNotice title={error.title} message={error.message} onAction={error.retryable ? () => { void users.refetch(); } : undefined} busy={users.isFetching} /> : null}
+        {waiting ? <ChatListSkeleton count={3} /> : people.length ? people.map(user => (
+          <Pressable key={`${user.userType}-${user.id}`} accessibilityRole="button" accessibilityLabel={`Message ${user.name}`}
+            accessibilityState={{ disabled: creating }} disabled={creating} onPress={() => onSelectUser(user)}
+            style={({ pressed }) => [styles.userRow, pressed && styles.pressed, creating && styles.disabled]}>
+            <View style={styles.avatar}><Text style={styles.avatarText}>{chatInitials(user.name)}</Text></View>
+            <View style={styles.userCopy}>
+              <Text numberOfLines={1} style={styles.userName}>{user.name}</Text>
+              <Text numberOfLines={1} style={styles.userMeta}>{ROLE_LABEL[user.userType] ?? user.userType}{user.phone ? ` · ${user.phone}` : ''}</Text>
+            </View>
+            <Ionicons name="chatbubble-outline" size={18} color={C.gold} />
+          </Pressable>
+        )) : !error && !users.isPaused ? <View style={styles.empty}>
+          <Ionicons name="people-outline" size={26} color={C.gold} />
+          <Text style={styles.emptyTitle}>{activeSupermarket ? 'No people found' : 'Choose your shop first'}</Text>
+          <Text style={styles.emptyText}>{search ? 'Try another name.' : 'Eligible owners and employees from retail shops appear here.'}</Text>
+        </View> : null}
       </View>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: Spacing.lg,
-    gap: Spacing.md,
-  },
-  title: {
-    ...Typography.h3,
-    color: Colors.light.text,
-  },
-  searchWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    paddingHorizontal: Spacing.md,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 11,
-    ...Typography.body,
-    color: Colors.light.text,
-  },
-  list: {
-    maxHeight: 380,
-  },
-  empty: {
-    ...Typography.body,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    marginTop: Spacing.lg,
-  },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.divider,
-  },
-  userRowPressed: {
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.light.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    ...Typography.bodyBold,
-    color: Colors.light.primary,
-  },
-  userName: {
-    ...Typography.bodyBold,
-    fontSize: 15,
-    color: Colors.light.text,
-  },
-  userMeta: {
-    ...Typography.caption,
-    color: Colors.light.textSecondary,
-  },
-  rolePill: {
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  roleText: {
-    ...Typography.caption,
-    fontWeight: '700',
-    color: Colors.light.textSecondary,
-  },
+  sheet: { backgroundColor: C.canvas, width: '100%', maxWidth: 560, alignSelf: 'center', paddingHorizontal: 20 },
+  content: { paddingBottom: 12, gap: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  heading: { flex: 1, minWidth: 0, gap: 5 },
+  title: { fontSize: 23, fontWeight: '600', color: C.text, letterSpacing: -0.5 },
+  subtitle: { fontSize: 12, color: C.textSecondary },
+  iconButton: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },
+  searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 14, paddingRight: 4, backgroundColor: C.surfaceMuted, borderRadius: 14 },
+  searchInput: { flex: 1, minWidth: 0, paddingVertical: 13, fontSize: 14, color: C.text },
+  creating: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 },
+  userRow: { flexDirection: 'row', alignItems: 'center', gap: 13, minHeight: 66, paddingVertical: 8, paddingHorizontal: 3, borderRadius: 14 },
+  pressed: { backgroundColor: C.surfaceMuted }, disabled: { opacity: 0.5 },
+  avatar: { width: 44, height: 44, borderRadius: 17, backgroundColor: C.goldSoft, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 14, fontWeight: '600', color: C.gold },
+  userCopy: { flex: 1, minWidth: 0, gap: 5 },
+  userName: { fontSize: 15, fontWeight: '500', color: C.text },
+  userMeta: { fontSize: 12, color: C.textSecondary },
+  empty: { alignItems: 'center', gap: 10, paddingVertical: 32, paddingHorizontal: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: C.text },
+  emptyText: { fontSize: 13, lineHeight: 20, color: C.textSecondary, textAlign: 'center' },
 });

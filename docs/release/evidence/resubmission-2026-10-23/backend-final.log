@@ -1,0 +1,59 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ public deletion resource needs no app and does not embed credentials or permit framing (501.062592ms)
+✔ request reauthenticates current account, is idempotent, and status requires a private receipt (148.767529ms)
+✔ owner deletion preserves staff, co-owner, workspace, tasks and shared lists; files and stale sessions are removed (143.811663ms)
+✔ employee deletion cannot remove another role with the same ID; file errors remain retryable (79.727601ms)
+✔ admin deletion removes the account without deleting its managed shop (67.213617ms)
+✔ former employees can request deletion with credentials without regaining workspace access (32.610671ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ all authorized existing groups, teams and direct histories are visible; listing is strictly read-only (876.684859ms)
+✔ team rosters derive from active memberships without recreating participant records (113.718944ms)
+✔ missing shop links do not trigger replacement chat creation (29.916868ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ owner, employee and admin see the same authoritative roster in every shop, independent of feature permissions and legacy pointer (999.259185ms)
+✔ both employee devices receive background refresh without participant rows; unauthorized accounts receive nothing (240.454619ms)
+✔ concurrent first posts from two devices join once and preserve both messages (84.48373ms)
+✔ create, assign, deactivate, reactivate and remove refresh owners and active members without leaking to another shop (884.014665ms)
+✔ shop diagnostics report legacy and inactive relationships without modifying data or exposing personal fields (106.711414ms)
+📎 Saving file with extension: .jpg from mimetype: image/jpeg
+📎 Saving file with extension: .jpg from mimetype: image/jpeg
+✔ camera JPEG multipart uploads send and download for owners and employees; outsiders and removed members cannot fetch them (610.382857ms)
+✔ photo retries after a lost response create one message and one event without changing newer chat activity (509.890634ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires no rules acceptance and rejects content larger than the server limit (825.211232ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (109.539524ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (384.41209ms)
+✔ moderation removes reported content from histories and summaries and records a decision (56.324526ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (132.572725ms)
+✔ socket clients cannot relay a forged message or sender identity (140.41869ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (55.982541ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📎 Saving file with extension: .txt from mimetype: text/plain
+✔ new and existing accounts send, receive and upload without any acceptance row (1098.583387ms)
+✔ report identity, explanation and exact snapshot persist; own and inaccessible reports fail; races dedupe (132.950485ms)
+✔ all admin operations reject customer and delegated staff, and never expose reporter details publicly (145.659134ms)
+✔ admin can filter, investigate context, record internal notes and transition status without restricting account (182.537695ms)
+✔ account suspension denies existing sessions, login and socket reconnect; expiry and early reactivation preserve data (250.479142ms)
+✔ chat and account restrictions are independent, custom durations expire and chat blocks direct API writes (98.175914ms)
+✔ individual deletion preserves evidence, other authors and report status; concurrent requests are idempotent (93.33761ms)
+✔ bulk deletion requires both confirmations, survives retry/restart and preserves newer messages and other authors (1191.524287ms)
+Moderation queue ready (PostgreSQL)
+✔ a failed bulk batch rolls back fully and the startup worker resumes the durable job (143.98065ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ report snapshots preserve reported content and protected attachments after author deletion (888.254575ms)
+✔ suspension applies to all sessions and uploads/typing while private workspace operations stay accessible (382.376055ms)
+✔ removal revokes reused attachment access and notifies active clients, while evidence remains admin-only (268.45715ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17407.465769

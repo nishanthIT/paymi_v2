@@ -1,13 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { useToast } from '@/components/ui/toast';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
@@ -18,7 +18,6 @@ import * as listApi from '@/features/lists/api';
 import { listKeys } from '@/features/lists/keys';
 import type { ShoppingList } from '@/features/lists/types';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 const toNumber = (value: number | string | null): number | null => {
   if (value == null) return null;
@@ -138,7 +137,6 @@ function ProductRow({
   adding: boolean;
   onAdd: () => void;
 }) {
-  const imageUrl = getProductImageUrl(product.img as any, product.barcode);
   const sizeLabel = formatSizeLabel({ title: product.title });
 
   const price = toNumber(product.price);
@@ -156,18 +154,7 @@ function ProductRow({
   return (
     <View style={styles.row}>
       <View style={styles.thumbWrap}>
-        {imageUrl ? (
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.thumb}
-            contentFit="contain"
-            cachePolicy="memory-disk"
-            recyclingKey={product.id}
-            transition={180}
-          />
-        ) : (
-          <Ionicons name="cube-outline" size={24} color={Colors.light.textLight} />
-        )}
+        <ProductImage img={product.img} barcode={product.barcode} style={styles.thumb} />
       </View>
 
       <View style={styles.rowBody}>

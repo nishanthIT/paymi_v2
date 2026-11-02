@@ -46,3 +46,12 @@ example
 # Local release binaries and credential exports
 /release-artifacts/
 credentials.json
+
+# Local deployment credentials
+.env
+.env.*
+!.env.example
+/env
+*.pem
+*.key
+credentials.json

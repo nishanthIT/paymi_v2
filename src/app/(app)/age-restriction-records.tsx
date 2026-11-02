@@ -150,7 +150,7 @@ export default function AgeRestrictionRecordsScreen() {
           refreshControl={
             <RefreshControl
               refreshing={records.isRefetching}
-              onRefresh={records.refetch}
+              onRefresh={async () => { await records.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }
@@ -159,7 +159,7 @@ export default function AgeRestrictionRecordsScreen() {
               <Text style={styles.countText}>
                 {list.length} {list.length === 1 ? 'record' : 'records'}
               </Text>
-            ) : null
+            ) : undefined
           }
           renderItem={({ item }) => (
             <RecordCard

@@ -1,0 +1,34 @@
+# Chat redesign, search and recovery — 25 October 2026
+
+The app and backend changes are implemented. The missing shop-chat schema was repaired in the configured shared database, and the LOCAL development API was reloaded. The production-hosted API was not redeployed. Native iOS/Android and interactive desktop-browser verification remain outstanding because no UI test surfaces are connected to this session.
+
+## Root causes and fixes
+
+- The configured database lacked `Chat.shopId`, which the authorized shop directory queries require. This produced a server failure that the frontend mislabeled as a connection problem. The targeted migration added the field, associated 12 unambiguous existing conversations and restored one dangling canonical team. Its transaction verified every existing message, participant and original chat field before committing: **33 → 34 chats, 68 → 68 messages, 77 → 77 participants**. It granted no ownership or membership and left the unrelated supplier packaging migration unapplied. The migration runner defaults to read-only, verifies a reviewed SQL checksum, records only this migration atomically and rolls back on any preservation mismatch.
+- API errors discarded HTTP status/code, hiding the difference between authorization, schema, server and network failures. These are now distinct states with appropriate retry controls. Known shop-access denial clears cached directory/search data; transient network failures preserve saved conversations and drafts.
+- Conversation search covered only the title and latest preview. It now searches authorized server history, names and attachment names. Thread search has its own paginated query and does not replace the live timeline. Debouncing/cancellation suppress old results; offline fallback is explicitly identified as saved conversation matches. Search retains shop, active membership, blocking and deleted-message boundaries.
+- Offset pagination could shift when messages arrived. The backend now supplies stable timestamp/ID cursors and pagination metadata while retaining page/limit compatibility. Cached pages deduplicate live messages; refreshes preserve unsent messages and their retry controls.
+- Failed read receipts were marked successful locally and never retried. They now retry with backoff, preserve unread counts until acknowledged and refresh authoritative totals. Replayed socket events no longer increment unread counts twice. Foregrounding, reconnect, token changes and polling recover missed updates.
+- Lost send acknowledgements could cause duplicate text/document sends. Stable client identifiers now make their retries idempotent, retaining the existing image retry mechanism. Cache/notification failures after persistence no longer falsely report a failed send.
+- The live database connection exhibited multi-second round trips. Chat requests now use a bounded 60-second minimum budget instead of the general 10-second default, retaining cancellation. A healthy backend schema check now uses one database round trip; service-by-service diagnosis runs only on failure.
+
+## Interface
+
+The four tabs inside Chat are **All Chats, Team Chat, Direct and Unread**. Existing valid group conversations remain in All Chats. The main Home/Lists/Chat/Profile navigation retains its prior behavior and permissions.
+
+The feed, New Chat sheet, thread header, bubbles, timestamps, unread badges and composer share a light cream/off-white palette with restrained mustard-gold accents. The feed uses a bounded desktop width; narrow screens retain horizontal access to all four tabs. Loading skeletons, reconnect notices and empty states replace blank areas and bulky error bars. New Chat has a visible close control and a keyboard-aware, height-bounded directory. Conversation options are available by click as well as long press, with explicit confirmation before deletion.
+
+Camera capture/preview/retake/close, gallery attachments, typing, read receipts, shared-list/document messages, copy/delete/retry/report/block actions, safety navigation and valid message history remain integrated with the real APIs. Camera/search closure preserves drafts. Access denial blocks history and message controls even when caches exist.
+
+## Verification
+
+- **116 frontend tests passed**, including actual component event tests for iOS/Android/web branches, four-tab filtering, authorized directory selection, full-history search, stale-result suppression, cached error recovery, offline waiting, camera/draft behavior, desktop actions and responsive bubble sizing at 320/375/768/1440 widths.
+- **237 backend tests passed, 1 optional latency test skipped** against a guarded disposable PostgreSQL database. Coverage includes owner/employee/company/supplier/cross-shop access, real HTTP and Socket.IO exchanges, reconnect/membership revocation, uploads, history/search pagination, concurrent idempotent sends, the additive migration and forced rollback of unexpected history mutation through both database-driver paths.
+- Read-only verification of the actual shared database passed for **all 18 authorized account/shop combinations across 10 shops**: each eligible owner/employee receives the selected shop’s team conversation, and no other-shop conversations appear. One shop has no verified roster and remains denied. This exercised the actual directory service, not a forged login or an authenticated physical-device flow. Counts remained 68 messages and 77 participant records; the supplier migration is still unapplied. The local API health endpoint returned **HTTP 200** in 3.2 seconds after the final restart.
+- TypeScript, full ESLint and both repositories’ whitespace checks passed.
+- iOS, Android and static web JavaScript/asset exports passed. These are not signed native release builds.
+- The migration preservation result and test/export logs are saved in [evidence/chat-overhaul-2026-10-25](evidence/chat-overhaul-2026-10-25/). Test fixtures exist only in disposable tests; the app does not introduce mock conversations or users.
+
+Component platform branches and layout bounds are automated checks, not physical device or browser rendering verification. Repeat the hardware camera, keyboard/safe-area, rotation, large-text, actual network-loss/reconnect and two-account send/receive flows on the release candidate before store submission. One pre-existing ownerless shop remains inaccessible pending verification through the existing ownership workflow; no ownership was inferred or granted.
+
+Reload Expo Go to receive the updated bundle. Other deployment targets must deploy the matching backend code and regenerate Prisma; do not apply the unrelated pending packaging migration as part of this chat rollout. The exact database operation is documented in `product-A-backend/docs/chat-overhaul-deployment-2026-10-25.md`.

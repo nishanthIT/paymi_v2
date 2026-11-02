@@ -1,5 +1,5 @@
 import React, { forwardRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { StyleSheet, Text, TextInput, View, type TextInputProps, type TextInputInstance } from 'react-native';
 
 import { LabelTokens as T } from '../tokens';
 
@@ -13,7 +13,7 @@ interface LabelFieldProps extends TextInputProps {
 }
 
 /** Rounded outlined field with a floating label on the border (R14/R16 style). */
-export const LabelField = forwardRef<TextInput, LabelFieldProps>(
+export const LabelField = forwardRef<TextInputInstance, LabelFieldProps>(
   ({ label, helper, error, right, style, onFocus, onBlur, inlineWhenEmpty, ...inputProps }, ref) => {
     const [focused, setFocused] = useState(false);
     const empty = !inputProps.value;

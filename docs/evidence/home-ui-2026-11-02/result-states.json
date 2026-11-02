@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "No ads hides carousel; empty news usable",
+    "Loading skeletons transition to dynamic data",
+    "Failed-query fallback renders without crash",
+    "No shop workspace opens supermarkets",
+    "Shop error workspace opens supermarkets",
+    "Long account/shop names fit320",
+    "Employee retains same Home shortcuts/content"
+  ],
+  "browserErrors": [],
+  "fixtureOnly": true,
+  "nativeDeviceTesting": false
+}

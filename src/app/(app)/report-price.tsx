@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -17,6 +16,7 @@ import {
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { useToast } from '@/components/ui/toast';
@@ -31,7 +31,6 @@ import { subscribeReportScan } from '@/features/price-reports/scan-bridge';
 import type { ReportProduct, ReportShop } from '@/features/price-reports/types';
 import { formatMoneyTyping } from '@/features/shop-tools/format';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 function money(value: number | null | undefined) {
   if (value == null || Number.isNaN(Number(value))) return '—';
@@ -314,14 +313,9 @@ function StepLabel({ index, label, done }: { index: number; label: string; done:
 }
 
 function ProductThumb({ product }: { product: ReportProduct }) {
-  const url = getProductImageUrl(product.img as any, product.barcode);
   return (
     <View style={styles.thumb}>
-      {url ? (
-        <Image source={{ uri: url }} style={styles.thumbImage} contentFit="contain" />
-      ) : (
-        <Ionicons name="cube-outline" size={20} color={Colors.light.textLight} />
-      )}
+      <ProductImage img={product.img} barcode={product.barcode} style={styles.thumbImage} />
     </View>
   );
 }

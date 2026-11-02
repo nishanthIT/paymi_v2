@@ -1,0 +1,15 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ directory/search/team participants contain only selected shop owners and active employees (1244.372648ms)
+✔ simultaneous and reverse employee DMs reuse one conversation; messages and socket replies survive reopening (392.187829ms)
+✔ forged identities, supplier/company targets, other shops and malformed DMs cannot bypass eligibility (323.639415ms)
+✔ stale participants and joined sockets lose read, typing and send access after membership revocation (197.404674ms)
+✔ additive migration scopes only unambiguous histories and preserves every message and participant (117.875301ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3158.525061

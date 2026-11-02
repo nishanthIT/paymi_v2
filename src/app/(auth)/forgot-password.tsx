@@ -8,7 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
+  type TextInputInstance,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -32,7 +32,7 @@ type Step = 'email' | 'reset' | 'done';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const confirmRef = useRef<TextInput>(null);
+  const confirmRef = useRef<TextInputInstance>(null);
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
@@ -238,7 +238,7 @@ export default function ForgotPasswordScreen() {
                   <TextField
                     label="New password"
                     icon="lock-closed-outline"
-                    placeholder="At least 6 characters"
+                    placeholder="At least 8 characters"
                     value={newPassword}
                     onChangeText={(text) => {
                       setNewPassword(text);

@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { useToast } from '@/components/ui/toast';
@@ -14,7 +14,6 @@ import { useTrackList } from '@/features/lists/hooks/use-lists';
 import type { ListProduct } from '@/features/lists/types';
 import { usePullToRefresh, useRefetchOnFocus } from '@/hooks/use-query-refresh';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 import { matchesSearch } from '@/utils/search';
 
 /**
@@ -125,7 +124,7 @@ export default function EmployeeListScreen() {
         data={products}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <ReadOnlyProductRow item={item} />}
-        ListHeaderComponent={banner}
+        ListHeaderComponent={banner ?? undefined}
         contentContainerStyle={styles.listContent}
         keyboardShouldPersistTaps="handled"
         ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
@@ -133,7 +132,7 @@ export default function EmployeeListScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.light.primary} />
         }
         ListEmptyComponent={
-          !list && fetchStatus === 'fetching' ? null : (
+          !list && fetchStatus === 'fetching' ? undefined : (
             <View style={styles.empty}>
               <Ionicons
                 name={isError && !list ? 'alert-circle-outline' : 'basket-outline'}
@@ -159,16 +158,11 @@ export default function EmployeeListScreen() {
 }
 
 function ReadOnlyProductRow({ item }: { item: ListProduct }) {
-  const imageUrl = getProductImageUrl(item.img, item.barcode);
   const price = item.hasActiveOffer && item.offerPrice != null ? item.offerPrice : item.lowestPrice;
   return (
     <View style={[styles.row, item.isPurchased && styles.rowCollected]}>
       <View style={styles.imageWrapper}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
-        ) : (
-          <Ionicons name="cube-outline" size={22} color={Colors.light.textLight} />
-        )}
+        <ProductImage img={item.img} barcode={item.barcode} style={styles.image} />
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
         <View style={styles.nameRow}>

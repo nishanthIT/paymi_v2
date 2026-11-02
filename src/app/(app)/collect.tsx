@@ -261,7 +261,7 @@ export default function CollectScreen() {
         <FlatList
           data={rows}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListHeaderComponent={allDone ? <Text style={styles.doneTitle}>All collected!</Text> : list && isError ? <Text style={styles.emptyText}>Couldn’t refresh. Pull down to retry.</Text> : null}
+          ListHeaderComponent={allDone ? <Text style={styles.doneTitle}>All collected!</Text> : list && isError ? <Text style={styles.emptyText}>Couldn’t refresh. Pull down to retry.</Text> : undefined}
           keyExtractor={(row) => (row.type === 'product' ? row.item.id : row.key)}
           renderItem={({ item: row }) =>
             row.type === 'bundle-header' ? (

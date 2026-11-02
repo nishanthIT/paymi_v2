@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 import {
@@ -122,11 +122,7 @@ export function ProductEditorSheet({
 
         <View style={styles.photoRow}>
           <View style={styles.photo}>
-            {snap.imageUri ? (
-              <Image source={{ uri: snap.imageUri }} style={styles.photoImage} contentFit="contain" />
-            ) : (
-              <Ionicons name="image-outline" size={22} color={T.textLight} />
-            )}
+            <ProductImage img={snap.imageUri} style={styles.photoImage} />
           </View>
           <View style={styles.photoActions}>
             <Pressable onPress={pickPhoto} hitSlop={6}>

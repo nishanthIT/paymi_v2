@@ -1,0 +1,28 @@
+{
+  "mobileTests": {
+    "passed": 146,
+    "failed": 0
+  },
+  "focusedTests": {
+    "passed": 47,
+    "failed": 0
+  },
+  "typescript": "passed",
+  "runtimeDiagnosis": {
+    "environment": "LOCAL",
+    "apiOrigin": "http://192.168.1.151:3000",
+    "initialListenerPresent": false,
+    "configuredDatabase": "remote",
+    "missingSchema": "resolved by explicitly approved migration"
+  },
+  "changes": [
+    "Avoid unchanged connection-state updates",
+    "Memoize conversation rows and timeline",
+    "Preserve socket reconnect backoff",
+    "Throttle duplicate diagnostics and exclude request credentials"
+  ],
+  "deviceRuntimeVerified": false,
+  "localApiHealth": "passed",
+  "expoHost": "192.168.1.151:8081",
+  "migrationAppliedWithApproval": true
+}

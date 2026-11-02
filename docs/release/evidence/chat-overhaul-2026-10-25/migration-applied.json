@@ -1,0 +1,30 @@
+{
+  "migration": "20261024100000_shop_chat_scope",
+  "checksum": "1a50bb65d2141381bdadec1cf4af884d08ebacb47d22b759f84ea71f3e261f90",
+  "mode": "apply",
+  "committed": true,
+  "pendingMigrations": [
+    "20261017210000_packaging_without_outer_barcode",
+    "20261024100000_shop_chat_scope"
+  ],
+  "before": {
+    "chats": 33,
+    "messages": 68,
+    "participants": 77
+  },
+  "planned": {
+    "newCanonicalTeams": 1,
+    "existingConversationsScoped": 12
+  },
+  "status": "applied",
+  "preserved": {
+    "messages": true,
+    "participants": true,
+    "existingChatFields": true
+  },
+  "after": {
+    "chats": 34,
+    "messages": 68,
+    "participants": 77
+  }
+}

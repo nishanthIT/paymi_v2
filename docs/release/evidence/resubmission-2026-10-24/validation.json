@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-24",
+  "backend": {
+    "passed": 223,
+    "failed": 0,
+    "skipped": 1,
+    "command": "TEST_DATABASE_URL=<disposable local test database> npm test"
+  },
+  "finalShopIsolationAndMigration": {
+    "passed": 5,
+    "failed": 0,
+    "command": "TEST_DATABASE_URL=<disposable local test database> node --test --test-concurrency=1 tests/shopChatIsolation.test.js"
+  },
+  "frontend": {
+    "passed": 71,
+    "failed": 0,
+    "command": "npm test"
+  },
+  "checks": {
+    "typescript": "passed: npx tsc --noEmit",
+    "eslint": "passed: npm run lint",
+    "whitespaceBothRepositories": "passed: git diff --check",
+    "expoExport": "passed: Android, iOS and web; exit 0; not a signed native build"
+  },
+  "nativeAndroid": {
+    "runtime": "Expo Go 57.0.9",
+    "android": "14 / API 34",
+    "avd": "Pixel 7 (read-only disposable session)",
+    "viewports": [
+      {
+        "pixels": [
+          1080,
+          2400
+        ],
+        "density": 420
+      },
+      {
+        "pixels": [
+          720,
+          1280
+        ],
+        "density": 320
+      }
+    ],
+    "accounts": [
+      "synthetic shop owner",
+      "synthetic employee without tool permissions"
+    ],
+    "recipient": "second synthetic employee via authenticated HTTP/Socket.IO",
+    "passed": [
+      "All Chats / Team Chat",
+      "eligible New Chat picker",
+      "private DM isolation from owner",
+      "create/reopen employee DM",
+      "permission denied close",
+      "camera capture/preview/retake",
+      "camera X and Android back preserve draft",
+      "actual JPEG upload/private download",
+      "live reply",
+      "small-screen controls",
+      "stalled upload close with no duplicate message",
+      "owner team message readable by employee",
+      "missing product image PayMi logo"
+    ]
+  },
+  "configuredDatabaseAudit": {
+    "readOnly": true,
+    "shopCount": 10,
+    "activeEmployeeMemberships": 9,
+    "legacyEmployeesWithoutMembership": 0,
+    "findingCounts": {
+      "OWNERSHIP_REVIEW_REQUIRED": 1,
+      "STALE_PARTICIPANTS_DO_NOT_GRANT_ACCESS": 2,
+      "INVALID_CHAT_LINK_REQUIRES_REVIEW": 1
+    },
+    "productionWrites": false
+  },
+  "notExecuted": [
+    "production migration/deployment",
+    "native iOS device/simulator",
+    "signed Android release on physical devices",
+    "Google Play internal/pre-launch review/submission"
+  ]
+}

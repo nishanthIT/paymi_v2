@@ -128,7 +128,7 @@ function OwnerTasks() {
           refreshControl={
             <RefreshControl
               refreshing={tasks.isRefetching}
-              onRefresh={tasks.refetch}
+              onRefresh={async () => { await tasks.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }
@@ -450,12 +450,12 @@ function EmployeeTasks() {
           contentContainerStyle={styles.listContent}
           itemLayoutAnimation={LinearTransition.springify().damping(18)}
           ListHeaderComponent={
-            tab === 'todo' ? <TaskProgress done={done.length} total={all.length} /> : null
+            tab === 'todo' ? <TaskProgress done={done.length} total={all.length} /> : undefined
           }
           refreshControl={
             <RefreshControl
               refreshing={tasks.isRefetching}
-              onRefresh={tasks.refetch}
+              onRefresh={async () => { await tasks.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }

@@ -1,0 +1,28 @@
+{
+  "androidPermissions": [
+    "android.permission.INTERNET",
+    "android.permission.VIBRATE",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.CAMERA"
+  ],
+  "androidBlockedPermissions": [
+    "android.permission.READ_MEDIA_IMAGES",
+    "android.permission.READ_MEDIA_VIDEO",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.WRITE_EXTERNAL_STORAGE",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+    "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+    "android.permission.SYSTEM_ALERT_WINDOW",
+    "android.permission.USE_BIOMETRIC",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.WAKE_LOCK",
+    "android.permission.RECORD_AUDIO"
+  ],
+  "androidUsesFeatures": [],
+  "iosCameraUsageDescription": "Allow Paymi to scan product barcodes and take photos for chat, certificates and age-restriction records.",
+  "iosPhotoUsageDescription": "Allow Paymi to select photos for chat, incident records, certificates, age-restriction records and labels.",
+  "iosMicrophoneUsageDescription": null,
+  "note": "Expo introspection; not a packaged native manifest/plist."
+}

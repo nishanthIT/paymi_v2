@@ -2,6 +2,10 @@ import { getSupermarketScope, beginScopedWrite, endScopedWrite } from '@/feature
 import { API_CONFIG } from '@/config/api';
 import api from '@/services/api';
 import { secureStorage } from '@/utils/secureStorage';
+import { Platform } from 'react-native';
+
+import { createChatUploadBody } from './photo-send';
+import { toChatError, type ChatError } from './errors';
 
 import type {
   ChatSummary,
@@ -14,30 +18,37 @@ import type {
 } from './types';
 
 export const MESSAGES_PAGE_SIZE = 30;
+// Chat authorization and history need several database queries. A cold/remote
+// database can exceed the general 10-second API budget without being offline.
+const CHAT_TIMEOUT = Math.max(API_CONFIG.TIMEOUT || 0, 60000);
 
-function apiError(error: any, fallback: string): Error {
-  if (error?.silent) return error;
-  const message = error?.response?.data?.message ?? error?.response?.data?.error ?? fallback;
-  return new Error(message);
+function invalidResponse(): never {
+  const error: ChatError = new Error('The chat service returned an incomplete response.');
+  error.code = 'CHAT_INVALID_RESPONSE';
+  throw error;
 }
 
-export async function fetchChats(): Promise<ChatSummary[]> {
+export async function fetchChats(search?: string, signal?: AbortSignal): Promise<ChatSummary[]> {
   try {
-    const response = await api.get('/chat');
-    return response.data?.chats ?? [];
+    const response = await api.get('/chat', { params: search?.trim() ? { search: search.trim() } : undefined, signal, timeout: CHAT_TIMEOUT });
+    if (!Array.isArray(response.data?.chats)) invalidResponse();
+    return response.data.chats;
   } catch (error: any) {
-    throw apiError(error, 'Could not load chats');
+    throw toChatError(error, 'Could not load chats');
   }
 }
 
-export async function fetchChatPage(chatId: string, page: number): Promise<ChatThreadPage> {
+export async function fetchChatPage(chatId: string, page: number, options: { before?: string; search?: string; signal?: AbortSignal } = {}): Promise<ChatThreadPage> {
   try {
     const response = await api.get(`/chat/${chatId}`, {
-      params: { page, limit: MESSAGES_PAGE_SIZE },
+      params: { page, limit: MESSAGES_PAGE_SIZE, ...(options.before ? { before: options.before } : {}), ...(options.search?.trim() ? { search: options.search.trim() } : {}) },
+      signal: options.signal,
+      timeout: CHAT_TIMEOUT,
     });
-    return response.data?.chat;
+    if (!response.data?.chat?.id || !Array.isArray(response.data.chat.messages)) invalidResponse();
+    return response.data.chat;
   } catch (error: any) {
-    throw apiError(error, 'Could not load messages');
+    throw toChatError(error, 'Could not load messages');
   }
 }
 
@@ -46,46 +57,52 @@ export async function sendChatMessage(input: SendMessageInput) {
     const response = await api.post('/chat/message', {
       messageType: 'TEXT',
       ...input,
-    });
-    return response.data?.message;
+    }, { timeout: CHAT_TIMEOUT });
+    if (!response.data?.message?.id) invalidResponse();
+    return response.data.message;
   } catch (error: any) {
-    throw apiError(error, 'Message failed to send');
+    throw toChatError(error, 'Message failed to send');
   }
 }
 
-export async function markMessagesRead(messageIds: string[]): Promise<void> {
-  if (messageIds.length === 0) return;
+export async function markMessagesRead(messageIds: string[]): Promise<boolean> {
+  if (messageIds.length === 0) return true;
   try {
-    await api.post('/chat/read', { messageIds });
+    await api.post('/chat/read', { messageIds }, { timeout: CHAT_TIMEOUT });
+    return true;
   } catch {
     // Read receipts are best-effort — never surface an error for them.
+    return false;
   }
 }
 
 export async function deleteChatMessage(messageId: string): Promise<void> {
   try {
-    await api.delete(`/chat/message/${messageId}`);
+    await api.delete(`/chat/message/${messageId}`, { timeout: CHAT_TIMEOUT });
   } catch (error: any) {
-    throw apiError(error, 'Could not delete the message');
+    throw toChatError(error, 'Could not delete the message');
   }
 }
 
 export async function deleteChat(chatId: string): Promise<void> {
   try {
-    await api.delete(`/chat/${chatId}`);
+    await api.delete(`/chat/${chatId}`, { timeout: CHAT_TIMEOUT });
   } catch (error: any) {
-    throw apiError(error, 'Could not delete the chat');
+    throw toChatError(error, 'Could not delete the chat');
   }
 }
 
-export async function fetchChatUsers(search?: string): Promise<DirectoryUser[]> {
+export async function fetchChatUsers(search?: string, signal?: AbortSignal): Promise<DirectoryUser[]> {
   try {
     const response = await api.get('/chat/users', {
       params: search ? { search } : undefined,
+      signal,
+      timeout: CHAT_TIMEOUT,
     });
-    return response.data?.users ?? [];
+    if (!Array.isArray(response.data?.users)) invalidResponse();
+    return response.data.users;
   } catch (error: any) {
-    throw apiError(error, 'Could not load contacts');
+    throw toChatError(error, 'Could not load contacts');
   }
 }
 
@@ -95,10 +112,11 @@ export async function createChat(input: {
   name?: string;
 }): Promise<ChatSummary> {
   try {
-    const response = await api.post('/chat', input);
-    return response.data?.chat;
+    const response = await api.post('/chat', input, { timeout: CHAT_TIMEOUT });
+    if (!response.data?.chat?.id) invalidResponse();
+    return response.data.chat;
   } catch (error: any) {
-    throw apiError(error, 'Could not start the chat');
+    throw toChatError(error, 'Could not start the chat');
   }
 }
 
@@ -109,44 +127,47 @@ export async function uploadChatFile(
   uri: string,
   fileName: string,
   mimeType: string,
+  signal?: AbortSignal,
 ): Promise<UploadedFile> {
   const scope = getSupermarketScope();
   beginScopedWrite();
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  signal?.addEventListener('abort', cancel, { once: true });
+  if (signal?.aborted) cancel();
+  const timeout = setTimeout(() => controller.abort(), 60000);
   try {
-  const token = await secureStorage.getToken();
-  if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
-  const fileUri =
-    uri.startsWith('file://') || uri.startsWith('content://') || uri.startsWith('http')
-      ? uri
-      : `file://${uri}`;
+    if (signal?.aborted) throw new Error('Photo upload cancelled.');
+    const token = await secureStorage.getToken();
+    if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
+    const formData = await createChatUploadBody({ uri, name: fileName, mimeType }, Platform.OS);
+    if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
 
-  const formData = new FormData();
-  formData.append('file', {
-    uri: fileUri,
-    name: fileName,
-    type: mimeType || 'image/jpeg',
-  } as any);
-
-  const response = await fetch(`${API_CONFIG.BASE_URL}/chat/upload`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-      ...(scope.id ? { 'X-Supermarket-Id': scope.id } : {}),
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Upload failed (${response.status})`);
+    const response = await fetch(`${API_CONFIG.BASE_URL}/chat/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        ...(scope.id ? { 'X-Supermarket-Id': scope.id } : {}),
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.success || !data.file?.url) {
+      throw new Error(data?.message ?? data?.error ?? `Upload failed (${response.status})`);
+    }
+    if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
+    return data.file as UploadedFile;
+  } catch (error) {
+    if (signal?.aborted) throw new Error('Photo upload cancelled.');
+    if (controller.signal.aborted) throw new Error('Photo upload timed out. Check your connection and try again.');
+    throw error;
+  } finally {
+    signal?.removeEventListener('abort', cancel);
+    clearTimeout(timeout);
+    endScopedWrite();
   }
-  const data = await response.json();
-  if (!data?.success) {
-    throw new Error(data?.message ?? 'Upload failed');
-  }
-  if (scope.generation !== getSupermarketScope().generation) throw new Error('Shop changed');
-  return data.file as UploadedFile;
-  } finally { endScopedWrite(); }
 }
 
 /** Resolve a stored attachment path (e.g. /uploads/...) to a full URL. */

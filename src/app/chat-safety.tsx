@@ -1,3 +1,4 @@
+import { chatKeys } from '@/features/chat/keys';
 import { useState } from 'react';
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -26,8 +27,8 @@ export default function ChatSafety() {
       if (route === 'report') setReported(true);
       if (route.startsWith('block')) {
         disconnectChatSocket();
-        await client.cancelQueries({ predicate: q => ['chat', 'chats', 'chat-users'].includes(String(q.queryKey[0])) });
-        client.removeQueries({ predicate: q => ['chat', 'chats', 'chat-users'].includes(String(q.queryKey[0])) });
+        await client.cancelQueries({ predicate: q => [chatKeys.all[0], chatKeys.threads[0], chatKeys.directory[0], 'chat', 'chats', 'chat-users'].includes(String(q.queryKey[0])) });
+        client.removeQueries({ predicate: q => [chatKeys.all[0], chatKeys.threads[0], chatKeys.directory[0], 'chat', 'chats', 'chat-users'].includes(String(q.queryKey[0])) });
       }
       await safety.refetch(); setResult(text);
     } catch (error: any) { setResult(error.response?.data?.error || 'Could not complete this action. Try again or contact support.'); }
@@ -38,7 +39,7 @@ export default function ChatSafety() {
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.heading}>Community rules</Text>
       <Text style={styles.body}>Use Paymi for respectful business conversations. Do not post harassment, threats, sexual content, child exploitation, hateful or illegal material, scams, spam, or information you do not have permission to share. Do not use chat to arrange sales of age-restricted goods to minors.</Text>
-      <Text style={styles.body}>Keep shop and customer information within authorized team conversations. ALL Chat is available to registered users beyond your shop. Reports are available to Kaliam moderators, who can remove reported content and restrict chat posting or temporarily suspend account access. Authorized moderators can inspect the reported message, limited surrounding context and related reports. Contact support@paymi.co.uk for safety concerns or to challenge a moderation decision.</Text>
+      <Text style={styles.body}>Keep shop and customer information within authorized team conversations. Chat is limited to eligible teammates and authorized owners in your selected shop. Reports are available to Kaliam moderators, who can remove reported content and restrict chat posting or temporarily suspend account access. Authorized moderators can inspect the reported message, limited surrounding context and related reports. Contact support@paymi.co.uk for safety concerns or to challenge a moderation decision.</Text>
       <Text style={styles.body}>Long-press a message and choose Report Message to report content or its sender. Blocking hides messages between you and that user and prevents direct conversations. It does not change anyone’s shop permissions.</Text>
       {safety.data?.suspension && <Text accessibilityRole="alert" style={styles.body}>Chat posting is suspended until {new Date(safety.data.suspension.until).toLocaleString()}. {safety.data.suspension.reason} Private shop tools remain available. Contact support@paymi.co.uk to appeal.</Text>}
       {!!safety.error && <PrimaryButton title="Retry loading safety settings" onPress={() => safety.refetch()} />}

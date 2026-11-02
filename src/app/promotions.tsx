@@ -38,7 +38,7 @@ export default function PromotionsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={refetch}
+            onRefresh={async () => { await refetch(); }}
             tintColor={Colors.light.primary}
             colors={[Colors.light.primary]}
           />

@@ -165,7 +165,7 @@ export default function IncidentLogsScreen() {
           refreshControl={
             <RefreshControl
               refreshing={incidents.isRefetching}
-              onRefresh={incidents.refetch}
+              onRefresh={async () => { await incidents.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }

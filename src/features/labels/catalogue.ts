@@ -21,7 +21,7 @@ export function toLookupResult(product: Product): CatalogueLookupResult {
     barcode: product.barcode ?? null,
     retailSize: cleanText(product.retailSize),
     rrp: product.rrp ?? null,
-    imageUri: getProductImageUrl(product.img as never, product.barcode ?? null),
+    imageUri: getProductImageUrl(product.img, product.barcode ?? null),
   };
 }
 

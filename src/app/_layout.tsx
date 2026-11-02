@@ -41,19 +41,23 @@ function RootNavigator() {
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={isAuthenticated}>
-          <Stack.Screen name="(app)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!isAuthenticated}>
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
-        <Stack.Screen name="promotions" />
-        <Stack.Screen name="promotion/[id]" />
-        <Stack.Screen name="about" />
-        <Stack.Screen name="chat-safety" />
-        <Stack.Screen name="account-deletion" />
-      </Stack>
+      {/* Preserve the launch URL until auth is known, including saved chat links. */}
+      {!isRestoring && (
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* SDK 58 redirects to hrefs; the auth group itself has no index route. */}
+          <Stack.Protected guard={isAuthenticated} redirectTo="/(auth)/login">
+            <Stack.Screen name="(app)" />
+          </Stack.Protected>
+          <Stack.Protected guard={!isAuthenticated} redirectTo="/(app)/(tabs)">
+            <Stack.Screen name="(auth)" />
+          </Stack.Protected>
+          <Stack.Screen name="promotions" />
+          <Stack.Screen name="promotion/[id]" />
+          <Stack.Screen name="about" />
+          <Stack.Screen name="chat-safety" />
+          <Stack.Screen name="account-deletion" />
+        </Stack>
+      )}
       <AnimatedSplash ready={!isRestoring} />
     </>
   );

@@ -1,14 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 import { usePackOptions, usePriceTiers } from '../hooks/use-smart-add';
 import type { PackOption, PriceTier, Product } from '../types';
@@ -63,7 +62,6 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
 
   if (!product) return null;
 
-  const imageUrl = getProductImageUrl(product.img as any, product.barcode);
   const sizeLabel = formatSizeLabel(product);
 
   const selectedOption =
@@ -118,11 +116,7 @@ export function ProductSheet({ product, visible, onClose, onAdd, inList }: Produ
   return (
     <BottomSheet visible={visible} onClose={onClose} keyboardAware scrollable>
       <View style={styles.imageWrapper}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={200} />
-        ) : (
-          <Ionicons name="cube-outline" size={48} color={Colors.light.textLight} />
-        )}
+        <ProductImage img={product.img} barcode={product.barcode} style={styles.image} />
       </View>
 
       <View style={styles.titleRow}>

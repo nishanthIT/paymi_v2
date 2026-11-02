@@ -1,9 +1,9 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
@@ -122,11 +122,7 @@ export function ProductSearchSheet({
                   }}
                 >
                   <View style={styles.thumb}>
-                    {result.imageUri ? (
-                      <Image source={{ uri: result.imageUri }} style={styles.thumbImage} contentFit="contain" />
-                    ) : (
-                      <Ionicons name="cube-outline" size={18} color={T.textLight} />
-                    )}
+                    <ProductImage img={result.imageUri} barcode={result.barcode} style={styles.thumbImage} />
                   </View>
                   <View style={styles.rowText}>
                     <Text style={styles.resultTitle} numberOfLines={2}>

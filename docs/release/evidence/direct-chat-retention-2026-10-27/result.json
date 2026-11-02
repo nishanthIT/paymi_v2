@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "viewports": [
+    1440,
+    390
+  ],
+  "roles": [
+    "retail owner",
+    "retail employee"
+  ],
+  "checks": [
+    "four chat sections",
+    "global-to-personal navigation",
+    "unopened inbox unread",
+    "live bidirectional messages",
+    "read receipts",
+    "message search",
+    "camera X within viewport",
+    "camera draft preservation",
+    "camera capture preview upload delivery",
+    "network reconnect",
+    "New Chat room reuse"
+  ],
+  "browserErrors": []
+}

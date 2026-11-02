@@ -1,6 +1,6 @@
 /**
  * Form validation helpers for the auth module.
- * Rules mirror the backend contract (password ≥ 6 chars, required name/email).
+ * Rules mirror the backend contract (new password ≥ 8 chars, ≤ 72 UTF-8 bytes, required name/email).
  */
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -19,7 +19,13 @@ export function validateEmail(email: string): string | null {
 
 export function validatePassword(password: string): string | null {
   if (!password) return 'Please enter a password';
-  if (password.length < 6) return 'Password must be at least 6 characters';
+  if (password.length < 8) return 'Password must be at least 8 characters';
+  let bytes = 0;
+  for (const character of password) {
+    const point = character.codePointAt(0)!;
+    bytes += point <= 0x7f ? 1 : point <= 0x7ff ? 2 : point <= 0xffff ? 3 : 4;
+  }
+  if (bytes > 72) return 'Password must be 72 UTF-8 bytes or fewer';
   return null;
 }
 

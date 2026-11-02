@@ -181,7 +181,7 @@ export default function EmployeesScreen() {
         refreshControl={
           <RefreshControl
             refreshing={employeesQuery.isRefetching}
-            onRefresh={() => employeesQuery.refetch()}
+            onRefresh={async () => { await employeesQuery.refetch(); }}
             tintColor={Colors.light.primary}
           />
         }

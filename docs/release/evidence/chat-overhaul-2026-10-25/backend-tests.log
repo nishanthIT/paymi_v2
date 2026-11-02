@@ -1,0 +1,732 @@
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ public deletion resource needs no app and does not embed credentials or permit framing (525.698075ms)
+✔ request reauthenticates current account, is idempotent, and status requires a private receipt (120.518481ms)
+✔ owner deletion preserves staff, co-owner, workspace, tasks and shared lists; files and stale sessions are removed (84.638342ms)
+✔ employee deletion cannot remove another role with the same ID; file errors remain retryable (45.670528ms)
+✔ admin deletion removes the account without deleting its managed shop (28.245411ms)
+✔ former employees can request deletion with credentials without regaining workspace access (15.759911ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ shop owner creates employees
+  ✔ creates only a shop membership in the owner's own shop, never company membership (293.271561ms)
+  ✔ a client-submitted shopId for another shop is rejected (7.09221ms)
+  ✔ a shop owner cannot assign company roles or permissions (279.570976ms)
+✔ shop owner creates employees (1196.996377ms)
+▶ shop employees and owners cannot reach company administration
+  ✔ shop employee gets 403 on every company endpoint (69.029019ms)
+  ✔ shop owner gets 403 on every company endpoint (64.799196ms)
+  ✔ previously unauthenticated company endpoints now require a token (2.809118ms)
+  ✔ a forged EMPLOYEE token for a shop employee still has no company access (8.755935ms)
+✔ shop employees and owners cannot reach company administration (598.762923ms)
+📡 Emitted list_created to shop_cmvnvsdt40002aqg4o32e1u5y_lists
+▶ cross-shop isolation
+  ✔ owner B only sees Bravo employees (7.353316ms)
+  ✔ owner B cannot read or change an Alpha employee by id (13.857375ms)
+  ✔ owner B cannot track, read or claim Alpha lists or shop (73.750042ms)
+  ✔ Bravo employee cannot read Alpha lists (235.485784ms)
+  ✔ admin customer view cannot be pointed at another customer's shop (12.777849ms)
+✔ cross-shop isolation (1062.591185ms)
+📡 Emitted list_created to shop_cmvnvsdt40002aqg4o32e1u5y_lists
+▶ deactivation and stale sessions
+  ✔ inactive employee loses access on an existing token; lists are kept (957.947189ms)
+📡 Emitted list_created to shop_cmvnvsdt40002aqg4o32e1u5y_lists
+  ✔ removing an employee keeps the account and lists but revokes access (481.542065ms)
+  ✔ bumping the session version invalidates old tokens (460.347456ms)
+✔ deactivation and stale sessions (1900.087537ms)
+▶ single shop role
+  ✔ the shop manager role no longer exists and only the owner manages employees (464.11823ms)
+  ✔ a regular shop employee cannot manage employees (456.95126ms)
+✔ single shop role (921.235859ms)
+▶ company staff
+  ✔ staff keep exactly their granted company permissions (52.4229ms)
+  ✔ deactivated company membership revokes existing sessions (34.561347ms)
+  ✔ company staff list contains only company staff (6.97399ms)
+  ✔ staff managers cannot grant permissions they do not hold (68.472838ms)
+✔ company staff (162.740287ms)
+▶ dual membership
+  ✔ company and shop permissions are checked independently (766.167708ms)
+  ✔ a shop owner cannot attach an existing company staff account to their shop (7.551841ms)
+✔ dual membership (773.928261ms)
+▶ Customers → Customer details → Employees
+  ✔ shows the customer's shop employees, status counts and their lists (24.503237ms)
+  ✔ viewing customer employees grants them no company access (228.357125ms)
+✔ Customers → Customer details → Employees (253.072953ms)
+▶ realtime shop rooms
+  ✔ only members/owner of a shop may join its list room (6.530992ms)
+✔ realtime shop rooms (6.695927ms)
+✔ startup checks actual schema and supplies safe actionable diagnostics (38.940513ms)
+✔ startup rejects unapplied list migrations before accepting broken list requests (6.558517ms)
+✔ database fallback survives new instances and expires strings, hashes, lists and sets (35.987382ms)
+✔ concurrent rate limits have atomic increments and TTL, database failure stays fail closed (11.641471ms)
+Redis ready; durable PostgreSQL fallback ready
+Redis ready; durable PostgreSQL fallback ready
+✔ real Redis outage and reconnection cannot resurrect consumed or stale values (125.408653ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ actual synthetic pg_dump/pg_restore stays closed until ledger replay removes erased identities (752.006189ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ all authorized existing groups, teams and direct histories are visible; listing is strictly read-only (693.51532ms)
+✔ team rosters derive from active memberships without recreating participant records (58.766989ms)
+✔ missing shop links do not trigger replacement chat creation (14.765004ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ owners and active employees see only the selected shop roster; company roles confer no chat access (768.664299ms)
+✔ both employee devices receive background refresh without participant rows; unauthorized accounts receive nothing (175.932807ms)
+✔ concurrent first posts from two devices join once and preserve both messages (38.909934ms)
+✔ create, assign, deactivate, reactivate and remove refresh owners and active members without leaking to another shop (724.184355ms)
+✔ shop diagnostics report legacy and inactive relationships without modifying data or exposing personal fields (61.95103ms)
+📎 Saving file with extension: .jpg from mimetype: image/jpeg
+📎 Saving file with extension: .jpg from mimetype: image/jpeg
+✔ camera JPEG multipart uploads send and download for owners and employees; outsiders and removed members cannot fetch them (256.902027ms)
+✔ photo retries after a lost response create one message and one event without changing newer chat activity (440.34137ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ conversation search matches complete authorized history, attachment names, participant names and names (776.539188ms)
+✔ message search includes older pages and filenames and keeps the existing chronological response (103.469084ms)
+✔ cursor pagination has no gaps or duplicate messages when new messages arrive or the boundary is deleted (157.554791ms)
+✔ search and cursors never bypass shop access, blocked authors or removed-message filtering (78.969176ms)
+✔ invalid query parameters return a client error, not a misleading unavailable error (58.849171ms)
+Chat directory unavailable {
+  name: 'PrismaClientKnownRequestError',
+  code: 'P2022',
+  databaseCode: undefined,
+  service: undefined,
+  model: 'Chat',
+  table: undefined,
+  column: 'Chat.shopId',
+  action: 'Apply pending Prisma migrations and regenerate the client before restarting.'
+}
+✔ schema failures are identified without exposing SQL, credentials or message content (13.870513ms)
+✔ text retries persist once, reject conflicting payloads and do not resurrect deleted messages (85.003152ms)
+Message saved; realtime refresh deferred {
+  name: 'Error',
+  code: 'UNKNOWN',
+  databaseCode: undefined,
+  service: 'cache',
+  model: undefined,
+  table: undefined,
+  column: undefined,
+  action: undefined
+}
+✔ a post-commit cache outage still acknowledges and broadcasts a saved message and safe retry (114.067329ms)
+✔ document retries reuse the original upload and require current conversation access (64.864316ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ posting requires no rules acceptance and rejects content larger than the server limit (720.382082ms)
+✔ reports are limited to accessible content, deduplicated and available only to moderators (124.017808ms)
+✔ blocking hides group history and summary, rejects direct messages and forged new chats, and filters realtime bodies (418.476573ms)
+✔ moderation removes reported content from histories and summaries and records a decision (53.243362ms)
+✔ chat attachment sharing requires uploader ownership and private file requests require chat access (123.674299ms)
+✔ socket clients cannot relay a forged message or sender identity (130.30167ms)
+✔ deleting a legacy message cannot unlink arbitrary files or another message attachment (109.612952ms)
+✔ default migration run is read-only and reports only reviewed chat changes (634.226736ms)
+✔ targeted migration commits schema and ledger together, preserves history and is safe to rerun (593.875509ms)
+✔ preservation verification failure rolls back schema, message changes and migration ledger (582.59155ms)
+✔ application Prisma driver applies the same guarded transaction and defaults to read-only (588.025828ms)
+✔ Prisma rolls back the complete repair when preservation checks fail (584.656811ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ additive SQL and pre-schema inspection preserve every existing table row (557.242858ms)
+✔ single verified supermarket becomes default without changing IDs, names, employees or business data (13.450157ms)
+✔ rerunning is idempotent and stale reports are rejected (17.439999ms)
+✔ default FK rejects another owner and supplier ownership fails even through direct database writes (4.570546ms)
+✔ multiple verified shops retain legacy/default state; explicit selection does not mutate any pointer (7.005809ms)
+✔ ambiguous and incomplete ownership is reviewed without guessing, copying or creating shops (16.938124ms)
+✔ recovery restores defaults only, retaining ownerships and all existing records; it is repeatable (13.081201ms)
+✔ existing owner and employee login still work; employee default never grants owner rights or disabled features (134.588916ms)
+✔ registration commits one named first shop and default; lost response retry works after OTP consumption (468.923515ms)
+✔ concurrent registration commits one account, shop, chat and receipt (27.549616ms)
+✔ concurrent HTTP onboarding retries all return the same committed shop (1445.793049ms)
+✔ registration cannot recreate an existing employee as a customer, even with a verified code (212.485571ms)
+✔ provisioning failure after account creation rolls every write back and permits retry (11.696853ms)
+✔ supplier prices and original employees/operational data remain byte-equivalent throughout (16.453873ms)
+✔ pure classification never infers a second owner from operational records or missing defaults (0.320659ms)
+✔ CLI requires a target, binds reports to it, supports reviewed local apply/recovery and refuses unapproved remote writes (614.08689ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ a failed provider purge leaves deletion retryable and revokes all old sessions before erasure (624.730352ms)
+✔ verified ledger replay erases a restored account, preserves shared shops, rejects old tokens and advances ID sequences (46.109742ms)
+✔ Redis deletion failures propagate instead of silently falling back to local memory (0.775529ms)
+✔ journal storage failure prevents erasure; durable journal is integrity-protected and excludes account content (57.299657ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ chats
+  ✔ shop employees use their own shop group chat but not another shop's (180.616088ms)
+  ✔ existing conversations still load and accept messages (49.492399ms)
+  ✔ chat selectors include shop teammates and exclude company-only support staff (29.938871ms)
+  ✔ sockets: rooms are authorized and per-user events do not leak across account types (592.545974ms)
+✔ chats (2760.862751ms)
+▶ tasks
+  ✔ owner assigns only own active shop employees; employee works the task (87.894432ms)
+  ✔ editing a task keeps existing assignments and their progress, including deactivated employees (94.920861ms)
+✔ tasks (183.344116ms)
+▶ deactivation side effects
+  ✔ deactivated employee leaves the shop chat, notifications and selectors; history is kept; reactivation restores (481.181712ms)
+  ✔ status survives a refresh and failed actions report errors (14.06058ms)
+📡 Emitted list_created to shop_cmvnvt0j10002aq2krgm0wcwl_lists
+  ✔ lists stay with their shop and creator (80.7073ms)
+✔ deactivation side effects (576.421787ms)
+📡 Emitted list_created to shop_cmvnvt0j10002aq2krgm0wcwl_lists
+📡 Emitted list_updated to shop_cmvnvt0j10002aq2krgm0wcwl_lists
+▶ per-tool shop access (read / write / edit)
+  ✔ owner switches tools and access levels for one employee; API and notifications follow (174.338687ms)
+  ✔ task progress needs write access, not edit (44.825177ms)
+✔ per-tool shop access (read / write / edit) (219.546051ms)
+📡 Emitted list_created to shop_cmvnvt0j10002aq2krgm0wcwl_lists
+📦 Fetching list from DATABASE (no cache): cmvnvt3e7001paq2kcdp6kr3q
+📦 Database isPurchased states: []
+Found 1 in-stock shops with product cmvnvt0jg000daq2kkdytmvf2
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvt0j10002aq2krgm0wcwl_lists
+📦 Fetching list from DATABASE (no cache): cmvnvt3e7001paq2kcdp6kr3q
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvt3q2001taq2kvg5kipof',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+▶ employee lists: owner views, copies and stays in sync
+  ✔ owner opens an employee list, copies it, and sees new items live (475.7739ms)
+✔ employee lists: owner views, copies and stays in sync (476.053714ms)
+▶ company views
+  ✔ company staff page never lists shop employees; customer details lists them per shop (143.929703ms)
+✔ company views (144.091398ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+﹣ create → deactivate → reactivate survives 0ms DB latency (491.573102ms) # set TEST_DB_LATENCY_MS
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+▶ employee membership migration
+  ✔ dry run classifies by provenance and writes nothing (30.900714ms)
+  ✔ apply maps employees to the right shop, removes unverified company access and keeps history (82.511931ms)
+  ✔ migrated accounts get the right access and stale tokens stop working (155.351872ms)
+  ✔ rerunning is a no-op and does not duplicate memberships or re-invalidate sessions (25.899896ms)
+  ✔ resolving a review explicitly assigns a shop without touching lists (108.741822ms)
+  ✔ rollback removes only rows the run created (30.979664ms)
+✔ employee membership migration (917.53157ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📎 Saving file with extension: .txt from mimetype: text/plain
+✔ new and existing accounts send, receive and upload without any acceptance row (1078.591542ms)
+✔ report identity, explanation and exact snapshot persist; own and inaccessible reports fail; races dedupe (130.859987ms)
+✔ all admin operations reject customer and delegated staff, and never expose reporter details publicly (116.383981ms)
+✔ admin can filter, investigate context, record internal notes and transition status without restricting account (114.712183ms)
+✔ account suspension denies existing sessions, login and socket reconnect; expiry and early reactivation preserve data (188.967873ms)
+✔ chat and account restrictions are independent, custom durations expire and chat blocks direct API writes (39.49074ms)
+✔ individual deletion preserves evidence, other authors and report status; concurrent requests are idempotent (60.512751ms)
+✔ bulk deletion requires both confirmations, survives retry/restart and preserves newer messages and other authors (840.454747ms)
+Moderation queue ready (PostgreSQL)
+✔ a failed bulk batch rolls back fully and the startup worker resumes the durable job (138.023593ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ report snapshots preserve reported content and protected attachments after author deletion (813.376024ms)
+✔ suspension applies to all sessions and uploads/typing while private workspace operations stay accessible (382.097607ms)
+✔ removal revokes reused attachment access and notifies active clients, while evidence remains admin-only (296.481005ms)
+[CACHE] PERSISTENT_CACHE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+[CACHE] DATABASE inventory:page:1
+Cache read failed for inventory:page:1: cache unavailable
+[CACHE] DATABASE inventory:page:1
+Cache write failed for inventory:page:1: cache unavailable
+✔ a persistent cache hit performs no writes and retains the remaining TTL (1.67922ms)
+✔ another cache instance observes group invalidation instead of returning local inventory (0.424829ms)
+✔ group invalidation prevents a pending old loader from repopulating inventory (0.344616ms)
+✔ key invalidation prevents a pending old loader from repopulating inventory (0.330595ms)
+✔ group invalidation waits for a publication already writing then removes it (0.294939ms)
+✔ new requests wait for invalidation to finish before consulting persistent cache (1.707728ms)
+✔ a failed loader is shared and subsequent requests can load again (0.4771ms)
+✔ cache errors fall through to the source loader without serving an in-memory copy (0.349024ms)
+✔ failed invalidation rejects and releases the lock for a later valid invalidation (0.190735ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ second shop creation is transactional and concurrent/lost-response retries create exactly one shop (604.716934ms)
+✔ directory, default, and explicit selection require verified CUSTOMER ownership (47.910392ms)
+📡 Emitted list_created to shop_cmvnvtaq80002aqowspf3p9zw_lists
+📡 Emitted list_created to shop_cmvnvtb4s000gaqowdbkl11q6_lists
+Found 1 in-stock shops with product cmvnvtaqg000daqow73vesmxh
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtaq80002aqowspf3p9zw_lists
+📦 Fetching list from DATABASE (no cache): cmvnvtb7v000maqowy17qfbtr
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvtb95000qaqow0kbi4zel',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+Found 1 in-stock shops with product cmvnvtaqg000daqow73vesmxh
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtb4s000gaqowdbkl11q6_lists
+📦 Fetching list from DATABASE (no cache): cmvnvtb87000oaqowk8xb4s5k
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvtban000saqow4so2egbm',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✅ Toggle purchased request: {
+  listId: 'cmvnvtb7v000maqowy17qfbtr',
+  listProductId: 'cmvnvtb95000qaqow0kbi4zel',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvnvtaq80002aqowspf3p9zw_lists
+✅ Purchased status toggled: { listProductId: 'cmvnvtb95000qaqow0kbi4zel', isPurchased: true }
+✔ lists, Collect Mode and retail stock are isolated; supplier prices and stock remain unchanged (228.604982ms)
+✔ employee access is explicit per shop, feature-specific, and never grants creation or company access (628.273474ms)
+✔ operational records and history IDs never cross supermarkets (155.44965ms)
+✔ company supplier endpoints cannot mutate or transfer into customer shops (31.434801ms)
+✔ list backfill preserves data, reports ambiguity, and supports repeatable apply and recovery (30.878895ms)
+✔ company supermarket directory is separate, searchable, permission-controlled and auditable (89.717099ms)
+✔ waste, age records, payouts, shifts, certificates and private photos remain shop-scoped (213.952764ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ concurrent unavailable items from different suppliers use one list and preserve row IDs and quantities (625.118929ms)
+📦 Fetching list from DATABASE (no cache): cmvnvtd8b000qaquie8fo7196
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvtd8b000saqui8gp9yrzv',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+✔ consolidated read includes legacy and new supplier groups without rewriting history (71.728164ms)
+✔ collection preserves existing account, tracking, shop and read/edit permissions (522.383522ms)
+📦 Update quantity request: {
+  listId: 'cmvnvtd9k000uaquicz2u75uq',
+  productAtShopId: undefined,
+  listProductId: 'cmvnvtd89000maquihkbyiber',
+  quantity: 4,
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+📡 Emitted list_product_updated to shop_cmvnvtctr0002aqui0bknyb3n_lists
+✅ Quantity updated: { listProductId: 'cmvnvtd89000maquihkbyiber', quantity: 4 }
+✅ Toggle purchased request: {
+  listId: 'cmvnvtd9k000uaquicz2u75uq',
+  listProductId: 'cmvnvtd89000maquihkbyiber',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvnvtctr0002aqui0bknyb3n_lists
+✅ Purchased status toggled: { listProductId: 'cmvnvtd89000maquihkbyiber', isPurchased: true }
+✔ original item IDs support editing, collecting and moving back to an ordinary list (77.813981ms)
+✔ Out of Stock provenance migration upgrades existing rows additively without inventing historical origins (90.098768ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtflw000laq1m0uqfvus5
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+📦 Update quantity request: {
+  listId: 'cmvnvtfoj000vaq1mqosv36e4',
+  productAtShopId: undefined,
+  listProductId: 'cmvnvtfna000taq1moqbdkidn',
+  quantity: 7,
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+📡 Emitted list_product_updated to shop_cmvnvtets0002aq1mw2auink9_lists
+✅ Quantity updated: { listProductId: 'cmvnvtfna000taq1moqbdkidn', quantity: 7 }
+✅ Toggle purchased request: {
+  listId: 'cmvnvtfoj000vaq1mqosv36e4',
+  listProductId: 'cmvnvtfna000taq1moqbdkidn',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvnvtets0002aq1mw2auink9_lists
+✅ Purchased status toggled: { listProductId: 'cmvnvtfna000taq1moqbdkidn', isPurchased: true }
+✅ Toggle purchased request: {
+  listId: 'cmvnvtfoj000vaq1mqosv36e4',
+  listProductId: 'cmvnvtfna000taq1moqbdkidn',
+  userId: 1,
+  userType: 'CUSTOMER'
+}
+🔄 Current isPurchased state: true
+🔄 New isPurchased state: false
+📡 Emitted list_product_updated to shop_cmvnvtets0002aq1mw2auink9_lists
+✅ Purchased status toggled: { listProductId: 'cmvnvtfna000taq1moqbdkidn', isPurchased: false }
+📦 Fetching list from DATABASE (no cache): cmvnvtfm9000raq1mdzv1g8ag
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvtfna000taq1moqbdkidn',
+    name: 'OOS workflow 1',
+    isPurchased: false
+  }
+]
+✔ normal list → Out of Stock → edit/collect/uncollect/change supplier → original list uses ordinary endpoints (1354.931132ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtfui000waq1mqk9tvaa4
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtfui000waq1mqk9tvaa4
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtfui000waq1mqk9tvaa4
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtfui000waq1mqk9tvaa4
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmvnvtets0002aq1mw2auink9_lists
+✔ search/scanner additions to the virtual list never increment a moved item or its original list (161.333103ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtfz00019aq1mgyg3r70b
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtfz00019aq1mgyg3r70b
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+List found? YES
+Deleted count: 1
+📡 Emitted list_product_removed to shop_cmvnvtets0002aq1mw2auink9_lists
+✔ supplier changes and exact removal preserve identical products from different original lists (204.97891ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtg4p001maq1m3va2llyt
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+✔ legacy items have no invented origin and can still move to a selected ordinary list (92.476696ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtg7a001zaq1ml7ozyjpd
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtg7a001zaq1ml7ozyjpd
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+✔ alternate moves to real Out of Stock list IDs preserve original rows, origins and authorization (195.013331ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtgcp002eaq1m5pmylfb2
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+✔ concurrent supplier changes merge the same origin atomically without losing quantities (187.418778ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtghx002raq1m7kg0dmjy
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+✔ overflow rejects supplier and original-list merges without modifying either item (134.548504ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtgln0034aq1mc8j24zry
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtgn4003daq1mdpvsnbc1
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+📦 Update quantity request: {
+  listId: 'cmvnvtgot003naq1m2c7lzdqb',
+  productAtShopId: undefined,
+  listProductId: 'cmvnvtgo4003laq1m4i9lelon',
+  quantity: 6,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+📡 Emitted list_product_updated to shop_cmvnvtets0002aq1mw2auink9_lists
+✅ Quantity updated: { listProductId: 'cmvnvtgo4003laq1m4i9lelon', quantity: 6 }
+✔ virtual writes require the exact authorized row and preserve employee read/write/edit boundaries (230.89397ms)
+📡 Emitted list_created to shop_cmvnvtets0002aq1mw2auink9_lists
+Found 2 in-stock shops with product cmvnvtgs2003oaq1mufo7st60
+Adding product with lowest effective price: £1 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtets0002aq1mw2auink9_lists
+📦 Update quantity request: {
+  listId: 'cmvnvtgsu003yaq1m1kfw6bgi',
+  productAtShopId: undefined,
+  listProductId: 'cmvnvtgsx0040aq1m34o3ydq1',
+  quantity: 7,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+📡 Emitted list_product_updated to shop_cmvnvtets0002aq1mw2auink9_lists
+✅ Quantity updated: { listProductId: 'cmvnvtgsx0040aq1m34o3ydq1', quantity: 7 }
+✔ tracked source lists can be edited and untracked without deleting the owner’s saved items (118.706811ms)
+Found 1 in-stock shops with product cmvnvteua000daq1mz5ufrl45
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvteu30008aq1miau77cno_lists
+📡 Emitted list_deleted to shop_cmvnvteu30008aq1miau77cno_lists
+Found 1 in-stock shops with product cmvnvteua000daq1mz5ufrl45
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvteu30008aq1miau77cno_lists
+✔ owner deletes a real Out of Stock list normally and a later add creates a valid new destination (91.446086ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ additive migration preserves historical customer reports and earnings and enforces typed ownership (1038.826202ms)
+📋 New price report created by CUSTOMER 1 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+📋 New price report created by EMPLOYEE 1 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+📋 New price report created by ADMIN 1 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+📋 New price report created by EMPLOYEE 500 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+✔ colliding customer/employee/admin IDs submit attributable reports and read only their own history (102.196903ms)
+✔ only authorized reviewers see identities and responses never expose account credentials (35.694066ms)
+✔ both approval aliases preserve customer-only rewards and record the actual reviewer type (36.771256ms)
+✔ concurrent customer approvals award once and terminal reports cannot be re-rejected (42.767457ms)
+📋 New price report created by EMPLOYEE 1 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+📋 New price report created by ADMIN 1 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+✔ reject aliases retain typed attribution, do not award earnings, and return not-found accurately (67.589857ms)
+📋 New price report created by EMPLOYEE 1 for product cmvnvthi0000daq6f9qdq28h4 at shop cmvnvthhk0000aq6fd6ei2ulj
+✔ invalid prices do not create malformed reports and zero current prices are preserved (77.651976ms)
+✔ personal deletion cascades only typed authored reports and clears reviewer links without harming colliding accounts (132.424607ms)
+✔ GTINs retain zeroes; only valid lengths/check digits gain equivalent aliases (1.053713ms)
+✔ unit barcode alone matches; supplier codes, input barcode, titles and case-only products never do (1.747727ms)
+✔ equivalent barcode collisions quarantine all matches instead of preferring exact strings (0.230072ms)
+✔ duplicate source records collapse and a rerun has zero changes (0.386516ms)
+✔ distinct case configurations coexist without selecting an arbitrary legacy default (4.69036ms)
+✔ same case code with different quantities is wholly quarantined (0.156085ms)
+✔ shared source case barcode, existing case owner and unit-code collisions are blocked (0.185141ms)
+✔ missing barcodes and invalid checksums never create incomplete packaging (0.140194ms)
+✔ nested saleable packs preserve the inner expression and do not multiply unit counts (0.285628ms)
+✔ existing valid values and prior case configurations are never overwritten (0.209051ms)
+✔ different source unit sizes and known database size conflicts are quarantined (0.134176ms)
+✔ source prices are excluded from proposed database writes and provenance (0.161473ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ dry-run performs no writes; apply migrates additively, preserves inventory/prices and reruns as a no-op (884.705975ms)
+{"code":"PRODUCT_MASTER_FAILED","message":"Database or plan changed since dry-run; create a fresh dry-run report","committed":false,"reportPath":"/tmp/paymi-packaging-tests-3SBTqX/stale-apply.json"}
+✔ reviewed report becomes stale on catalog edits and application refuses before writing (144.98835ms)
+✔ database constraints reject duplicate canonical cases, invalid formats, empty sizes and zero quantities (9.199495ms)
+Product found: Changed title
+Product found: Changed title
+Product found: Changed title
+Product found: Changed title
+Product found: Changed title
+Product not found for barcode: 5010511482313
+Product not found for barcode: 5010511040445
+Product found: Changed title
+Product not found for barcode: SUPPLIER-NOT-A-GTIN
+✔ unit, padded unit and each case scan return the same product plus the correct case configuration (159.680858ms)
+✔ legacy barcode collisions return 409 for scans, quick-add and expiry instead of selecting a product (49.663788ms)
+✔ quick-add recognizes existing cases and leaves products and stock unchanged (12.484566ms)
+Filter Products Controller - Request Query: { search: '5000382114994', page: '1' }
+Pagination: { pageNum: 1, limitNum: 100, skip: 0 }
+[productSearch] indexed 2 products in 18ms
+Total count: 1
+Found 1 products from DB
+[CACHE] DATABASE products-at-shop:cmvnvtj770000aqakfoikdp7q:page=1:limit=100:search=5000382114994:category=:aisle=:stock=
+Filter Products Controller - Request Query: { search: '5010511482313', withoutCaseBarcode: 'true', page: '1' }
+Pagination: { pageNum: 1, limitNum: 100, skip: 0 }
+Total count: 0
+Found 0 products from DB
+✔ detail, catalog, shop inventory, expiry and pack options expose packaging without changing prices (162.722584ms)
+[productSearch] indexed 2 products in 3ms
+[productSearch] indexed 2 products in 2ms
+✔ ranked search includes every case and remains correct after legacy product refreshes (43.849273ms)
+✔ legacy writes cannot overwrite reviewed identity or cases; ordinary title edits remain available (63.568264ms)
+📡 Emitted list_created to shop_cmvnvtj7b0002aqak05olslrw_lists
+Product found: Reviewed title
+Found 1 in-stock shops with product cmvnvtj7m000gaqaksq6fpzui
+Adding product with lowest effective price: £3.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtj7b0002aqak05olslrw_lists
+Product found: Reviewed title
+Found 1 in-stock shops with product cmvnvtj7m000gaqaksq6fpzui
+Adding product with lowest effective price: £3.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmvnvtj7b0002aqak05olslrw_lists
+✔ scanning different cases adds to the existing product identity without multiplying inventory or quantity (113.201312ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ anonymous promotions expose only current published wholesaler offers and cannot grant workspace access (520.480089ms)
+✔ release migrations upgrade the prior schema without replacing account IDs, passwords, ownership or tasks (125.711442ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ logout durably revokes only that session and disconnects its socket; retries succeed (553.380586ms)
+✔ password recovery invalidates customer and admin tokens and prevents OTP reuse (864.096582ms)
+✔ legacy version-zero tokens remain valid until revocation, and bearer wins over cookie (3.940781ms)
+✔ an expired legacy trial does not limit the free release or spend saved points (30.872343ms)
+✔ explicit credentials cannot authenticate as the previous cookie account (0.50829ms)
+✔ missing and known fallback signing secrets fail closed (0.261191ms)
+✔ production cookies require TLS and resist cross-site requests (0.476601ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ directory/search/team participants contain only selected shop owners and active employees (915.124239ms)
+✔ simultaneous and reverse employee DMs reuse one conversation; messages and socket replies survive reopening (387.666191ms)
+✔ forged identities, supplier/company targets, other shops and malformed DMs cannot bypass eligibility (235.450913ms)
+✔ stale participants and joined sockets lose read, typing and send access after membership revocation (219.008086ms)
+✔ additive migration scopes only unambiguous histories and preserves every message and participant (118.075283ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ chiller, freezer and legacy freezer limits survive create, edit and reload; alerts use saved range (793.807449ms)
+✔ both age record APIs accept either, both or neither product details; current records can clear fields (241.929394ms)
+✔ payouts persist, list, filter and keep their automatic creation timestamp on edits (95.248958ms)
+✔ additive age migration preserves existing rows and allows independent null fields (16.121852ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+📡 Emitted list_created to shop_cmvnvtres0002aqyub6bxsqko_lists
+Found 1 in-stock shops with product cmvnvtrf2000daqyu3mbwtuyk
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_added to shop_cmvnvtres0002aqyub6bxsqko_lists
+📦 Fetching list from DATABASE (no cache): cmvnvts6f000laqyu26vzibfq
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvts72000naqyu4u66w2yp',
+    name: 'Test Cola 330ml',
+    isPurchased: false
+  }
+]
+✔ write-only shop employee creates a list and adds three cases in one request (1099.581485ms)
+Found 1 in-stock shops with product cmvnvtrf2000daqyu3mbwtuyk
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+Found 1 in-stock shops with product cmvnvtrf2000daqyu3mbwtuyk
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+Found 1 in-stock shops with product cmvnvtrf2000daqyu3mbwtuyk
+Adding product with lowest effective price: £1.25 (regular price) at Wholesale Depot
+📡 Emitted list_product_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+📡 Emitted list_product_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+✔ concurrent additions preserve the sum and do not create duplicate logical products (49.854709ms)
+📡 Emitted list_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+📡 Emitted list_created to shop_cmvnvtres0002aqyub6bxsqko_lists
+📡 Emitted list_deleted to shop_cmvnvtres0002aqyub6bxsqko_lists
+✔ lists and employees remain current without the retired list-cache dependency (78.014361ms)
+[productSearch] indexed 1 products in 17ms
+Product found: Test Cola 330ml
+✔ product search, detail, barcode and list prices load for the employee (87.907389ms)
+📡 Emitted list_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+📦 Update quantity request: {
+  listId: 'cmvnvts6f000laqyu26vzibfq',
+  productAtShopId: undefined,
+  listProductId: 'cmvnvts72000naqyu4u66w2yp',
+  quantity: 8,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+📡 Emitted list_product_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+✅ Quantity updated: { listProductId: 'cmvnvts72000naqyu4u66w2yp', quantity: 8 }
+📦 Update quantity request: {
+  listId: 'cmvnvts6f000laqyu26vzibfq',
+  productAtShopId: undefined,
+  listProductId: 'cmvnvts72000naqyu4u66w2yp',
+  quantity: 1.5,
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+✅ Toggle purchased request: {
+  listId: 'cmvnvts6f000laqyu26vzibfq',
+  listProductId: 'cmvnvts72000naqyu4u66w2yp',
+  userId: 1,
+  userType: 'EMPLOYEE'
+}
+🔄 Current isPurchased state: false
+🔄 New isPurchased state: true
+📡 Emitted list_product_updated to shop_cmvnvtres0002aqyub6bxsqko_lists
+✅ Purchased status toggled: { listProductId: 'cmvnvts72000naqyu4u66w2yp', isPurchased: true }
+📦 Fetching list from DATABASE (no cache): cmvnvts6f000laqyu26vzibfq
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvts72000naqyu4u66w2yp',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+📦 Fetching list from DATABASE (no cache): cmvnvts6f000laqyu26vzibfq
+📦 Database isPurchased states: [
+  {
+    id: 'cmvnvts72000naqyu4u66w2yp',
+    name: 'Test Cola 330ml',
+    isPurchased: true
+  }
+]
+✔ employee access changes apply immediately and management cannot cross shops (433.721897ms)
+📡 Emitted list_created to shop_cmvnvtrez0008aqyu5teexkfq_lists
+✔ summary preserves legacy admin-owned lists and distinguishes typed IDs and shop scopes (19.964706ms)
+✔ Dhamecha source loading does not parse or require Bestway datasets (10.924815ms)
+✔ money rejects absent, zero, negative, fractional-penny and malformed values without guessing (0.20553ms)
+✔ Bestway reads actual retail barcodes and rejects conflicting fields, supplier IDs and invalid GTINs (0.279689ms)
+✔ Bestway validates source product IDs independently of master barcodes (0.254438ms)
+✔ all four Bestway exports reuse exact checkpoint identity and reject missing/conflicting identities and price bases (8.478678ms)
+✔ Dhamecha preserves original, current, null promo and alternate raw values; duplicate rows collapse (0.362753ms)
+✔ missing quantities never infer case size; verified retail RRP can independently fill a missing value (0.156382ms)
+✔ Dhamecha requires both a source product ID and a nonblank product name, including for RRP (0.185769ms)
+✔ a single-supplier plan cannot write another supplier even when given mixed audit input (0.526606ms)
+✔ unknown/mismatched cases, ambiguous identities and different duplicate prices are quarantined (0.293939ms)
+✔ a legacy case alias on another product blocks a unit match and any RRP write (0.126197ms)
+✔ verified case configuration wins over legacy scalar size; unit-size conflicts are rejected (0.133725ms)
+✔ Bestway retains unit and case wholesale prices without creating promotional pricing (0.138684ms)
+✔ Bestway updates a verified existing unit price while retaining its identity, offers and independent case tiers (0.371538ms)
+✔ newer prices and existing manual promotions survive older imports (0.234528ms)
+✔ a verified unit price cannot be overwritten by a Dhamecha case price (0.107829ms)
+✔ JSONB key order does not cause duplicate updates; rerun is a no-op (0.283926ms)
+✔ RRP conflicts do not overwrite the master and existing valid RRP is preserved (0.146247ms)
+✔ selector respects expiry and explicit current source without inventing a discount for null promotions (0.133936ms)
+✔ case scanning selects the linked case total and never substitutes a different case or unit price (0.175771ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ dry-run is read-only; reviewed apply migrates atomically, preserves existing IDs and stock, and reruns without writes (1301.793427ms)
+{"code":"SUPPLIER_IMPORT_FAILED","message":"Database or plan changed since dry-run; generate a fresh report","committed":false,"reportPath":"/tmp/paymi-supplier-test-ZuJ8xC/bad-apply.json"}
+✔ stale reviewed reports are rejected before any write (145.302268ms)
+🔎 /products/cmvnvttcu000gaq3dk5d9yayp/compare → 3 shops, 0 bundles (23ms)
+✔ authenticated comparison exposes original/current Dhamecha and all Bestway case tiers (66.841323ms)
+Product found: Changed title
+Product found: Changed title
+Product found: Changed title
+✔ unit and case scanners resolve identity and select only the exact case price (58.487148ms)
+updateProductPriceAtShop received: {
+  shopId: 'cmhmfswa60000dgqs90qv3x02',
+  productId: 'cmvnvttcu000gaq3dk5d9yayp',
+  price: 7.5,
+  employeeId: 1,
+  offerPrice: undefined,
+  offerExpiryDate: undefined,
+  aisle: undefined,
+  locationCode: undefined,
+  offerPriceType: 'undefined',
+  offerExpiryDateType: 'undefined',
+  locationCodeType: 'undefined'
+}
+Parsed values: {
+  originalPrice: 7.5,
+  parsedPrice: 7.5,
+  originalOfferPrice: undefined,
+  parsedOfferPrice: null,
+  originalOfferExpiryDate: undefined,
+  parsedOfferExpiryDate: null,
+  aisle: undefined,
+  locationCode: undefined
+}
+Update data: {
+  price: 7.5,
+  updatedAt: 2026-10-25T13:47:25.283Z,
+  offerPriceSource: null,
+  priceObservedAt: 2026-10-25T13:47:25.283Z,
+  offerPrice: null,
+  offerExpiryDate: null
+}
+Database update result: {
+  id: 'cmvnvttd0000iaq3dhhweplhe',
+  price: 7.5,
+  offerPrice: null,
+  offerExpiryDate: null,
+  updatedAt: 2026-10-25T13:47:25.283Z
+}
+🔎 /products/cmvnvttcu000gaq3dk5d9yayp/compare → 3 shops, 0 bundles (7ms)
+✔ manual supplier price edit clears imported-current selection and cannot be reverted by the older source (139.796502ms)
+{"code":"ERR_ASSERTION","message":"Guarded withdrawal failed; existing records preserved unless committed is true","committed":false}
+✔ legacy-alias repair withdraws only the unused newly imported row and refuses a stock change (310.810524ms)
+Image controller initialized
+Using image directory: /home/n1sh/Start_up/Paymi/product-A-backend/images
+✔ employee saves -23 freezer and positive fridge readings; warm freezer alarms are saved, not rejected (1575.429867ms)
+✔ category suggestions combine existing catalog with shop-local saved names and never overwrite global taxonomy (102.593555ms)
+✔ product selector searches catalogue names/barcodes, filters categories, and excludes another shop private products (45.121638ms)
+✔ age-record lookups require current membership and feature permission; read-only users cannot save new categories (21.365291ms)
+ℹ tests 238
+ℹ suites 16
+ℹ pass 237
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 73378.626777

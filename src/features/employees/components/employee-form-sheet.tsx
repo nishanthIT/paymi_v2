@@ -7,7 +7,7 @@ import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { Colors, Spacing, Typography } from '@/constants/theme';
-import { validateEmail } from '@/utils/validation';
+import { validateEmail, validatePassword } from '@/utils/validation';
 
 import type { Employee, EmployeeInput } from '../api';
 import { defaultShopPermissions } from '../permissions';
@@ -55,8 +55,10 @@ export function EmployeeFormSheet({ visible, employee, onClose, onSubmit, submit
     if (!name.trim()) next.name = 'Name is required';
     const emailError = credentialsLocked ? null : validateEmail(email.trim());
     if (emailError) next.email = emailError;
-    if (!isEdit && password.length < 6) next.password = 'At least 6 characters';
-    if (isEdit && password.length > 0 && password.length < 6) next.password = 'At least 6 characters';
+    if (!credentialsLocked && (!isEdit || password.length > 0)) {
+      const passwordError = validatePassword(password);
+      if (passwordError) next.password = passwordError;
+    }
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 

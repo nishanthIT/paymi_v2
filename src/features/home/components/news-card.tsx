@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 import type { NewsItem } from '../types';
+import { HomeAction } from './home-action';
 
 interface NewsCardProps {
   item: NewsItem;
@@ -23,15 +24,17 @@ export function formatNewsDate(iso: string): string {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-/** Compact, scannable news card: cover left, text right. */
+/** Editorial card for the Home news rail; the original article and preview stay intact. */
 export function NewsCard({ item, onPress }: NewsCardProps) {
   // Article bodies can contain many newlines; collapse for the 2-line preview.
   const preview = (item.description ?? '').replace(/\s+/g, ' ').trim();
 
   return (
-    <Pressable
+    <HomeAction
+      label={item.title}
+      hint={`${formatNewsDate(item.publishedAt)}. ${preview}. Read the full article`}
       onPress={() => onPress(item)}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={styles.card}
     >
       <View style={styles.coverWrap}>
         {item.imageUrl ? (
@@ -45,13 +48,13 @@ export function NewsCard({ item, onPress }: NewsCardProps) {
           />
         ) : (
           <View style={styles.coverFallback}>
-            <Ionicons name="newspaper-outline" size={24} color={Colors.light.textLight} />
+            <Ionicons name="newspaper-outline" size={38} color="#79551F" />
           </View>
         )}
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={styles.title} numberOfLines={3}>
           {item.title}
         </Text>
         <Text style={styles.description} numberOfLines={2}>
@@ -61,84 +64,46 @@ export function NewsCard({ item, onPress }: NewsCardProps) {
           <Text style={styles.date}>{formatNewsDate(item.publishedAt)}</Text>
           <View style={styles.readMore}>
             <Text style={styles.readMoreText}>Read more</Text>
-            <Ionicons name="chevron-forward" size={12} color={Colors.light.primary} />
+            <Ionicons name="arrow-forward" size={14} color="#79551F" />
           </View>
         </View>
       </View>
-    </Pressable>
+    </HomeAction>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    height: 108,
-    overflow: 'hidden',
-    backgroundColor: Colors.light.backgroundCard,
-    borderRadius: BorderRadius.lg,
+    flex: 1,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: Colors.light.border,
-    padding: Spacing.sm,
+    borderColor: '#EAE3D7',
+    backgroundColor: Colors.light.backgroundCard,
     ...Shadows.sm,
   },
-  pressed: {
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
   coverWrap: {
-    width: 92,
-    height: 92,
-    borderRadius: BorderRadius.md,
+    margin: 6,
+    marginBottom: 0,
+    aspectRatio: 1.8,
+    borderRadius: 17,
     overflow: 'hidden',
     backgroundColor: Colors.light.backgroundSecondary,
   },
-  cover: {
-    width: '100%',
-    height: '100%',
-  },
-  coverFallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  body: {
-    flex: 1,
-    gap: 3,
-    justifyContent: 'center',
-    height: '100%',
-  },
-  title: {
-    ...Typography.bodySmall,
-    fontWeight: '700',
-    color: Colors.light.text,
-    lineHeight: 18,
-  },
-  description: {
-    ...Typography.caption,
-    color: Colors.light.textSecondary,
-    lineHeight: 16,
-  },
+  cover: { width: '100%', height: '100%' },
+  coverFallback: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.light.primaryLight },
+  body: { flex: 1, padding: 16, gap: 8 },
+  title: { fontSize: 18, lineHeight: 24, fontWeight: '700', letterSpacing: -0.35, color: Colors.light.text },
+  description: { fontSize: 13, lineHeight: 20, color: Colors.light.textSecondary },
   footer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 2,
+    gap: 8,
+    marginTop: 'auto',
+    paddingTop: 12,
   },
-  date: {
-    ...Typography.caption,
-    fontSize: 11,
-    color: Colors.light.textLight,
-  },
-  readMore: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  readMoreText: {
-    ...Typography.caption,
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.light.primary,
-  },
+  date: { fontSize: 11, lineHeight: 16, color: Colors.light.textSecondary },
+  readMore: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  readMoreText: { fontSize: 11, lineHeight: 16, fontWeight: '600', color: '#79551F' },
 });

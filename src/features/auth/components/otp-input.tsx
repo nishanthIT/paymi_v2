@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputInstance } from 'react-native';
 
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 
@@ -20,7 +20,7 @@ interface OtpInputProps {
  * autofill (one-time-code) and the number pad all work naturally.
  */
 export function OtpInput({ value, onChange, onComplete, disabled, error, autoFocus = true }: OtpInputProps) {
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const [focused, setFocused] = useState(false);
 
   const handleChange = (text: string) => {

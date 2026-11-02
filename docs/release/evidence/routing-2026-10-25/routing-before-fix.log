@@ -1,0 +1,180 @@
+✖ session restoration keeps the initial URL pending instead of redirecting before auth is known (39.550619ms)
+✖ ios: cold signed-out launch and logout resolve the protected home to login (14.73797ms)
+✖ ios: login and restored sessions resolve to home without breaking chat deep links (6.664995ms)
+✖ android: cold signed-out launch and logout resolve the protected home to login (12.614538ms)
+✖ android: login and restored sessions resolve to home without breaking chat deep links (5.389028ms)
+✖ web: cold signed-out launch and logout resolve the protected home to login (5.501035ms)
+✖ web: login and restored sessions resolve to home without breaking chat deep links (4.263528ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 474.864849
+
+✖ failing tests:
+
+test at tests/auth-routing.test.mjs:97:1
+✖ session restoration keeps the initial URL pending instead of redirecting before auth is known (39.550619ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:99:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/auth-routing.test.mjs:107:3
+✖ ios: cold signed-out launch and logout resolve the protected home to login (14.73797ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/(auth)'
+  - '/(auth)/login'
+            ^
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:114:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/(auth)',
+    expected: '/(auth)/login',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/auth-routing.test.mjs:118:3
+✖ ios: login and restored sessions resolve to home without breaking chat deep links (6.664995ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/(app)'
+  - '/(app)/(tabs)'
+           ^
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:123:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/(app)',
+    expected: '/(app)/(tabs)',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/auth-routing.test.mjs:107:3
+✖ android: cold signed-out launch and logout resolve the protected home to login (12.614538ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/(auth)'
+  - '/(auth)/login'
+            ^
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:114:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/(auth)',
+    expected: '/(auth)/login',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/auth-routing.test.mjs:118:3
+✖ android: login and restored sessions resolve to home without breaking chat deep links (5.389028ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/(app)'
+  - '/(app)/(tabs)'
+           ^
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:123:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/(app)',
+    expected: '/(app)/(tabs)',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/auth-routing.test.mjs:107:3
+✖ web: cold signed-out launch and logout resolve the protected home to login (5.501035ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/(auth)'
+  - '/(auth)/login'
+            ^
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:114:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/(auth)',
+    expected: '/(auth)/login',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/auth-routing.test.mjs:118:3
+✖ web: login and restored sessions resolve to home without breaking chat deep links (4.263528ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/(app)'
+  - '/(app)/(tabs)'
+           ^
+  
+      at TestContext.<anonymous> (file:///home/n1sh/Start_up/Paymi/paymi_v2/tests/auth-routing.test.mjs:123:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/(app)',
+    expected: '/(app)/(tabs)',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

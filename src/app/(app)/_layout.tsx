@@ -1,7 +1,10 @@
 import { Stack } from 'expo-router';
 import { Colors } from '@/constants/theme';
+import { useChatRealtime } from '@/features/chat/hooks/use-chats';
 
 export default function AppLayout() {
+  // Includes deep-linked threads that never mount the tab navigator.
+  useChatRealtime();
   return (
     <Stack
       screenOptions={{
@@ -27,6 +30,7 @@ export default function AppLayout() {
       <Stack.Screen name="employee/[id]" />
       <Stack.Screen name="employee/list/[listId]" />
       <Stack.Screen name="chat/[id]" />
+      <Stack.Screen name="chat/start" />
       <Stack.Screen name="news/[id]" />
       <Stack.Screen name="manage-expiry" />
       <Stack.Screen name="task-management" />

@@ -152,7 +152,7 @@ export default function WasteManagementScreen() {
           refreshControl={
             <RefreshControl
               refreshing={waste.isRefetching}
-              onRefresh={waste.refetch}
+              onRefresh={async () => { await waste.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }

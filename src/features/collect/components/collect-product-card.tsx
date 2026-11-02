@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import React, { memo, useCallback, useState } from 'react';
 import {
@@ -20,12 +19,12 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { SizeBadge } from '@/components/ui/size-badge';
 import type { ListProduct } from '@/features/lists/types';
 import { formatMoneyTyping } from '@/features/shop-tools/format';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 interface CollectProductCardProps {
   product: ListProduct;
@@ -93,7 +92,6 @@ export const CollectProductCard = memo(function CollectProductCard({
     }
   }, [onSubmitPrice, priceValue, product]);
 
-  const imageUrl = getProductImageUrl(product.img as any, product.barcode);
   const purchased = product.isPurchased;
   const price = formatPrice(product.lowestPrice);
   const originalPrice =
@@ -103,27 +101,20 @@ export const CollectProductCard = memo(function CollectProductCard({
   return (
     <Animated.View style={[styles.card, purchased && styles.cardPurchased]}>
       <View style={styles.body}>
-        <Pressable
-          style={styles.imageWrap}
-          disabled={!imageUrl}
-          accessibilityRole="button"
-          accessibilityLabel={`Preview image of ${product.productName}`}
-          onPress={(event) => {
-            event.stopPropagation();
-            if (imageUrl) onPreviewImage(imageUrl);
-          }}
-        >
-          {imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
-          ) : (
-            <Ionicons name="cube-outline" size={24} color={Colors.light.textLight} />
-          )}
+        <View style={styles.imageWrap}>
+          <ProductImage
+            img={product.img}
+            barcode={product.barcode}
+            style={styles.image}
+            onPreview={onPreviewImage}
+            accessibilityLabel={`Preview image of ${product.productName}`}
+          />
           {product.quantity > 1 && (
             <View style={styles.qtyBadge}>
               <Text style={styles.qtyBadgeText}>×{product.quantity}</Text>
             </View>
           )}
-        </Pressable>
+        </View>
 
         <Pressable
           style={({ pressed }) => [styles.info, pressed && { opacity: 0.7 }]}

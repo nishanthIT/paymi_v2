@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 import type { Product } from '../types';
 import { QuantityStepper } from './quantity-stepper';
@@ -34,16 +33,10 @@ export const SearchResultCard = React.memo(function SearchResultCard({
   quantityInList,
   onQuantityChange,
 }: SearchResultCardProps) {
-  const imageUrl = getProductImageUrl(product.img as any, product.barcode);
-
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
       <View style={styles.imageWrapper}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
-        ) : (
-          <Ionicons name="cube-outline" size={24} color={Colors.light.textLight} />
-        )}
+        <ProductImage img={product.img} barcode={product.barcode} style={styles.image} />
       </View>
 
       <View style={styles.body}>

@@ -125,7 +125,7 @@ export default function EmployeeDetailScreen() {
             />
           )}
           ListEmptyComponent={
-            listsQuery.isPending ? null : listsQuery.isError ? (
+            listsQuery.isPending ? undefined : listsQuery.isError ? (
               <EmptyState icon="alert-circle-outline" title="Couldn’t load lists" body={listsQuery.error.message} />
             ) : (
               <EmptyState
@@ -145,7 +145,7 @@ export default function EmployeeDetailScreen() {
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => <EmployeeTaskRow task={item} employeeId={employeeId} />}
           ListEmptyComponent={
-            tasksQuery.isPending ? null : tasksQuery.isError ? (
+            tasksQuery.isPending ? undefined : tasksQuery.isError ? (
               <EmptyState icon="alert-circle-outline" title="Couldn’t load tasks" body={tasksQuery.error.message} />
             ) : (
               <EmptyState

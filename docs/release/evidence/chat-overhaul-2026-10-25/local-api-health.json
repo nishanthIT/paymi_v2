@@ -1,0 +1,12 @@
+{
+  "status": 200,
+  "healthy": true,
+  "ms": 3199,
+  "services": {
+    "sessions": "ready",
+    "moderation": {
+      "state": "ready",
+      "lastPollAt": "2026-10-25T13:49:05.501Z"
+    }
+  }
+}

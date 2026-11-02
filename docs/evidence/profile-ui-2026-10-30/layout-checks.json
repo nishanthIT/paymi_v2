@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 390,
+      "badgeClear": true,
+      "noHorizontalOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 320,
+      "badgeClear": true,
+      "noHorizontalOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 430,
+      "badgeClear": true,
+      "noHorizontalOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 768,
+      "badgeClear": true,
+      "noHorizontalOverflow": true,
+      "touchTargets": true
+    }
+  ],
+  "enlargedText": {
+    "width": 320,
+    "scale": 1.3,
+    "badgeClear": true
+  },
+  "browserErrors": []
+}

@@ -1,12 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
-import { useRouter, type Href } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { certificateKeys, fetchCertificateAlerts } from '@/features/certificates/api';
 import { fetchToday as fetchCleaningToday } from '@/features/cleaning/api';
@@ -14,23 +13,22 @@ import { cleaningKeys } from '@/features/cleaning/keys';
 import { expiryKeys, fetchExpiryNotifications } from '@/features/expiry/api';
 import { useIsOwner } from '@/features/shop-tools/hooks/use-is-owner';
 import { useCanManageShopEmployees } from '@/features/employees/hooks';
-import { useShopFeatures, type ShopFeature } from '@/features/employees/permissions';
+import { useShopFeatures } from '@/features/employees/permissions';
+import {
+  PROFILE_TOOL_SECTIONS,
+  ProfileIdentity,
+  ProfileLogout,
+  ProfileMenu,
+  ProfileMenuRow,
+  ProfileSection,
+  ProfileToolGrid,
+} from '@/features/profile/components/profile-sections';
+import type { ShopTool } from '@/features/profile/types';
 import { fetchMyTasks, taskKeys } from '@/features/tasks/api';
-
-interface ShopTool {
-  route: Href;
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  ownerOnly?: boolean;
-  /** Shop permission an employee needs to see this tool. */
-  feature?: ShopFeature;
-  badge?: number;
-  badgeColor?: string;
-}
 
 /** Profile tab: account info, shop tools dashboard and logout. */
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, activeSupermarket } = useAuth();
   const isOwner = useIsOwner();
   const canManageEmployees = useCanManageShopEmployees();
   const hasFeature = useShopFeatures();
@@ -73,6 +71,7 @@ export default function ProfileScreen() {
       {
         route: '/(app)/manage-expiry',
         label: 'Manage Expiry',
+        section: 'daily',
         icon: 'calendar-outline',
         feature: 'feature.expiry',
         badge: expiryAlerts.data?.length,
@@ -81,46 +80,51 @@ export default function ProfileScreen() {
       {
         route: '/(app)/task-management',
         label: 'Tasks',
+        section: 'daily',
         icon: 'checkbox-outline',
         feature: 'feature.tasks',
         badge: openTaskCount > 0 ? openTaskCount : undefined,
         badgeColor: Colors.light.primary,
       },
-      { route: '/(app)/fridge-temperature', label: 'Temperature Log', icon: 'thermometer-outline', feature: 'feature.fridges' },
+      { route: '/(app)/fridge-temperature', label: 'Temperature Log', section: 'daily', icon: 'thermometer-outline', feature: 'feature.fridges' },
       {
         route: '/(app)/cleaning-status',
         label: 'Cleaning',
+        section: 'daily',
         icon: 'sparkles-outline',
         feature: 'feature.cleaning',
         badge: cleaningRemaining > 0 ? cleaningRemaining : undefined,
         badgeColor: Colors.light.warning,
       },
-      { route: '/(app)/incident-logs', label: 'Incident Logs', icon: 'warning-outline', feature: 'feature.incidents' },
+      { route: '/(app)/incident-logs', label: 'Incident Logs', section: 'records', icon: 'warning-outline', feature: 'feature.incidents' },
       {
         route: '/(app)/age-restriction-records',
         label: 'Age Restriction Records',
+        section: 'records',
         icon: 'shield-checkmark-outline',
         feature: 'feature.age_records',
       },
       {
         route: '/(app)/certificate-management',
         label: 'Certificates',
+        section: 'records',
         icon: 'ribbon-outline',
         ownerOnly: true,
         badge: certificateAlerts.data?.length,
         badgeColor: Colors.light.error,
       },
-      { route: '/(app)/waste-management-record', label: 'Waste Log', icon: 'trash-outline', feature: 'feature.waste' },
+      { route: '/(app)/waste-management-record', label: 'Waste Log', section: 'records', icon: 'trash-outline', feature: 'feature.waste' },
       {
         route: '/(app)/supplier-payout-record',
         label: 'Supplier Payouts',
+        section: 'business',
         icon: 'cash-outline',
         feature: 'feature.supplier_payouts',
       },
-      { route: '/(app)/labels', label: 'Labels', icon: 'pricetags-outline' },
-      { route: '/(app)/shift-sheet', label: 'Shift Sheet', icon: 'receipt-outline', feature: 'feature.shift_sheet' },
-      { route: '/(app)/vat-calculator', label: 'VAT Calculator', icon: 'calculator-outline' },
-      { route: '/(app)/profit-calculator', label: 'Profit Calculator', icon: 'trending-up-outline' },
+      { route: '/(app)/labels', label: 'Labels', section: 'business', icon: 'pricetags-outline' },
+      { route: '/(app)/shift-sheet', label: 'Shift Sheet', section: 'business', icon: 'receipt-outline', feature: 'feature.shift_sheet' },
+      { route: '/(app)/vat-calculator', label: 'VAT Calculator', section: 'business', icon: 'calculator-outline' },
+      { route: '/(app)/profit-calculator', label: 'Profit Calculator', section: 'business', icon: 'trending-up-outline' },
     ] as ShopTool[]
   ).filter((tool) => (isOwner || !tool.ownerOnly) && hasFeature(tool.feature));
 
@@ -145,267 +149,83 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={32} color={Colors.light.primary} />
-          </View>
-          <Text style={styles.name}>{user?.name ?? 'Your account'}</Text>
-          <Text style={styles.email}>{user?.email}</Text>
-          {!!user?.userType && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {user.userType === 'CUSTOMER'
-                  ? 'SHOP OWNER'
-                  : user.userType === 'EMPLOYEE'
-                    ? 'SHOP EMPLOYEE'
-                    : String(user.userType)}
-              </Text>
-            </View>
-          )}
+        <View style={styles.heading}>
+          <View style={styles.headingAccent} />
+          <Text accessibilityRole="header" style={styles.title}>Profile</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>My Supermarket</Text>
-        <View style={styles.menu}>
-          <MenuRow icon="storefront-outline" label="My Supermarket" onPress={() => router.push('/(app)/supermarkets')} />
-        </View>
-        <View style={styles.grid}>
-          {tools.map((tool) => (
-            <ToolCard
-              key={tool.label}
-              tool={tool}
-              onPress={() => {
-                Haptics.selectionAsync();
-                router.push(tool.route);
-              }}
-            />
-          ))}
-        </View>
+        <ProfileIdentity
+          name={user?.name}
+          email={user?.email}
+          role={user?.userType
+            ? user.userType === 'CUSTOMER'
+              ? 'SHOP OWNER'
+              : user.userType === 'EMPLOYEE'
+                ? 'SHOP EMPLOYEE'
+                : String(user.userType)
+            : undefined}
+          shopName={activeSupermarket?.name}
+          onOpenSupermarkets={() => router.push('/(app)/supermarkets')}
+        />
 
-        <Text style={styles.sectionTitle}>Shop Tools / Account</Text>
-        <View style={styles.menu}>
-          {canManageEmployees && <MenuRow icon="people-outline" label="Shop Employees" onPress={() => router.push('/(app)/employees')} />}
-          <MenuRow icon="pricetag-outline" label="Report a Wrong Price" onPress={() => router.push('/(app)/report-price')} />
-          <MenuRow icon="log-out-outline" label={isLoggingOut ? 'Logging out…' : 'Log Out'} disabled={isLoggingOut} onPress={handleLogout} />
-          <MenuRow icon="trash-outline" label="Delete Personal Account" onPress={() => router.push('/account-deletion')} />
-          <MenuRow icon="information-circle-outline" label="About PayMi" onPress={() => router.push('/about')} />
-          <MenuRow icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => router.push({ pathname: '/about', params: { privacy: '1' } })} />
-        </View>
+        {PROFILE_TOOL_SECTIONS.map((section) => {
+          const sectionTools = tools.filter((tool) => tool.section === section.id);
+          if (!sectionTools.length) return null;
+          return (
+            <ProfileSection key={section.id} title={section.title} description={section.description}>
+              <ProfileToolGrid
+                tools={sectionTools}
+                section={section.id}
+                onPress={(tool) => {
+                  Haptics.selectionAsync();
+                  router.push(tool.route);
+                }}
+              />
+            </ProfileSection>
+          );
+        })}
+
+        <ProfileSection title="Shop & support">
+          <ProfileMenu>
+            {canManageEmployees && (
+              <ProfileMenuRow
+                icon="people-outline"
+                label="Shop Employees"
+                description="Your team and their shop access"
+                onPress={() => router.push('/(app)/employees')}
+              />
+            )}
+            <ProfileMenuRow icon="pricetag-outline" label="Report a Wrong Price" onPress={() => router.push('/(app)/report-price')} />
+            <ProfileMenuRow icon="information-circle-outline" label="About PayMi" last onPress={() => router.push('/about')} />
+          </ProfileMenu>
+        </ProfileSection>
+
+        <ProfileSection title="Privacy & account">
+          <ProfileMenu>
+            <ProfileMenuRow icon="shield-checkmark-outline" label="Privacy Policy" onPress={() => router.push({ pathname: '/about', params: { privacy: '1' } })} />
+            <ProfileMenuRow icon="trash-outline" label="Delete Personal Account" destructive last onPress={() => router.push('/account-deletion')} />
+          </ProfileMenu>
+          <ProfileLogout busy={isLoggingOut} onPress={handleLogout} />
+        </ProfileSection>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function ToolCard({ tool, onPress }: { tool: ShopTool; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.toolCard, pressed && styles.toolCardPressed]}
-    >
-      <View style={styles.toolIcon}>
-        <Ionicons name={tool.icon} size={22} color={Colors.light.primary} />
-        {tool.badge != null && tool.badge > 0 && (
-          <View
-            style={[styles.toolBadge, { backgroundColor: tool.badgeColor ?? Colors.light.error }]}
-          >
-            <Text style={styles.toolBadgeText}>{tool.badge > 99 ? '99+' : tool.badge}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.toolLabel} numberOfLines={2}>
-        {tool.label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function MenuRow({
-  disabled = false,
-  icon,
-  label,
-  onPress,
-}: {
-  disabled?: boolean;
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      style={({ pressed }) => [styles.menuRow, pressed && styles.menuRowPressed]}
-    >
-      <View style={styles.menuIcon}>
-        <Ionicons name={icon} size={19} color={Colors.light.primary} />
-      </View>
-      <Text style={styles.menuLabel}>{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={Colors.light.textLight} />
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
+  safeArea: { flex: 1, backgroundColor: Colors.light.background },
   content: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxl,
+    width: '100%',
+    maxWidth: 680,
+    alignSelf: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 32,
+    gap: 26,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  sectionTitle: {
-    ...Typography.h4,
-    color: Colors.light.text,
-    marginBottom: Spacing.sm,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
-  },
-  toolCard: {
-    width: '31%',
-    flexGrow: 1,
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.light.backgroundCard,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xs,
-    ...Shadows.sm,
-  },
-  toolCardPressed: {
-    backgroundColor: Colors.light.primaryLight,
-    transform: [{ scale: 0.97 }],
-  },
-  toolIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.light.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toolBadge: {
-    position: 'absolute',
-    top: -6,
-    right: -8,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  toolBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#FFF',
-  },
-  toolLabel: {
-    ...Typography.caption,
-    fontWeight: '600',
-    color: Colors.light.text,
-    textAlign: 'center',
-  },
-  menu: {
-    backgroundColor: Colors.light.backgroundCard,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    marginBottom: Spacing.lg,
-    overflow: 'hidden',
-    ...Shadows.sm,
-  },
-  menuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.light.divider,
-  },
-  menuRowPressed: {
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
-  menuIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.light.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuLabel: {
-    ...Typography.body,
-    fontWeight: '600',
-    color: Colors.light.text,
-    flex: 1,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.light.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-  },
-  name: {
-    ...Typography.h3,
-    color: Colors.light.text,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
-  },
-  email: {
-    ...Typography.body,
-    color: Colors.light.textSecondary,
-  },
-  badge: {
-    marginTop: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.light.primaryLight,
-  },
-  badgeText: {
-    ...Typography.caption,
-    color: Colors.light.primary,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.light.backgroundCard,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    ...Shadows.sm,
-  },
-  cardText: {
-    ...Typography.bodySmall,
-    color: Colors.light.textSecondary,
-    flex: 1,
-    lineHeight: 20,
-  },
-  footer: {
-    marginTop: Spacing.md,
-  },
+  heading: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: -8 },
+  headingAccent: { width: 4, height: 24, borderRadius: 2, backgroundColor: Colors.light.primary },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.8, color: Colors.light.text },
 });

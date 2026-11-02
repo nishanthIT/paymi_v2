@@ -1,0 +1,21 @@
+{
+  "frontendTests": {
+    "passed": 122,
+    "failed": 0
+  },
+  "backendTests": {
+    "passed": 247,
+    "failed": 0,
+    "skipped": 1
+  },
+  "typescript": "passed",
+  "eslint": "passed",
+  "javascriptExports": [
+    "ios",
+    "android",
+    "web"
+  ],
+  "physicalDeviceVerification": "not performed; no connected device",
+  "productionDeployment": "not performed",
+  "localApi": "restarted and healthy"
+}

@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 import type { ListProduct } from '../types';
 import { QuantityStepper } from './quantity-stepper';
@@ -29,28 +28,20 @@ export const ListProductRow = React.memo(function ListProductRow({
   onOpenDetails,
   onPreviewImage,
 }: ListProductRowProps) {
-  const imageUrl = getProductImageUrl(item.img, item.barcode);
   const price = item.hasActiveOffer && item.offerPrice != null ? item.offerPrice : item.lowestPrice;
   const isPending = item.id.startsWith('optimistic-');
 
   return (
     <View style={[styles.card, isPending && styles.cardPending]}>
-      <Pressable
-        style={styles.imageWrapper}
-        disabled={!imageUrl}
-        accessibilityRole="button"
-        accessibilityLabel={`Preview image of ${item.productName}`}
-        onPress={(event) => {
-          event.stopPropagation();
-          if (imageUrl) onPreviewImage(imageUrl);
-        }}
-      >
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
-        ) : (
-          <Ionicons name="cube-outline" size={22} color={Colors.light.textLight} />
-        )}
-      </Pressable>
+      <View style={styles.imageWrapper}>
+        <ProductImage
+          img={item.img}
+          barcode={item.barcode}
+          style={styles.image}
+          onPreview={onPreviewImage}
+          accessibilityLabel={`Preview image of ${item.productName}`}
+        />
+      </View>
 
       <View style={styles.body}>
         <Pressable

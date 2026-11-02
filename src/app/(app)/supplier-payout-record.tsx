@@ -208,12 +208,12 @@ export default function SupplierPayoutScreen() {
                 <StatCard label="To pay" value={formatMoney(totals.pending)} tone="warning" />
                 <StatCard label="Paid" value={formatMoney(totals.paid)} tone="success" />
               </View>
-            ) : null
+            ) : undefined
           }
           refreshControl={
             <RefreshControl
               refreshing={records.isRefetching}
-              onRefresh={records.refetch}
+              onRefresh={async () => { await records.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }

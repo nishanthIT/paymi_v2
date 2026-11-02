@@ -147,12 +147,12 @@ export default function ShiftSheetScreen() {
                 <StatCard label="Card" value={formatMoney(totals.card)} />
                 <StatCard label="Total" value={formatMoney(totals.sales)} tone="success" />
               </View>
-            ) : null
+            ) : undefined
           }
           refreshControl={
             <RefreshControl
               refreshing={records.isRefetching}
-              onRefresh={records.refetch}
+              onRefresh={async () => { await records.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }

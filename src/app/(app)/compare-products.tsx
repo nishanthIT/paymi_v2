@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -14,12 +13,12 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { SizeBadge } from '@/components/ui/size-badge';
 import { BorderRadius, Colors, Spacing, Shadows, Typography } from '@/constants/theme';
 import { useProductSearch } from '@/features/lists/hooks/use-product-search';
 import type { Product } from '@/features/lists/types';
 import { formatSizeLabel } from '@/utils/pack-size';
-import { getProductImageUrl } from '@/utils/product-image';
 
 /**
  * Compare Products entry screen. Two paths lead to the same comparison screen:
@@ -143,7 +142,6 @@ const SearchRow = React.memo(function SearchRow({
   product: Product;
   onPress: () => void;
 }) {
-  const imageUrl = getProductImageUrl(product.img as any, product.barcode);
   const price =
     product.lowestPrice != null && Number.isFinite(Number(product.lowestPrice))
       ? `from £${Number(product.lowestPrice).toFixed(2)}`
@@ -155,16 +153,7 @@ const SearchRow = React.memo(function SearchRow({
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
     >
       <View style={styles.rowImageWrap}>
-        {imageUrl ? (
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.rowImage}
-            contentFit="contain"
-            transition={150}
-          />
-        ) : (
-          <Ionicons name="cube-outline" size={24} color={Colors.light.textLight} />
-        )}
+        <ProductImage img={product.img} barcode={product.barcode} style={styles.rowImage} />
       </View>
 
       <View style={styles.rowBody}>

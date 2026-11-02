@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-25",
+  "frontend": {
+    "passed": 116,
+    "failed": 0
+  },
+  "backend": {
+    "passed": 237,
+    "failed": 0,
+    "skipped": 1
+  },
+  "typescript": "passed",
+  "eslint": "passed",
+  "exports": [
+    "ios",
+    "android",
+    "web"
+  ],
+  "nativeDeviceAndBrowserInteraction": "unavailable; no connected UI surfaces",
+  "productionApiDeployment": false,
+  "configuredSharedChatMigration": "applied; preserved 68 messages and 77 participants",
+  "environmentFilesChangedByThisTask": false,
+  "sharedDatabaseVerification": {
+    "readOnly": true,
+    "shops": 10,
+    "authorizedAccountShopChecks": 18,
+    "teamChecks": 18,
+    "shopsWithoutVerifiedRoster": 1,
+    "chatMigrationApplied": true,
+    "packagingMigrationApplied": false,
+    "messages": 68,
+    "participants": 77,
+    "maxAccountCheckMs": 15294
+  },
+  "localApiHealth": {
+    "status": 200,
+    "healthy": true,
+    "ms": 3199,
+    "services": {
+      "sessions": "ready",
+      "moderation": {
+        "state": "ready",
+        "lastPollAt": "2026-10-25T13:49:05.501Z"
+      }
+    }
+  }
+}

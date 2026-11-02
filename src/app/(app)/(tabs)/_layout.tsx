@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Shadows } from '@/constants/theme';
-import { useChatRealtime, useUnreadCount } from '@/features/chat/hooks/use-chats';
+import { useUnreadCount } from '@/features/chat/hooks/use-chats';
 import { useShopFeature } from '@/features/employees/permissions';
 import { useTemperatureAlerts } from '@/features/fridges/hooks/use-temperature-alerts';
 import { useListRealtime } from '@/features/lists/hooks/use-list-realtime';
@@ -16,8 +16,6 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const bottomPadding = Platform.OS === 'android' ? Math.max(insets.bottom, 8) : insets.bottom;
 
-  // Keep chats, unread badge and open threads live app-wide.
-  useChatRealtime();
   // Keep shared shopping lists in sync in real time (owner + employees).
   useListRealtime();
   // Surface out-of-range temperature readings as instant notifications.
@@ -51,8 +49,8 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={focused ? Colors.light.primary : Colors.light.tabIconDefault} />
           ),
         }}
       />
@@ -62,8 +60,8 @@ export default function TabsLayout() {
           title: 'Lists',
           // Hidden for employees whose shop owner switched lists off.
           href: canUseLists ? undefined : null,
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'list' : 'list-outline'} size={24} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'list' : 'list-outline'} size={24} color={focused ? Colors.light.primary : Colors.light.tabIconDefault} />
           ),
         }}
       />
@@ -78,11 +76,11 @@ export default function TabsLayout() {
             fontSize: 10,
             fontWeight: '800',
           },
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
               size={24}
-              color={color}
+              color={focused ? Colors.light.primary : Colors.light.tabIconDefault}
             />
           ),
         }}
@@ -91,8 +89,8 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={focused ? Colors.light.primary : Colors.light.tabIconDefault} />
           ),
         }}
       />

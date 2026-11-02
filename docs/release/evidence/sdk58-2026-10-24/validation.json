@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-24",
+  "sdk": "58.0.0",
+  "expo": "58.0.19",
+  "react": "19.3.0",
+  "reactNative": "0.88.0",
+  "frontendTests": {
+    "passed": 73,
+    "failed": 0
+  },
+  "typescript": "passed",
+  "eslint": "passed",
+  "gitDiffCheck": "passed",
+  "exports": {
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
+    "exitCode": 0,
+    "signedNativeBuild": false
+  },
+  "expoDoctor": {
+    "passed": 19,
+    "total": 20,
+    "dependencyCompatibility": "passed",
+    "remainingIssue": "Existing app icon is not square: 3073x2908"
+  },
+  "iosManifest": {
+    "status": 200,
+    "sdkVersion": "58.0.0",
+    "runtimeVersion": "exposdk:58.0.0",
+    "hasBundle": true
+  },
+  "physicalIosTested": false,
+  "envModified": false
+}

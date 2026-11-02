@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "checks": [
+    "Dynamic news: first6 of fetchNews20, dates, no seventh card",
+    "320/390/430/768 layouts, vertical scrolling, touch targets, no overflow",
+    "Pull-to-refresh callback refetches ads, news, promotions, supermarkets",
+    "Banner carousel advances automatically",
+    "Horizontal banner paging changes visible image",
+    "News rail scrolls horizontally",
+    "Banner tap opens image viewer; close returns Home without following linkUrl",
+    "Shortcut Compare Products -> /compare-products",
+    "Shortcut Promotions -> /promotions",
+    "Shortcut Report Price -> /report-price",
+    "Current shop opens supermarkets",
+    "All6 news cards open original article routes and full dynamic content",
+    "Single advertisement has no horizontal scroll; empty news retained",
+    "No ads hides carousel; empty news usable",
+    "Loading skeletons transition to dynamic data",
+    "Failed-query fallback renders without crash",
+    "No shop workspace opens supermarkets",
+    "Shop error workspace opens supermarkets",
+    "Long account/shop names fit320",
+    "Employee retains same Home shortcuts/content"
+  ],
+  "browserErrorsInCompletedChecks": [],
+  "fixtureOnly": true,
+  "nativeDeviceTesting": false,
+  "executionNote": "The 13 core checks completed successfully before a Metro development SSR cache error (unknown module 979) blocked the next page load. The remaining 7 state checks then passed in a fresh server session. This report combines the completed assertions from those two sessions.",
+  "otherValidation": {
+    "typescript": "passed",
+    "focusedEslint": "passed",
+    "existingTests": {
+      "passed": 146,
+      "failed": 0
+    },
+    "androidJavaScriptExport": "passed",
+    "iosJavaScriptExport": "passed"
+  }
+}

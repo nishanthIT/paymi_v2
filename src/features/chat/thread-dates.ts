@@ -28,7 +28,7 @@ export function startsMessageDay(messages: readonly DatedMessage[], index: numbe
 
 export type VisibleMessage<T extends DatedMessage> = {
   item: T;
-  index: number | null;
+  index?: number | null;
   isViewable: boolean;
 };
 
@@ -36,7 +36,7 @@ export type VisibleMessage<T extends DatedMessage> = {
 export function topVisibleMessage<T extends DatedMessage>(tokens: readonly VisibleMessage<T>[]): T | null {
   let top: VisibleMessage<T> | null = null;
   for (const token of tokens) {
-    if (!token.isViewable || token.index === null || !Number.isInteger(token.index) || token.index < 0
+    if (!token.isViewable || token.index == null || !Number.isInteger(token.index) || token.index < 0
       || !messageDay(token.item?.timestamp)) continue;
     if (!top || token.index > top.index!) top = token;
   }

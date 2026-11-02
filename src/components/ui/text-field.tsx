@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   TextInputProps,
   TouchableOpacity,
   View,
@@ -26,7 +27,7 @@ interface TextFieldProps extends TextInputProps {
   isPassword?: boolean;
 }
 
-export const TextField = forwardRef<TextInput, TextFieldProps>(
+export const TextField = forwardRef<TextInputInstance, TextFieldProps>(
   ({ label, icon, error, isPassword, ...inputProps }, ref) => {
     const [isHidden, setIsHidden] = useState(!!isPassword);
 

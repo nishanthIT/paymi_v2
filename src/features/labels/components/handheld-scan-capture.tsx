@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, TextInput } from 'react-native';
+import { Platform, StyleSheet, TextInput, type TextInputInstance } from 'react-native';
 
 /**
  * Invisible capture for keyboard-wedge (HID) handheld scanners. It only holds
@@ -14,7 +14,7 @@ export function HandheldScanCapture({
   active: boolean;
   onBarcode: (barcode: string) => void;
 }) {
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const [value, setValue] = useState('');
 
   useEffect(() => {

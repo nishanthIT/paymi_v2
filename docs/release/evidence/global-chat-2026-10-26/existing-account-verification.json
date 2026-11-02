@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "mode": "read-only",
+  "authorizedSelections": 18,
+  "directoryRolesChecked": 2,
+  "excludedAccountsChecked": 7,
+  "eligibleRetailUsers": 17,
+  "preservedGlobalMessages": 31
+}

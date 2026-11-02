@@ -88,7 +88,7 @@ export async function saveCertificateToFolder(certificate: ShopCertificate): Pro
   try {
     const { mime } = fileTypeFor(file.name);
     const output = folder.createFile(file.name, mime);
-    output.write(await file.bytes());
+    await output.write(await file.bytes());
     return true;
   } catch {
     throw new Error('Could not save to that folder. Try another folder or use Share.');

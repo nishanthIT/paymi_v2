@@ -123,7 +123,7 @@ export default function CertificateManagementScreen() {
           refreshControl={
             <RefreshControl
               refreshing={certificates.isRefetching}
-              onRefresh={certificates.refetch}
+              onRefresh={async () => { await certificates.refetch(); }}
               tintColor={Colors.light.primary}
             />
           }

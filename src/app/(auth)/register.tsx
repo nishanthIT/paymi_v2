@@ -8,7 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
+  type TextInputInstance,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -37,9 +37,9 @@ interface FieldErrors {
 export default function RegisterScreen() {
   const router = useRouter();
 
-  const emailRef = useRef<TextInput>(null);
-  const passwordRef = useRef<TextInput>(null);
-  const confirmRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInputInstance>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
+  const confirmRef = useRef<TextInputInstance>(null);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -160,7 +160,7 @@ export default function RegisterScreen() {
               ref={passwordRef}
               label="Password"
               icon="lock-closed-outline"
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
               value={password}
               onChangeText={(text) => {
                 setPassword(text);

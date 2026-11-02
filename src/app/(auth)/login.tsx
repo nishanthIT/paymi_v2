@@ -1,14 +1,13 @@
 import { Link } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
+  type TextInputInstance,
   View,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -18,11 +17,11 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { ErrorBanner, TextField } from '@/components/ui/text-field';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
-import { validateEmail, validatePassword } from '@/utils/validation';
+import { validateEmail } from '@/utils/validation';
 
 export default function LoginScreen() {
   const { login } = useAuth();
-  const passwordRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +35,7 @@ export default function LoginScreen() {
 
     const errors = {
       email: validateEmail(email),
-      password: validatePassword(password),
+      password: password ? null : 'Please enter your password',
     };
     setFieldErrors(errors);
     if (errors.email || errors.password) return;
@@ -64,13 +63,6 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Animated.View entering={FadeInUp.duration(500)} style={styles.header}>
-            <View style={styles.logoBadge}>
-              <Image
-                source={require('@/assets/images/splash-icon.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
             <Text style={styles.title}>Welcome to Paymi</Text>
             <Link href="/promotions" style={{ color: Colors.light.primary, padding: Spacing.md }}>Browse promotions without signing in</Link>
             <Text style={styles.subtitle}>
@@ -164,22 +156,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: Spacing.xl,
-  },
-  logoBadge: {
-    width: 92,
-    height: 92,
-    borderRadius: BorderRadius.xl,
-    backgroundColor: Colors.light.backgroundCard,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    ...Shadows.md,
-  },
-  logo: {
-    width: 60,
-    height: 60,
   },
   title: {
     ...Typography.h2,

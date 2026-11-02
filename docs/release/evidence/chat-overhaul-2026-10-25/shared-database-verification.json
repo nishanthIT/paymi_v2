@@ -1,0 +1,12 @@
+{
+  "readOnly": true,
+  "shops": 10,
+  "authorizedAccountShopChecks": 18,
+  "teamChecks": 18,
+  "shopsWithoutVerifiedRoster": 1,
+  "chatMigrationApplied": true,
+  "packagingMigrationApplied": false,
+  "messages": 68,
+  "participants": 77,
+  "maxAccountCheckMs": 15294
+}

@@ -1,7 +1,6 @@
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -17,6 +16,7 @@ import {
   View,
 } from 'react-native';
 
+import { ProductImage } from '@/components/ui/product-image';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
@@ -341,13 +341,7 @@ function ExpiryRow({
   return (
     <RecordCard onPress={onEdit} onLongPress={onDelete}>
       <View style={styles.expiryRow}>
-        {product.productImage ? (
-          <Image source={{ uri: product.productImage }} style={styles.productThumb} contentFit="contain" />
-        ) : (
-          <View style={[styles.productThumb, styles.thumbPlaceholder]}>
-            <Ionicons name="cube-outline" size={20} color={Colors.light.textLight} />
-          </View>
-        )}
+        <ProductImage img={product.productImage} barcode={product.productBarcode} style={styles.productThumb} />
         <View style={styles.flex1}>
           <Text style={styles.recordTitle} numberOfLines={1}>
             {product.productName}
@@ -461,13 +455,7 @@ function AddExpirySheet({
             <ScrollView style={styles.hitsScroll} keyboardShouldPersistTaps="handled">
               {hits.map((hit) => (
                 <Pressable key={hit.id} style={styles.hitRow} onPress={() => setSelected(hit)}>
-                  {hit.img ? (
-                    <Image source={{ uri: hit.img }} style={styles.hitThumb} contentFit="contain" />
-                  ) : (
-                    <View style={[styles.hitThumb, styles.thumbPlaceholder]}>
-                      <Ionicons name="cube-outline" size={16} color={Colors.light.textLight} />
-                    </View>
-                  )}
+                  <ProductImage img={hit.img} barcode={hit.barcode} style={styles.hitThumb} />
                   <View style={styles.flex1}>
                     <Text style={styles.hitTitle} numberOfLines={1}>
                       {hit.title}

@@ -65,5 +65,6 @@ test('floating date follows the top visible inverted row regardless of event ord
   assert.equal(topVisibleMessage([{ item: newest, index: 0, isViewable: true }]), newest);
   assert.equal(topVisibleMessage([]), null);
   assert.equal(topVisibleMessage([{ item: top, index: -1, isViewable: true }]), null);
+  assert.equal(topVisibleMessage([{ item: top, isViewable: true }]), null);
   assert.equal(topVisibleMessage([{ item: { timestamp: 'invalid' }, index: 0, isViewable: true }]), null);
 });
