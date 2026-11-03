@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { getSupermarketScope, beginScopedWrite, endScopedWrite } from '@/features/supermarkets/scope';
 import axios, { CanceledError, isCancel, type InternalAxiosRequestConfig } from 'axios';
 import { API_CONFIG } from '@/config/api';
@@ -18,7 +18,10 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  // Native sessions use the SecureStore bearer token. An expired cookie left
+  // in the OS cookie jar must not turn a new login/reset into a cookie-only
+  // request without Origin and trigger the browser CSRF guard.
+  withCredentials: Platform.OS === 'web',
 });
 
 // Request interceptor — attach Bearer token from secure storage.
